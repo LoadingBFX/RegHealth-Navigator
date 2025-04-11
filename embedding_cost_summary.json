@@ -1,0 +1,54 @@
+{
+  "total_tokens": 2232358,
+  "estimated_total_cost": 0.2232,
+  "per_document": {
+    "2022 Hospice Final Rule.xml": {
+      "tokens": 163622,
+      "cost": 0.0164
+    },
+    "2022 Hospice Proposed Rule.xml": {
+      "tokens": 144402,
+      "cost": 0.0144
+    },
+    "2023 Hospice Final Rule.xml": {
+      "tokens": 43751,
+      "cost": 0.0044
+    },
+    "2023 Hospice Proposed Rule.xml": {
+      "tokens": 51436,
+      "cost": 0.0051
+    },
+    "2023 SNF Final Rule.xml": {
+      "tokens": 465514,
+      "cost": 0.0466
+    },
+    "2023 SNF Proposed Rule.xml": {
+      "tokens": 332939,
+      "cost": 0.0333
+    },
+    "2024 Hospice Final Rule.xml": {
+      "tokens": 51436,
+      "cost": 0.0051
+    },
+    "2024 SNF Final Rule.xml": {
+      "tokens": 301541,
+      "cost": 0.0302
+    },
+    "2025 Hospice Final Rule.xml": {
+      "tokens": 96572,
+      "cost": 0.0097
+    },
+    "2025 Hospice Proposed Rule.xml": {
+      "tokens": 64766,
+      "cost": 0.0065
+    },
+    "2025 SNF Final Rule.xml": {
+      "tokens": 301541,
+      "cost": 0.0302
+    },
+    "2025 SNF Proposed Rule.xml": {
+      "tokens": 214838,
+      "cost": 0.0215
+    }
+  }
+}
