@@ -1,117 +1,179 @@
 import streamlit as st
-from state import init_session
-import faiss, openai, json, numpy as np, tiktoken
+from state import (
+    init_session, load_index, embed_query, search_chunks,
+    get_context, PROMPTS, render_chunks, count_tokens
+)
+import openai
+import json
+import re
 
-import streamlit as st
-from state import init_session
+MODEL_TOKEN_LIMITS = {
+    "gpt-4": (8192, 3000),
+    "gpt-4o": (128000, 16384)
+}
+
 init_session()
-
 if not st.session_state.submitted:
-    st.warning("Please enter your OpenAI API key and model first on the home page.")
+    st.warning("Please enter your OpenAI API key and model first.")
     st.stop()
 
+st.title("📊 Compare Two Rules")
+st.markdown("Compare healthcare final or proposed rules across years or sections.")
 
-init_session()
-encoding = tiktoken.encoding_for_model("gpt-4")
+with st.expander("💡 Example Comparison Questions", expanded=False):
+    st.markdown("""
+- What changed in hospice wage index policy between the 2022 proposed and final rules?
+- Compare quality reporting updates in the 2023 SNF proposed and final rules.
+- How did the 2023 vs. 2024 hospice rules differ in reporting requirements?
+- What are the major policy changes in SNF payment between 2023 and 2025?
+- Compare the treatment of palliative care in the 2024 and 2025 hospice final rules.
+""")
 
-index = faiss.read_index("faiss.index")
-with open("faiss_metadata.json", "r") as f:
-    metadata = json.load(f)
+# Load index
+index, metadata = load_index()
 
-def count_tokens(text): return len(encoding.encode(text))
+# Get dynamic metadata options
+def get_filtered_options(key, program=None):
+    values = set()
+    for m in metadata:
+        if program and program.lower() not in m["metadata"].get("title", "").lower():
+            continue
+        if key == "section":
+            values.add(m["section_header"])
+        else:
+            values.add(m["metadata"].get(key))
+    return sorted(v for v in values if v)
 
-def get_unique_options(key):
-    return sorted(set(str(d["metadata"].get(key, "")).strip() for d in metadata if d["metadata"].get(key)))
-
-def get_section_headers_filtered(year, rule_type, program):
-    return sorted(set(
-        d["section_header"]
-        for d in metadata
-        if str(d["metadata"].get("year")) == year
-        and rule_type.lower() in d["metadata"].get("rule_type", "").lower()
-        and program.lower() in d["metadata"].get("title", "").lower()
-    ))
-
-def ask_gpt(prompt):
-    client = openai.OpenAI(api_key=st.session_state.api_key)
-    response = client.chat.completions.create(
-        model=st.session_state.model,
-        messages=[
-            {"role": "system", "content": "You are a healthcare policy comparison assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.3,
-        max_tokens=2500
-    )
-    return response.choices[0].message.content
-
-def get_context(chunks, token_limit=3000):
-    context = ""
-    for c in chunks:
-        s = f"[Section: {c['section_header']}]\n{c['text']}\n"
-        if count_tokens(context + s) > token_limit: break
-        context += s
-    return context
-
-st.title("📊 Compare Two Rules Side-by-Side")
-
+# Input UI
 col1, col2 = st.columns(2)
-
 with col1:
-    st.subheader("📘 Rule 1")
-    y1 = st.selectbox("Year", get_unique_options("year"), key="y1")
-    t1 = st.selectbox("Rule Type", get_unique_options("rule_type"), key="t1")
-    p1 = st.selectbox("Program", get_unique_options("program"), key="p1")
-    s1 = st.selectbox("Section (optional)", [""] + get_section_headers_filtered(y1, t1, p1), key="s1")
-
+    program1 = st.selectbox("Program", ["Hospice", "SNF"], key="program1")
+    year1 = st.selectbox("Year", get_filtered_options("year", program1), key="year1")
+    rule_type1 = st.selectbox("Rule Type", get_filtered_options("rule_type", program1), key="type1")
+    section1 = st.selectbox("Section (optional)", [""] + get_filtered_options("section", program1), key="section1")
 with col2:
-    st.subheader("📘 Rule 2")
-    y2 = st.selectbox("Year", get_unique_options("year"), key="y2")
-    t2 = st.selectbox("Rule Type", get_unique_options("rule_type"), key="t2")
-    p2 = st.selectbox("Program", get_unique_options("program"), key="p2")
-    s2 = st.selectbox("Section (optional)", [""] + get_section_headers_filtered(y2, t2, p2), key="s2")
+    program2 = st.selectbox("Program", ["Hospice", "SNF"], key="program2")
+    year2 = st.selectbox("Year", get_filtered_options("year", program2), key="year2")
+    rule_type2 = st.selectbox("Rule Type", get_filtered_options("rule_type", program2), key="type2")
+    section2 = st.selectbox("Section (optional)", [""] + get_filtered_options("section", program2), key="section2")
 
-question = st.text_input("What do you want to compare?", value="What are the differences between the two rules?")
+query = st.text_input("What do you want to compare?", "What are the differences between the two rules?")
+show_chunks = st.checkbox("📄 Show chunks used")
+submit = st.button("Compare Rules")
 
-if st.button("Compare"):
-    rule1 = [c for c in metadata if str(c["metadata"].get("year")) == y1 and
-             t1.lower() in c["metadata"].get("rule_type", "").lower() and
-             p1.lower() in c["metadata"].get("title", "").lower() and
-             (s1 == "" or c["section_header"] == s1)]
+# Helper: mismatch warning
+def prompt_filter_mismatch(query, year1, year2, program1, program2):
+    mismatches = []
+    years = re.findall(r"\b(20[0-5][0-9])\b", query)
+    programs = ["hospice", "snf", "mpfs"]
+    year_set = {str(year1), str(year2)}
+    program_set = {program1.lower(), program2.lower()}
+    for y in years:
+        if y not in year_set:
+            mismatches.append(f"Prompt mentions year `{y}` but selected years are {year_set}")
+    for p in programs:
+        if p in query.lower() and p not in program_set:
+            mismatches.append(f"Prompt references `{p.upper()}` but filters are {program_set}")
+    return mismatches
+if submit and query:
+    mismatches = prompt_filter_mismatch(query, year1, year2, program1, program2)
+    if mismatches:
+        st.warning("⚠️ Prompt and filter mismatch detected:\n\n- " + "\n- ".join(mismatches))
 
-    rule2 = [c for c in metadata if str(c["metadata"].get("year")) == y2 and
-             t2.lower() in c["metadata"].get("rule_type", "").lower() and
-             p2.lower() in c["metadata"].get("title", "").lower() and
-             (s2 == "" or c["section_header"] == s2)]
+    client = openai.OpenAI(api_key=st.session_state.api_key)
 
-    if not rule1 or not rule2:
-        st.error("Could not find both rules. Please check filters.")
-        st.stop()
+    with st.spinner("🤖 Step 1: Understanding your comparison focus..."):
+        clarify_prompt = f"""
+You are a policy assistant helping compare two healthcare regulation documents. Extract the focus area of the comparison request below.
 
-    ctx1 = get_context(rule1)
-    ctx2 = get_context(rule2)
+Return a short phrase indicating the topic area (e.g. payment updates, wage index, QRP, staffing, SDOH, palliative care, etc.)
 
-    prompt = f"""
-You are a U.S. Medicare policy expert.
+Comparison request:
+{query}
 
-Compare the two rules below. Highlight the differences in:
-- payment methodologies
-- reporting or quality requirements
-- policy scope
-- financial implications
-- terminology and effective dates
-
-Use bullet points and include section references.
-
---- RULE 1 ({y1} {t1} {p1}) ---
-{ctx1}
-
---- RULE 2 ({y2} {t2} {p2}) ---
-{ctx2}
-
-Question: {question}
+Respond only with the topic.
 """
-    with st.spinner("Comparing..."):
-        response = ask_gpt(prompt)
-        st.markdown("### 🧠 Comparison")
-        st.markdown(response)
+        clarify_response = client.chat.completions.create(
+            model=st.session_state.model,
+            messages=[{"role": "user", "content": clarify_prompt}],
+            temperature=0,
+            max_tokens=100
+        )
+        focus_area = clarify_response.choices[0].message.content.strip()
+        st.markdown(f"🔍 Interpreted topic: **{focus_area}**")
+
+    with st.spinner("📚 Step 2: Retrieving context chunks..."):
+        def filter_chunks(year, program, rule_type, section):
+            return [
+                c for c in metadata
+                if str(c["metadata"].get("year")) == str(year)
+                and rule_type.lower() in c["metadata"].get("rule_type", "").lower()
+                and program.lower() in c["metadata"].get("title", "").lower()
+                and (not section or section.lower() in c["section_header"].lower())
+            ]
+
+        chunks1 = filter_chunks(year1, program1, rule_type1, section1)
+        chunks2 = filter_chunks(year2, program2, rule_type2, section2)
+
+        if not chunks1 or not chunks2:
+            st.error("❌ One or both selected rule documents are not available in the database.")
+            st.stop()
+
+        query_vec = embed_query(focus_area or query, st.session_state.api_key)
+        rule1_ranked = search_chunks(query_vec, index, chunks1, query=query, k=20)
+        rule2_ranked = search_chunks(query_vec, index, chunks2, query=query, k=20)
+
+        context1, used1 = get_context(rule1_ranked, limit=50000)
+        context2, used2 = get_context(rule2_ranked, limit=50000)
+
+        if show_chunks:
+            st.markdown("#### 📘 Rule 1 Context")
+            render_chunks(used1)
+            st.markdown("#### 📗 Rule 2 Context")
+            render_chunks(used2)
+
+    with st.spinner("🧠 Step 3: Comparing rules..."):
+        model = st.session_state.model
+        prompt = PROMPTS["compare"].format(context1=context1, context2=context2, query=query)
+        tokens = count_tokens(prompt)
+        model_limit, max_completion = MODEL_TOKEN_LIMITS.get(model, (8192, 3000))
+        max_output_tokens = min(max_completion, model_limit - tokens - 500)
+
+        comparison_response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "Compare these two regulation excerpts clearly, identifying key differences and similarities that matter to healthcare stakeholders."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=max_output_tokens
+        )
+        comparison = comparison_response.choices[0].message.content
+        st.markdown("### 📊 Comparison")
+        st.markdown(comparison)
+
+    with st.spinner("💡 Step 4: Summarizing implications..."):
+        summary_prompt = f"""
+Summarize the key implications of this rule comparison for healthcare organizations.
+
+Comparison:
+{comparison}
+
+Implications:
+"""
+        summary_response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": summary_prompt}],
+            temperature=0.4,
+            max_tokens=800
+        )
+        implications = summary_response.choices[0].message.content
+        st.markdown("### 📝 Implications")
+        st.markdown(implications)
+
+        st.session_state.history.append({
+            "comparison_query": query,
+            "focus": focus_area,
+            "comparison": comparison,
+            "implications": implications
+        })
