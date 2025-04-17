@@ -27,25 +27,35 @@ with st.expander("💡 Example Prompts", expanded=False):
 # --- Load Metadata ---
 index, metadata = load_index()
 
-# --- Filter: Program ---
-programs = sorted(set(doc["metadata"].get("title", "").split()[0] for doc in metadata))
+# --- Helper Functions ---
+def get_unique(metadata, field, condition=None):
+    return sorted(set(
+        c["metadata"][field]
+        for c in metadata
+        if field in c["metadata"] and (condition is None or condition(c))
+    ))
+
+def get_years_for_program(program):
+    return get_unique(metadata, "year", lambda c: c["metadata"].get("program") == program)
+
+def get_rule_types(program, year):
+    return get_unique(metadata, "rule_type", lambda c: c["metadata"].get("program") == program and c["metadata"].get("year") == year)
+
+# --- Filter UI ---
+programs = get_unique(metadata, "program")
 program = st.selectbox("📊 Program", programs)
 
-filtered_by_program = [doc for doc in metadata if doc["metadata"].get("title", "").startswith(program)]
-
-# --- Filter: Year ---
-years = sorted(set(doc["metadata"]["year"] for doc in filtered_by_program))
+years = get_years_for_program(program)
 year = st.selectbox("📅 Year", years)
 
-filtered_by_year = [doc for doc in filtered_by_program if doc["metadata"]["year"] == year]
-
-# --- Filter: Rule Type ---
-rule_types = sorted(set(doc["metadata"]["rule_type"] for doc in filtered_by_year))
+rule_types = get_rule_types(program, year)
 rule_type = st.selectbox("📄 Rule Type", rule_types)
 
 filtered_docs = [
-    doc for doc in filtered_by_year
-    if doc["metadata"]["rule_type"] == rule_type
+    doc for doc in metadata
+    if doc["metadata"].get("program") == program
+    and doc["metadata"].get("year") == year
+    and doc["metadata"].get("rule_type") == rule_type
 ]
 
 if not filtered_docs:
