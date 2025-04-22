@@ -1,17 +1,23 @@
 import streamlit as st
-from state import (
-    init_session, load_index, embed_query, count_tokens
-)
 import openai
-import numpy as np
 import faiss
+import json
+import numpy as np
 
-# --- Setup ---
+from state import (
+    init_session, sidebar_api_setup,  # ✅ Include sidebar_api_setup
+    load_index, embed_query, count_tokens
+)
+
+# ---------- Setup ----------
 init_session()
+sidebar_api_setup()  # ✅ Enable sidebar API key input + connection status
+
 if not st.session_state.submitted:
-    st.warning("Please enter your OpenAI API key and model first.")
+    st.warning("Please enter your OpenAI API key and model first in the sidebar.")
     st.stop()
 
+# ---------- Page UI ----------
 st.title("📚 Document Explorer")
 st.markdown("Browse and inspect indexed regulation chunks by metadata.")
 
@@ -24,50 +30,39 @@ with st.expander("💡 Example Prompts", expanded=False):
 - Find the section on in-person visit requirements.
 """)
 
-# --- Load Metadata ---
+# ---------- Load FAISS and Metadata ----------
 index, metadata = load_index()
 
-# --- Helper Functions ---
-def get_unique(metadata, field, condition=None):
-    return sorted(set(
-        c["metadata"][field]
-        for c in metadata
-        if field in c["metadata"] and (condition is None or condition(c))
-    ))
+# ---------- Filter UI ----------
+programs = sorted(set(doc["metadata"].get("program") for doc in metadata if doc["metadata"].get("program")))
+program = st.selectbox("🏥 Program", programs)
 
-def get_years_for_program(program):
-    return get_unique(metadata, "year", lambda c: c["metadata"].get("program") == program)
+filtered_by_program = [doc for doc in metadata if doc["metadata"].get("program") == program]
 
-def get_rule_types(program, year):
-    return get_unique(metadata, "rule_type", lambda c: c["metadata"].get("program") == program and c["metadata"].get("year") == year)
-
-# --- Filter UI ---
-programs = get_unique(metadata, "program")
-program = st.selectbox("📊 Program", programs)
-
-years = get_years_for_program(program)
+years = sorted(set(doc["metadata"]["year"] for doc in filtered_by_program if "year" in doc["metadata"]))
 year = st.selectbox("📅 Year", years)
 
-rule_types = get_rule_types(program, year)
+filtered_by_year = [doc for doc in filtered_by_program if doc["metadata"]["year"] == year]
+
+rule_types = sorted(set(doc["metadata"]["rule_type"] for doc in filtered_by_year if "rule_type" in doc["metadata"]))
 rule_type = st.selectbox("📄 Rule Type", rule_types)
 
 filtered_docs = [
-    doc for doc in metadata
-    if doc["metadata"].get("program") == program
-    and doc["metadata"].get("year") == year
-    and doc["metadata"].get("rule_type") == rule_type
+    doc for doc in filtered_by_year
+    if doc["metadata"]["rule_type"] == rule_type
 ]
 
 if not filtered_docs:
     st.error("❌ No documents available with selected filters.")
     st.stop()
 
-# --- Prompt Input + Submit Button ---
+# ---------- Prompt Input ----------
 st.markdown("### 🔎 Find relevant section headers")
 with st.form("section_lookup"):
     user_query = st.text_input("What are you looking for?", placeholder="e.g. hospice wage index update")
     submitted = st.form_submit_button("🔍 Submit")
 
+# ---------- Vector Search ----------
 if submitted and user_query:
     with st.spinner("Finding most relevant sections..."):
         query_vec = embed_query(user_query, st.session_state.api_key)
@@ -93,18 +88,21 @@ if submitted and user_query:
             st.error("❌ No matching sections found.")
             st.stop()
 
-        section_labels = [
-            f"[{doc['section_header']}] – {doc['metadata']['title']}" for doc in top_sections
-        ]
+        # Save results to session
+        st.session_state.top_sections = top_sections
 
-        selected_label = st.selectbox("📁 Select a section to view", section_labels)
+# ---------- Section Selector + Display ----------
+if "top_sections" in st.session_state and st.session_state.top_sections:
+    section_labels = [
+        f"[{doc['section_header']}] – {doc['metadata']['title']}" for doc in st.session_state.top_sections
+    ]
 
-        if selected_label:
-            index_selected = section_labels.index(selected_label)
-            doc = top_sections[index_selected]
+    selected_label = st.selectbox("📁 Select a section to view", section_labels, key="section_viewer")
+    selected_index = section_labels.index(selected_label)
+    selected_doc = st.session_state.top_sections[selected_index]
 
-            st.markdown("### 📖 Section Text")
-            st.markdown(f"**Section:** {doc['section_header']}")
-            st.markdown(f"**Rule:** {doc['metadata']['title']} ({doc['metadata']['rule_type'].title()}, {doc['metadata']['year']})")
-            st.markdown("---")
-            st.markdown(doc["text"])
+    st.markdown("### 📖 Section Text")
+    st.markdown(f"**Section:** {selected_doc['section_header']}")
+    st.markdown(f"**Rule:** {selected_doc['metadata']['title']} ({selected_doc['metadata']['rule_type'].title()}, {selected_doc['metadata']['year']})")
+    st.markdown("---")
+    st.markdown(selected_doc["text"])
