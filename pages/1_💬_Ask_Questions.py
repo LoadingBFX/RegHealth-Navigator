@@ -4,7 +4,8 @@ import json
 import re
 
 from state import (
-    init_session, load_index, embed_query, search_chunks,
+    init_session, sidebar_api_setup,  # 👈 ADD THIS
+    load_index, embed_query, search_chunks,
     get_context, PROMPTS, render_chunks, count_tokens
 )
 
@@ -15,10 +16,13 @@ MODEL_TOKEN_LIMITS = {
 
 # ---------- Setup ----------
 init_session()
+sidebar_api_setup()  # 👈 ADD THIS
+
 if not st.session_state.submitted:
-    st.warning("Please enter your OpenAI API key and model first.")
+    st.warning("Please enter your OpenAI API key and model first in the sidebar.")
     st.stop()
 
+# ---------- UI ----------
 st.title("💬 Ask a Question")
 st.markdown("Ask any question about healthcare compliance rules. Relevant sections will be retrieved and used to generate an answer.")
 
@@ -28,6 +32,7 @@ with st.expander("💡 Example Questions", expanded=False):
 - What QRP requirements were finalized for SNFs in 2024?
 - How is the wage index calculated in the 2022 proposed rule?
 """)
+
 
 # ---------- Load Metadata ----------
 index, metadata = load_index()

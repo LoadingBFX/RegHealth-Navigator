@@ -27,36 +27,115 @@ def count_tokens(text: str, model: str = "gpt-4o") -> int:
 
 # ---------- Prompt Templates ----------
 PROMPTS = {
-    "ask": """Use the context below to answer the question as clearly and accurately as possible. If the answer is not in the context, say so.
+    # -------------------------------
+    # ASK A QUESTION
+    # -------------------------------
+    "ask": """
+You are a compliance assistant helping users understand CMS healthcare regulations.
+
+Follow this process:
+1. Identify the regulation topics referenced in the user's question.
+2. Thoroughly read the provided context.
+3. Extract and explain any relevant policy details.
+4. Answer the question in full sentences using only the provided context.
+5. If the answer is not found, say so clearly.
+
+Rules:
+- NEVER make up content.
+- NEVER speculate beyond the context.
+- Use professional, precise, and regulatory tone.
 
 Context:
 {context}
 
-Question: {query}
-Answer:""",
-    
-    "compare": """You are comparing two regulation documents.
+User Question:
+{query}
 
-Use the following context to answer the user's question clearly. Only use what is in the provided text.
+Answer:
+""",
 
---- Document 1 ---
+    # -------------------------------
+    # COMPARE RULES
+    # -------------------------------
+    "compare": """
+You are a senior healthcare policy analyst comparing two versions of a CMS rule.
+
+Reasoning process:
+1. Identify the topic and policy focus of the comparison.
+2. Analyze each rule section independently.
+3. Explain what each rule says in full detail.
+4. Compare them point-by-point, highlighting differences and their significance.
+5. Focus on operational or compliance implications.
+
+Constraints:
+- Use only information from the provided rule text.
+- No speculation or assumptions.
+- Avoid lists. Write in structured, analytical paragraphs.
+- Tone should match the formality expected by compliance officers and legal reviewers.
+
+--- Rule 1 ---
 {context1}
 
---- Document 2 ---
+--- Rule 2 ---
 {context2}
 
-Question: {query}
-Answer:""",
+User Query:
+{query}
 
-    "insight": """You are advising a healthcare organization.
+Detailed Comparison:
+""",
 
-Based on the policy context below, generate helpful, actionable recommendations.
+    # -------------------------------
+    # GENERATE STRATEGIC INSIGHTS
+    # -------------------------------
+    "insight": """
+You are a healthcare compliance strategist advising organizations on how to respond to CMS policy updates.
+
+Process:
+1. Identify the strategic or operational question being asked.
+2. Review the full context of the policy changes or rule sections.
+3. Interpret and analyze how the rules affect compliance, reporting, care delivery, or staffing.
+4. Provide high-level insight into how organizations should think about this rule.
+
+Expectations:
+- Full sentences and well-structured analysis.
+- Use terminology familiar to compliance directors and operations leads.
+- Include reasoning behind each conclusion.
+- Avoid speculative content.
 
 Context:
 {context}
 
-Scenario: {query}
-Recommendations:"""
+Scenario:
+{query}
+
+Strategic Insight:
+""",
+
+    # -------------------------------
+    # FOLLOW-UP RECOMMENDATIONS (after insight)
+    # -------------------------------
+    "recommendations": """
+Based on the above analysis, provide a clear and actionable list of recommendations for healthcare organizations.
+
+Requirements:
+- Each recommendation should be specific and relevant to the rule.
+- Each item must include:
+    - **Bolded Title**
+    - A short one-line summary
+    - A detailed explanation (2–3 sentences minimum)
+    - If applicable, who in the organization it applies to (e.g., Compliance Officer, Finance Team)
+
+Audience:
+- Policy directors
+- Regulatory compliance teams
+- Operational leaders
+
+Insight:
+{insight}
+
+Recommendations:
+"""
 }
 
 # ---------- Load FAISS + Metadata ----------
@@ -161,3 +240,34 @@ def search_chunks(query_embedding, full_index, metadata_all, query, k=20):
     index.add(matrix)
     D, I = index.search(query_embedding, min(k, len(matrix)))
     return [filtered[i] for i in I[0] if i < len(filtered)]
+
+# ---------- Sidebar API Setup ----------
+def sidebar_api_setup():
+    with st.sidebar:
+        st.markdown("### 🔐 API Setup")
+        st.markdown("Enter your OpenAI API key and select your model to begin.")
+
+        st.session_state.api_key = st.text_input(
+            "🔑 OpenAI API Key", 
+            value=st.session_state.get("api_key", ""), 
+            type="password", 
+            key="sidebar_api_key"
+        )
+
+        st.session_state.model = st.selectbox(
+            "🤖 Model", 
+            ["gpt-4o", "gpt-4"], 
+            index=["gpt-4o", "gpt-4"].index(st.session_state.get("model", "gpt-4o")),
+            key="sidebar_model"
+        )
+
+        if st.button("✅ Submit API Key", key="submit_sidebar"):
+            if st.session_state.api_key:
+                st.session_state.submitted = True
+            else:
+                st.session_state.submitted = False
+
+        if st.session_state.get("submitted", False) and st.session_state.get("api_key"):
+            st.success(f"🟢 Connected using `{st.session_state.model}`")
+        else:
+            st.warning("🔴 Not connected")

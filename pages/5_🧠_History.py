@@ -1,7 +1,8 @@
 import streamlit as st
-from state import init_session
+from state import init_session, sidebar_api_setup
 
 init_session()
+sidebar_api_setup()  # ✅ Add sidebar support
 
 st.title("🧠 History Viewer")
 st.markdown("This page shows all previous queries and answers from your current session.")

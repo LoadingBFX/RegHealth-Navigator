@@ -1,69 +1,66 @@
 import streamlit as st
 from state import init_session
 
+# Set wide layout and page title
 st.set_page_config(page_title="RegHealth Navigator", layout="wide")
+
+# Initialize session state
 init_session()
 
-# ---------- Title & API Setup ----------
-st.title("🩺 RegHealth Navigator")
+# ---------- SIDEBAR: API KEY & MODEL ----------
+st.sidebar.header("🔐 API Setup")
+st.sidebar.markdown("Enter your OpenAI API key and select your model to begin.")
 
-with st.form("setup_form", clear_on_submit=False):
-    st.session_state.api_key = st.text_input("🔑 OpenAI API Key", type="password")
-    st.session_state.model = st.selectbox("🤖 Choose model", ["gpt-4o"])
-    submitted = st.form_submit_button("Submit")
+# Input fields stored in session_state
+st.session_state.api_key = st.sidebar.text_input(
+    "🔑 OpenAI API Key", 
+    type="password", 
+    value=st.session_state.get("api_key", "")
+)
 
-if submitted:
+st.session_state.model = st.sidebar.selectbox(
+    "🤖 Model", 
+    ["gpt-4o", "gpt-4"], 
+    index=["gpt-4o", "gpt-4"].index(st.session_state.get("model", "gpt-4o"))
+)
+
+# Submit button
+if st.sidebar.button("✅ Submit API Key"):
     if not st.session_state.api_key:
-        st.warning("❗ Please enter a valid API key.")
+        st.sidebar.warning("⚠️ Please enter a valid API key.")
     else:
         st.session_state.submitted = True
-        st.success("✅ API key saved. You may now use the app.")
+        st.sidebar.success(f"Connected using `{st.session_state.model}`")
 
-# ---------- Detailed Introduction ----------
+# ---------- MAIN CONTENT ----------
+st.title("🩺 RegHealth Navigator")
 st.markdown("""
-Welcome to **RegHealth Navigator** — your personalized platform for exploring and understanding U.S. **healthcare compliance regulations** with the power of advanced AI.
+Welcome to **RegHealth Navigator** — your AI-powered assistant for navigating complex U.S. healthcare compliance rules.
 
-Whether you're a healthcare administrator, policy analyst, compliance officer, or provider, this app helps you make sense of complex CMS rules and changes across years, programs, and rule types.
+Whether you're a policy analyst, compliance officer, or healthcare provider, this app helps you **explore**, **compare**, and **gain insights** from CMS rule updates.
 
-### 🔍 What you can do:
+### 🔍 What You Can Do:
+- 💬 **Ask Questions** about any CMS rule and get grounded answers
+- 📊 **Compare** proposed vs. final rules or changes across years
+- 📈 **Generate Strategic Insights** tailored to your organization
+- 📚 **Explore Regulatory Documents** and inspect rule chunks manually
 
-- 💬 **Ask Questions**  
-  Ask natural-language questions about proposed or final CMS rules. The AI retrieves relevant sections and provides grounded, accurate answers based on regulatory documents.
-
-- 📊 **Compare Rules**  
-  Compare how a rule has changed across years, or between proposed and final versions. See side-by-side summaries highlighting key differences in wording, scope, or policy focus.
-
-- 📈 **Generate Strategic Insights**  
-  Enter a scenario (e.g., “How should SNFs prepare for the 2025 Final Rule?”) and receive tailored recommendations based on regulatory context.
-
-- 📚 **Explore Documents**  
-  Browse and filter regulation content by year, program, rule type, and section header. Search for specific topics and inspect the source text used by the AI.
-
-Use the **sidebar** or the **buttons below** to explore each feature.
+Use the **sidebar** to enter your API key, then click below to begin.
 """)
 
-# ---------- Feature Buttons ----------
+# ---------- NAVIGATION BUTTONS ----------
 col1, col2 = st.columns(2)
 
 with col1:
     if st.button("💬 Ask Questions"):
         st.switch_page("pages/1_💬_Ask_Questions.py")
-
     if st.button("📊 Compare Rules"):
         st.switch_page("pages/2_📊_Compare_Rules.py")
-
     if st.button("📈 Generate Insights"):
         st.switch_page("pages/3_📈_Generate_Insights.py")
 
 with col2:
     if st.button("📚 Document Explorer"):
         st.switch_page("pages/4_📚_Document_Explorer.py")
-
     if st.button("🧠 Session History"):
         st.switch_page("pages/5_🧠_History.py")
-
-# ---------- Sidebar Status ----------
-if st.session_state.submitted:
-    st.sidebar.success(f"✅ Connected to OpenAI: `{st.session_state.model}`")
-else:
-    st.sidebar.warning("🔐 Please enter your OpenAI API key to begin.")
