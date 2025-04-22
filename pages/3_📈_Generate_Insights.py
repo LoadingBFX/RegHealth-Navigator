@@ -4,7 +4,8 @@ import json
 import re
 
 from state import (
-    init_session, load_index, embed_query, search_chunks,
+    init_session, sidebar_api_setup,  # ✅ Add this
+    load_index, embed_query, search_chunks,
     get_context, PROMPTS, render_chunks, count_tokens
 )
 
@@ -15,10 +16,13 @@ MODEL_TOKEN_LIMITS = {
 
 # ---------- Setup ----------
 init_session()
+sidebar_api_setup()  # ✅ Add this line
+
 if not st.session_state.submitted:
-    st.warning("Please enter your OpenAI API key and model first.")
+    st.warning("Please enter your OpenAI API key and model first in the sidebar.")
     st.stop()
 
+# ---------- UI ----------
 st.title("📈 Generate Strategic Insights")
 st.markdown("Analyze healthcare rule content and generate actionable recommendations.")
 

@@ -1,24 +1,31 @@
 import streamlit as st
 import openai
 from state import (
-    init_session, load_index, embed_query, search_chunks,
+    init_session, sidebar_api_setup,  # ✅ NEW
+    load_index, embed_query, search_chunks,
     get_context, PROMPTS, render_chunks, count_tokens
 )
 
+# ---------- Setup ----------
 init_session()
+sidebar_api_setup()  # ✅ NEW
+
 if not st.session_state.submitted:
-    st.warning("Please enter your OpenAI API key and model first.")
+    st.warning("Please enter your OpenAI API key and model first in the sidebar.")
     st.stop()
 
+# ---------- UI ----------
 st.title("📊 Compare Two Rules")
 st.markdown("Compare healthcare final or proposed rules across years or sections.")
 
 with st.expander("💡 Example Comparison Questions", expanded=False):
-    st.markdown("""- What changed in hospice wage index policy between the 2022 proposed and final rules?
+    st.markdown("""
+- What changed in hospice wage index policy between the 2022 proposed and final rules?
 - Compare quality reporting updates in the 2023 SNF proposed and final rules.
 - How did the 2023 vs. 2024 hospice rules differ in reporting requirements?
 - What are the major policy changes in SNF payment between 2023 and 2025?
-- Compare the treatment of palliative care in the 2024 and 2025 hospice final rules.""")
+- Compare the treatment of palliative care in the 2024 and 2025 hospice final rules.
+""")
 
 # Load metadata
 index, metadata = load_index()
