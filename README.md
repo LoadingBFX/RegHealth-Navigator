@@ -1,8 +1,24 @@
-# RegHealth MVP – Product Requirements Document  
-**Author:** [Your Name]  
-**Last Updated:** 27 May 2025  
-**Status:** Draft  
+# 🏥 RegHealth Navigator 2 – Product Requirements Document
 
+**Author:**  
+Xiao Yan  
+Dhruv Tangri  
+Sarvesh Siras  
+Saicharan Emmadi  
+Seon Young Jhang  
+Fanxing Bu  
+**Last Updated:** 27 May 2025  
+**Status:** 🚧 Draft  
+
+[![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
+
+This repo is the **Summer 2025 CMU Capstone** project, continuing the work from **Spring 2025** ([GitHub Repo](https://github.com/PaulHuatingSun/RegHealth-Navigator)). The project aims to:
+
+- Refine the system design  
+- Support processing of documents over **1,000 pages**
+- Complete unfinished Spring functionality
+- Optimize model performance  
+- Enhance the user experience  
 ---
 
 ## 1. Purpose & Vision  
