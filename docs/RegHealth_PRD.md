@@ -10,6 +10,30 @@ Professionals who track regulatory or standardsâ€‘driven content (e.g., healthâ€
 
 ---
 
+## 2. Technical Workflow Update (2024-06)
+
+### Large XML Handling & Section-Based Processing
+- **Partitioning:** Large XML files (often >300MB, >1000 pages) are automatically partitioned into logical sections (e.g., "Medicare Physician Fee Schedule", "HIPAA regulations").
+- **Chunking:** Each section is further split into manageable text chunks for embedding and retrieval.
+- **Embedding & Storage:** Chunks are embedded (e.g., via OpenAI API) and stored in a vector database, with metadata for section and location.
+- **Section-Level Operations:** All LLM-based features (Q&A, summarization, comparison) operate at the section level to avoid context overflow and ensure performance.
+- **API & Frontend:** Backend API and frontend are designed to support section selection and section-level operations. Users can select a section for Q&A, summary, or comparison.
+- **Rationale:**
+  - Enables handling of very large documents without exceeding LLM context limits.
+  - Improves performance and scalability by isolating operations to relevant sections.
+  - Lays the foundation for future cross-section or multi-section features.
+
+### Core Backend Modules (MVP)
+- `core/xml_partition.py`: Partition XML into logical sections.
+- `core/xml_chunker.py`: Chunk a section into smaller text units.
+- `core/embedding.py`: Generate and store embeddings for section chunks.
+- `core/llm.py`: Section-level LLM operations (summarization, Q&A, comparison).
+
+### Extensibility
+- The architecture supports future expansion to multi-section or cross-document operations, as well as more advanced caching and retrieval strategies.
+
+---
+
 ## 2. Goals & Success Metrics  
 
 | Goal | Measure of Success | Target (MVP) |
