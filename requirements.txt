@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+lxml
+redis
+httpx
+pydantic
+pytest
+python-dotenv 
