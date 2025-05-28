@@ -3,6 +3,12 @@ __pycache__/
 .DS_Store
 .vscode
 .cursor
+.gitignore
+.gitattributes
+.gitmodules
+.nvmrc
+.prettierrc
+.prettierignore
 claude*
 
 # Byte-compiled / optimized / DLL files
