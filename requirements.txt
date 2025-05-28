@@ -1,5 +1,0 @@
-streamlit
-openai
-tiktoken
-faiss-cpu
-python-dotenv
