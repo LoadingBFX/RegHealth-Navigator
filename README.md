@@ -13,7 +13,7 @@ Fanxing Bu
 
 [![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
 
-This repository is the **Summer 2025 CMU Capstone** project, continuing the work from **Spring 2025** ([GitHub Repo](https://github.com/PaulHuatingSun/RegHealth-Navigator)). The project aims to:
+This repository is the **Summer 2025 CMU Capstone** project, continuing the work from **Spring 2025** ([GitHub Repo](https://github.com/PaulHuatingSun/RegHealth-Navigator)). [GitHub Page](https://loadingbfx.github.io/RegHealth-Navigator/)
 
 ---
 
