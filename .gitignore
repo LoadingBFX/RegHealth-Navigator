@@ -12,6 +12,7 @@ __pycache__/
 *.zip
 claude*
 *.pdf
+.conda
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
