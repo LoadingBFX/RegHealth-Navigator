@@ -21,11 +21,26 @@ const Sidebar: React.FC = () => {
   } = useStore();
   
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const filteredFiles = files.filter(
-    file => file.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
+  const [yearFilter, setYearFilter] = useState('all');
+  const [programFilter, setProgramFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+
+  const programs = ['MPFS', 'QPP', 'SNF', 'IPPS'];
+  const types = ['Final Rule', 'Proposed Rule'];
+  const years = ['2025', '2024', '2023', '2022'];
+
+  const filteredFiles = files.filter(file => {
+    const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesYear = yearFilter === 'all' || file.date.includes(yearFilter);
+    const matchesProgram = programFilter === 'all' || file.name.includes(programFilter);
+    const matchesType = typeFilter === 'all' || (
+      typeFilter === 'Final Rule' ? file.name.includes('Final') : 
+      typeFilter === 'Proposed Rule' ? file.name.includes('Proposed') : 
+      true
+    );
+    return matchesSearch && matchesYear && matchesProgram && matchesType;
+  });
+
   const filteredHistory = history.filter(
     item => item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -66,7 +81,7 @@ const Sidebar: React.FC = () => {
       </div>
       
       <div className="p-3 border-b border-neutral-200">
-        <div className="relative">
+        <div className="relative mb-3">
           <input
             type="text"
             placeholder="Search..."
@@ -76,6 +91,43 @@ const Sidebar: React.FC = () => {
           />
           <Search className="absolute left-2.5 top-2 h-4 w-4 text-neutral-500" />
         </div>
+
+        {activeSidebarTab === 'files' && (
+          <div className="space-y-2">
+            <select 
+              className="w-full p-1.5 bg-white border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+            >
+              <option value="all">All Years</option>
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+
+            <select 
+              className="w-full p-1.5 bg-white border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={programFilter}
+              onChange={(e) => setProgramFilter(e.target.value)}
+            >
+              <option value="all">All Programs</option>
+              {programs.map(program => (
+                <option key={program} value={program}>{program}</option>
+              ))}
+            </select>
+
+            <select 
+              className="w-full p-1.5 bg-white border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">All Types</option>
+              {types.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       
       <div className="flex-1 overflow-y-auto">

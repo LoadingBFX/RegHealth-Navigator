@@ -9,6 +9,7 @@ __pycache__/
 .nvmrc
 .prettierrc
 .prettierignore
+.zip
 claude*
 
 # Byte-compiled / optimized / DLL files
