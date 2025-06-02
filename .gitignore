@@ -9,7 +9,7 @@ __pycache__/
 .nvmrc
 .prettierrc
 .prettierignore
-.zip
+*.zip
 claude*
 *.pdf
 
