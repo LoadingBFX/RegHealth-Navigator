@@ -206,6 +206,13 @@ const Sidebar: React.FC = () => {
           </div>
         )}
       </div>
+      
+      <div className="p-3 border-t border-neutral-200">
+        <button className="w-full flex items-center justify-center px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-md transition-colors">
+          <FolderOpen className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">Select XML Files</span>
+        </button>
+      </div>
     </div>
   );
 };
