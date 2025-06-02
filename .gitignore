@@ -3,14 +3,15 @@ __pycache__/
 .DS_Store
 .vscode
 .cursor
+.gitignore
+.gitattributes
 .gitmodules
 .nvmrc
 .prettierrc
 .prettierignore
-*.zip
+.zip
 claude*
 *.pdf
-.conda
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
