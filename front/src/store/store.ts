@@ -99,6 +99,78 @@ const sampleMindmap = {
   ]
 };
 
+// Add FAQ types and sample data
+type FAQQuestion = {
+  question: string;
+  answer: string;
+  citation: string;
+};
+
+type FAQSection = {
+  id: string;
+  title: string;
+  questions: FAQQuestion[];
+};
+
+type FAQ = {
+  title: string;
+  sections: FAQSection[];
+};
+
+const sampleFAQ = {
+  title: 'Medicare Physician Fee Schedule 2025 - FAQ',
+  sections: [
+    {
+      id: '1',
+      title: 'General Questions',
+      questions: [
+        {
+          question: 'When does this rule take effect?',
+          answer: 'The final rule takes effect on January 1, 2025.',
+          citation: '§1.1'
+        },
+        {
+          question: 'Who is affected by these changes?',
+          answer: 'This rule affects all Medicare-enrolled physicians and other healthcare practitioners who bill under the Physician Fee Schedule.',
+          citation: '§1.2'
+        }
+      ]
+    },
+    {
+      id: '2',
+      title: 'Payment Changes',
+      questions: [
+        {
+          question: 'What is the conversion factor for 2025?',
+          answer: 'The 2025 conversion factor is $32.75, representing a 3.4% decrease from 2024.',
+          citation: '§2.1'
+        },
+        {
+          question: 'Are there any new payment modifiers?',
+          answer: 'Yes, three new modifiers have been introduced for telehealth services.',
+          citation: '§2.3'
+        }
+      ]
+    },
+    {
+      id: '3',
+      title: 'Quality Reporting',
+      questions: [
+        {
+          question: 'What are the key MIPS changes for 2025?',
+          answer: 'The performance threshold has increased to 80 points, and there are 12 new quality measures.',
+          citation: '§3.1'
+        },
+        {
+          question: 'Are there new reporting requirements?',
+          answer: 'Yes, clinicians must now report on at least two high-priority measures.',
+          citation: '§3.2'
+        }
+      ]
+    }
+  ]
+};
+
 type FileType = {
   id: string;
   name: string;
@@ -182,6 +254,9 @@ type StoreState = {
   
   processingProgress: number;
   setProcessingProgress: (progress: number) => void;
+  
+  faq: FAQ | null;
+  setFAQ: (faq: FAQ | null) => void;
 };
 
 export const useStore = create<StoreState>((set) => ({
@@ -218,4 +293,7 @@ export const useStore = create<StoreState>((set) => ({
   
   processingProgress: 0,
   setProcessingProgress: (progress) => set({ processingProgress: progress }),
+  
+  faq: sampleFAQ,
+  setFAQ: (faq) => set({ faq }),
 }));
