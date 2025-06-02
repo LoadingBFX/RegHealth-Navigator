@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../../store/store';
 import SummaryTab from './SummaryTab';
-import MindmapTab from './MindmapTab';
+import FAQTab from './FAQTab';
 import ComparisonTab from './ComparisonTab';
 import { ListChecks, GitBranch, DiffIcon } from 'lucide-react';
 
@@ -25,14 +25,14 @@ const ResultsPanel: React.FC = () => {
           </button>
           <button
             className={`flex items-center py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'mindmap'
+              activeTab === 'faq'
                 ? 'bg-primary-50 text-primary-700'
                 : 'text-neutral-600 hover:text-primary-600 hover:bg-neutral-100'
             }`}
-            onClick={() => setActiveTab('mindmap')}
+            onClick={() => setActiveTab('faq')}
           >
             <GitBranch className="h-4 w-4 mr-1.5" />
-            Mind Map
+            FAQ
           </button>
           <button
             className={`flex items-center py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
@@ -50,7 +50,7 @@ const ResultsPanel: React.FC = () => {
       
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'summary' && <SummaryTab />}
-        {activeTab === 'mindmap' && <MindmapTab />}
+        {activeTab === 'faq' && <FAQTab />}
         {activeTab === 'comparison' && <ComparisonTab />}
       </div>
     </div>
