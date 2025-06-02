@@ -179,4 +179,4 @@ Types:
 ## Contact
 
 - Project Maintainers: Xiao Yan, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, Seon Young Jhang, Fanxing Bu
-- Repository: [https://github.com/LoadingBFX/RegHealth-Navigator](https://github.com/LoadingBFX/RegHealth-Navigator)
+- Repository: [https://github.com/LoadingBFX/RegHealth-Navigator](https://github.com/LoadingBFX/RegHealth-Navigator)docs
