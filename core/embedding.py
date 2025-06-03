@@ -26,3 +26,20 @@ def embed_and_store_section(file_id: str, section_name: str, chunks: List[Dict])
         chunks (List[dict]): Chunk data.
     """
     pass 
+
+class EmbeddingManager:
+    """
+    Manager for embedding operations (empty implementation).
+    """
+    def __init__(self):
+        pass
+
+    def embed_chunks(self, chunks):
+        """
+        Dummy embed_chunks method.
+        Args:
+            chunks (list): List of chunks to embed.
+        Returns:
+            list: Empty list (placeholder)
+        """
+        return [] 

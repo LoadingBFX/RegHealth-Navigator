@@ -27,3 +27,21 @@ def answer_query(query: str, context: List[str]) -> str:
         str: Answer with citations.
     """
     pass 
+
+class ChatEngine:
+    """
+    Manager for chat-based Q&A (empty implementation).
+    """
+    def __init__(self):
+        pass
+
+    def chat(self, section_id, query):
+        """
+        Dummy chat method.
+        Args:
+            section_id (str): Section ID
+            query (str): User query
+        Returns:
+            str: Placeholder response
+        """
+        return "[ChatEngine dummy response]" 
