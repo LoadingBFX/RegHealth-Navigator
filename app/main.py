@@ -7,11 +7,16 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import uvicorn
+import sys
+from pathlib import Path
+
+# Add parent directory to Python path
+sys.path.append(str(Path(__file__).parent.parent))
+
 from core.xml_partition import XMLPartitioner
 from core.xml_chunker import XMLChunker
 from core.embedding import EmbeddingManager
 from core.llm import LLMManager
-from core.mindmap_builder import MindMapBuilder
 from core.chat_engine import ChatEngine
 from pydantic import BaseModel
 import json
@@ -27,14 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize core components
-partitioner = XMLPartitioner()
-chunker = XMLChunker()
-embedding_manager = EmbeddingManager()
-llm_manager = LLMManager()
-mindmap_builder = MindMapBuilder()
-chat_engine = ChatEngine()
-
 class SectionRequest(BaseModel):
     section_id: str
     query: Optional[str] = None
@@ -43,6 +40,9 @@ class ComparisonRequest(BaseModel):
     doc1_id: str
     doc2_id: str
     section_ids: Optional[List[str]] = None
+
+class SimpleChatRequest(BaseModel):
+    message: str
 
 @app.post("/api/upload")
 async def upload_document(file: UploadFile = File(...)):
@@ -73,20 +73,32 @@ async def summarize_section(section_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/api/sections/{section_id}/mindmap")
-async def generate_mindmap(section_id: str):
-    """Generate mindmap for a section"""
-    try:
-        mindmap = mindmap_builder.build(section_id)
-        return {"mindmap": mindmap}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
 @app.post("/api/chat")
 async def chat(request: SectionRequest):
-    """Chat with a specific section"""
+    """
+    Chat endpoint that demonstrates frontend-backend interaction.
+    
+    Args:
+        request (SectionRequest): Request containing section_id and query
+        
+    Returns:
+        dict: Response containing the chat message
+        
+    Example:
+        Request:
+            {
+                "section_id": "demo_section",
+                "query": "What are the requirements?"
+            }
+        Response:
+            {
+                "response": "Hello! You asked about section demo_section. Your query was: What are the requirements?"
+            }
+    """
     try:
-        response = chat_engine.chat(request.section_id, request.query)
+        # Return a hardcoded response for demonstration
+        # In a real implementation, this would process the query using LLM or other services
+        response = f"Hello! You asked about section {request.section_id}. Your query was: {request.query}"
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -103,6 +115,11 @@ async def compare_documents(request: ComparisonRequest):
         return {"comparison": comparison}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/simple-chat")
+async def simple_chat(request: SimpleChatRequest):
+    """Simple chat endpoint that returns hello world"""
+    return {"response": "hello world!"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True) 
