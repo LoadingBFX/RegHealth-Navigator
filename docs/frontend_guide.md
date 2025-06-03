@@ -141,6 +141,90 @@ export const generateSummary = async (fileIds: string[]) => {
 };
 ```
 
+### Chat Example
+
+Here's a simple example of how the chat interface interacts with the backend:
+
+1. **Frontend (ChatPanel.tsx)**:
+```typescript
+// State for input text
+const [input, setInput] = useState('');
+
+// Handle form submission
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim()) {
+        // Send POST request to backend
+        const response = await fetch('http://localhost:8000/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                section_id: "demo_section",
+                query: input 
+            }),
+        });
+
+        // Handle response
+        const data = await response.json();
+        // Display response in chat
+        addMessage({
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: data.response
+        });
+    }
+};
+
+// Input field in JSX
+<input
+    type="text"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    placeholder="Ask about the XML documents..."
+    className="flex-1 p-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+/>
+```
+
+2. **Backend (main.py)**:
+```python
+@app.post("/api/chat")
+async def chat(request: SectionRequest):
+    """Chat with a specific section"""
+    try:
+        # Hardcoded response for demonstration
+        response = f"Hello! You asked about section {request.section_id}. Your query was: {request.query}"
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+```
+
+3. **Data Flow**:
+   - User types in the input field
+   - Clicks send button or presses enter
+   - Frontend sends POST request to `/api/chat`
+   - Backend processes request and returns response
+   - Frontend displays response in chat interface
+
+4. **Testing**:
+   1. Start backend server:
+   ```bash
+   cd app
+   uvicorn main:app --reload
+   ```
+   
+   2. Start frontend development server:
+   ```bash
+   cd front
+   npm run dev
+   ```
+   
+   3. Open frontend in browser
+   4. Type message in input field
+   5. Click send button
+   6. View response in chat interface
+
 ## Error Handling
 
 Implement error handling for API calls:
