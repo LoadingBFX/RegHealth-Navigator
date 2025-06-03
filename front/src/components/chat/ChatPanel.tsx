@@ -15,7 +15,7 @@ const ChatPanel: React.FC = () => {
     }
   }, [messages]);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
       // Add user message
@@ -25,15 +25,32 @@ const ChatPanel: React.FC = () => {
         content: input
       });
       
-      // Simulate assistant response (would be API call in real app)
-      setTimeout(() => {
+      try {
+        // Send message to backend
+        const response = await fetch('http://localhost:8000/api/simple-chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: input }),
+        });
+
+        const data = await response.json();
+        
+        // Add bot response
         addMessage({
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: `This is a simulated response to "${input}". In a real implementation, this would contain information extracted from the XML documents with proper citations.`,
-          citations: ['§1.2', '§3.4']
+          content: data.response
         });
-      }, 1000);
+      } catch (error) {
+        console.error('Error:', error);
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Sorry, there was an error processing your message.'
+        });
+      }
       
       setInput('');
     }
