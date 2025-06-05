@@ -62,7 +62,7 @@ def get_latest_documents(days: int = 365) -> List[Dict]:
         data = response.json()
         return data.get('results', [])
     except Exception as e:
-        print(f"❌ Error fetching document list: {str(e)}")
+        print(f"Error fetching document list: {str(e)}")
         return []
 
 def should_skip_document(doc: Dict) -> tuple[bool, str]:
@@ -195,8 +195,7 @@ def download_xml(doc: Dict, save_dir: Path, logger=None) -> bool:
 def process_document(doc: Dict, save_dir: Path, logger=None) -> tuple[bool, str]:
     """Process a single document."""
     doc_number = doc.get('document_number')
-    pub_date = datetime.strptime(doc.get('publication_date'), '%Y-%m-%d')
-    
+        
     # 检查是否应该跳过
     skip, reason = should_skip_document(doc)
     if skip:
