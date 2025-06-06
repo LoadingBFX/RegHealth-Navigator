@@ -1,0 +1,101 @@
+<NOTICE>
+            <PREAMB>
+                <AGENCY TYPE="N">DEPARTMENT OF VETERANS AFFAIRS</AGENCY>
+                <SUBJECT>Methodology for Reimbursing Medical Services, Extended Care Services, Pharmaceuticals, and Durable Medical Equipment Not on Medicare Fee Schedules</SUBJECT>
+                <AGY>
+                    <HD SOURCE="HED">AGENCY:</HD>
+                    <P>Department of Veterans Affairs.</P>
+                </AGY>
+                <ACT>
+                    <HD SOURCE="HED">ACTION:</HD>
+                    <P>Notice.</P>
+                </ACT>
+                <SUM>
+                    <HD SOURCE="HED">SUMMARY:</HD>
+                    <P>This notice is to inform the public about changes to rates contained within the Department of Veterans Affairs (VA) Fee Schedule. This fee schedule is currently used as part of the rate structure for certain agreements that VA uses to purchase community care under the Veterans Community Care Program (VCCP). Additionally, in this notice, VA will explain its use of non-reimbursable codes and industry standard business practices to ensure consistent adjudication of claims for services deemed non-billable or non-reimbursable.</P>
+                </SUM>
+                <DATES>
+                    <HD SOURCE="HED">DATES:</HD>
+                    <P>The change will be effective March 27, 2024.</P>
+                </DATES>
+                <FURINF>
+                    <HD SOURCE="HED">FOR FURTHER INFORMATION CONTACT:</HD>
+                    <P>Joseph Duran, Policy Directorate, 16IVCEO3, Veterans Health Administration, Department of Veterans Affairs, 810 Vermont Avenue NW, Washington, DC 20420; 303-370-1637 (This is not a toll-free number).</P>
+                </FURINF>
+            </PREAMB>
+            <SUPLINF>
+                <HD SOURCE="HED">SUPPLEMENTARY INFORMATION:</HD>
+                <HD SOURCE="HD1">A. Background</HD>
+                <P>
+                    Prior to implementing VCCP, as required by section 101 of the VA Maintaining Internal Systems and Strengthening Integrated Outside Networks Act of 2018, VA would pay for community care pursuant to regulations found at 38 CFR 17.55 and 17.56. These regulations created a VA 75th Percentile Fee Schedule that was used to determine payment rates when there was no negotiated rate and no Medicare Rate. While the VA 75th Percentile Fee Schedule still exists and is used for paying for care provided under certain authorities (for example, 38 U.S.C. 1728), it is not used for making payments under VCCP, and is not the subject of this notice. Under VCCP, there are not specific payment rates assigned through statute, and the amount that VA pays for health care provided under this program is determined by the terms of the agreement the care was purchased under. While the statute does not set rates, 38 U.S.C. 1703(i) does indicate that VA must, when practicable, limit the amounts it pays to the amounts that would be paid under Medicare for the same services. Specifically, 38 U.S.C. 1703(i) states that, “. . . to the extent practicable, the rate paid for hospital care, medical services, or extended care services under any provision in this title may not exceed the rate paid by the United States to a provider of services . . . or a supplier . . . under the Medicare program under title XI or title XVIII of the Social Security Act (42 
+                    <PRTPAGE P="21421"/>
+                    U.S.C. 1301 
+                    <E T="03">et seq.</E>
+                    ), including section 1834 of such Act (42 U.S.C. 1395m), for the same care or services.” While this section does not require VA to pay the same rates as Medicare, VA has determined that paying the Medicare rate when possible is the best policy. However, there are a number of services that VA provides to its beneficiaries through VCCP for which there is no Medicare rate. Therefore, VA developed the VA Fee Schedule (VAFS) to assign rates for codes that VA covers for which there is no Medicare rate.
+                </P>
+                <HD SOURCE="HD1">B. Purpose</HD>
+                <P>This notice is to inform the public about VA's methodology for calculating VAFS rates. The methodology used relies on a combination of VA claims data, Medicare policies and fee schedules, Medicaid fee schedules, TRICARE fee schedules, and benchmarking data to support fee schedule development. This notice will also explain VA's use of non-reimbursable codes and industry standard business practices to ensure consistent adjudication of claims for services deemed non-billable or non-reimbursable.</P>
+                <HD SOURCE="HD1">C. Description of VA Fee Schedule</HD>
+                <P>
+                    In most of VA's contracts and agreements for the purchase of community care, the default payment rate is the Medicare Fee Schedule amount (outpatient) and the Medicare Prospective Payment System amount (inpatient and outpatient care in hospital settings). These rates are collectively referred to throughout this notice as the “Medicare rate.” VA analyzed its payments made under 38 U.S.C. 1703 and 1703A and found that the Medicare rate was paid for approximately 80% of line item claims. Pursuant to the terms of agreements VA uses to purchase community care, when there is no Medicare rate available, VA pays the lesser of the VAFS amount or billed charges. To determine the VAFS rates, VA gathers data from several different sources for each procedure code. These sources include Medicare's relative value unit (RVU) data, Medicare Administrative Contractor (MAC) rates, geographic location data, and geographic index adjustments. VAFS rates are determined using benchmark data from trusted sources in the health care payment analytics space and validated by either another benchmarking source or using other sources of supplemental data to support rate setting decisions. VA may deviate from this methodology when access to critical care services could be impacted by sudden, significant changes in payment rates. All VAFS releases are published at the link below: 
+                    <E T="03">https://www.va.gov/COMMUNITYCARE/revenue-ops/Fee-Schedule.asp.</E>
+                </P>
+                <HD SOURCE="HD1">D. Methodology</HD>
+                <P>Medicare fee schedules are reviewed to identify which procedure codes do not have associated rates. When sufficient rate setting data exists, most codes are placed onto the VAFS, unless they are considered Unlisted, Not Otherwise Classified (NOC), or other notation used for miscellaneous services. Codes deemed Unlisted, NOC, and other miscellaneous services do not have rates calculated due to their broad range of application and high variance in resources necessary to render services. This process occurs prior to each new VAFS release. VA's process includes setting a national base rate via benchmark or Medicare data sources, and, when applicable, applying an adjustment to account for geographical cost differences. Inclusion or exclusion of a procedure code from the VAFS is not an indication of coverage or lack of coverage.</P>
+                <P>VA analyzes Medicaid rates for the respective services to ensure rates are never priced lower than currently published Medicaid rates for the same or comparable procedure code. Additionally, VA analyzes 12 months of provider billing data to establish maximum rate values at the national 75th percentile of billed charges for each procedure code. This value is established by ranking billed charge amounts by providers and calculating the 75th percentile of the national billed charge amount. If the methods described below for assigning VAFS rates lead to a rate that is lower than the minimum amount set for a code, the VAFS rate will instead be that minimum amount. Similarly, if the methodologies below lead to a rate that would be higher than the maximum rate for that code, the VAFS rate for that code will be the maximum amount. By reviewing Medicaid rates, as well as historical VA claims data, to establish minimum and maximum rates for each code, VA is ensuring that its VAFS rates will be reasonably in line with industry standard pricing. Once the minimum and maximum rates have been determined, VA applies its methodology, based on the type of code and service, to determine the base VAFS rate.</P>
+                <P>When dealing with procedure codes designated by Medicare Status Indicators as Status I (Medicare uses another procedure code to report service), R (restricted coverage), or N (non-covered service), the rate calculation involves leveraging RVU included in the quarterly file published by the Centers for Medicare &amp; Medicaid Services (CMS). RVUs are used to calculate rates for medical services and is the basis for Medicare's rate setting methodology. VA uses the same rate calculation based on the RVUs as Medicare to establish rates where RVU data exists for procedure codes not covered by Medicare. Since these codes are absent from Medicare fee schedules, rates for these procedure codes are set using CMS RVU calculation when available. This methodology is not applicable to each Status I, R, or N procedure code, and is only used when the applicable data is available from CMS. Medicare determines some procedure codes as “Carrier Priced” (Status C), meaning the MACs are responsible for setting rates based on their own methodologies. For many Status C codes (the term Carrier is synonymous with MAC), VA relies on rates from available MAC fee schedules to fill gaps for locations where the carriers have not established rates. VA analyzes the fee schedules from each MAC, and if rates are set in at least 28 localities, VA calculates the median rates among these MAC fee schedules. This median amount is used as the base rate which is then adjusted based on geographic locality to set rates where the procedure code is not included in MAC fee schedules. Not all Status C codes are assigned MAC rates due to limited data. When a code does not have enough assigned MAC rates available to make a median rate calculation, VA is unable to use this methodology to assign a rate for that code on the VAFS.</P>
+                <P>
+                    In many cases, VA relies on a benchmarking method to set rates, incorporating industry-proven and respected data comprised of Medicare, Medicaid, and commercial health insurance claims. VA has partnerships with multiple entities which supply provider payment data that VA uses in developing fee schedules. To improve the accuracy of benchmarking practices, VA employs multiple sources of benchmarking data to validate and confirm each value used in rate setting. VA analyzes the multiple years of benchmark data to build a robust dataset for analysis and application. FAIR Health, Truven MarketScan, and 5% Medicare Standard Analytical data are used as primary sources of benchmark data. As an additional benchmark source, VA considers the most recent TRICARE, Medicare Outpatient Prospective Payment System (OPPS), and Medicare Ambulatory Surgical Center (ASC) rates when available for 
+                    <PRTPAGE P="21422"/>
+                    comparable VAFS procedure codes. VA sets rates up to 6 months in advance, requiring any data element used in rate setting methodology to be adjusted based on historical Medicare Economic Index values for each year the data lags the implementation date.
+                </P>
+                <P>For many home health and community-based services, VA uses a method derived from the Medicare Home Health Prospective Payment System (PPS). These rates are calculated by converting Medicare Low Utilization Payment Adjustment (LUPA) rates into 15-minute rates based on national Medicare averages for the duration of visits. The labor-related share of rates is then adjusted by wage indices by geographic locality. VA also uses Medicaid fee schedules to develop rates for some community-based services, such as adult daycare, when application of the Medicare Home Health PPS and/or LUPA rates are not practicable.</P>
+                <P>VA also analyzes codes to determine if similar services exist. In some cases, the codes for these similar services provide a comparable rate that VA can use to set the base VAFS rate. Procedure codes are assessed based on their clinical similarity, resource utilization, and patient needs by medical coding subject matter experts to determine if the codes can be used interchangeably. If codes on the VAFS can be cross walked to comparable codes from either Medicare fee schedules or other benchmarking data sources, the similar procedure codes' rates may be set comparable to another for consistency in payment. Once VA establishes an association between comparable procedure codes or group of codes, it ensures the time, complexity, provider-type, wage-index adjustments, and other resources are factored into the rate for the procedure code. For instance, when a code has a rate for a procedure code with a description of “per 15 minutes” code, VA prices the “per hour” procedure code in alignment with the respective “per 15 minutes” code's rate.</P>
+                <P>Rates set with Medicare published RVUs have geographic adjustments built into the calculations based on geographic practice cost index (GPCI) for their locations. To ensure parity of geographic adjustments for codes without RVU data, the base rates for all other VAFS procedure codes are adjusted with an index to account for practice cost differences in each geographic locality. A geographic cost index is calculated for each locality using the Medicare fee schedule and applied to base rates to finalize each locality specific VAFS rate. This is done by taking the sum of all base rates from the Medicare Physician Fee Schedule (MPFS) as the denominator while using the sum of each locality's MPFS rates as the numerator to calculate the index. This index is then multiplied by the base rate for each procedure code to develop a locality-dependent rate. Consistent with Medicare, drugs and laboratory rates do not have geographic adjustments applied. Procedure codes representing these medications and pathology services have the same rate for each geographic locality.</P>
+                <HD SOURCE="HD1">E. Business Rules</HD>
+                <P>VA is also developing guidance for non-reimbursable codes and industry standard business practices to institute additional cost controls, including but not limited to those associated with VA benefit exclusions, non-reimbursable codes (for reporting purposes only), bundled services or supplies, procedure codes representing experimental &amp; investigational services providing no medical benefit, services outside of VA approved treatment plan guidance, or services considered not-medically necessary. VA reviews policies from CMS, private health insurance, and TRICARE to assess each code and decide if reimbursement is appropriate according to VA standards. This is a collaborative process incorporating payment policy, medical policy, and standard episode of care (SEOC) guidance to provide recommendations on which codes fall outside of proper reimbursement criteria. VA referrals will never include authorization for VA payment of certain non-reimbursable codes. Once codes are identified as potential additions, they are reviewed to assess the impact to both internal VA and provider operations. Codes identified as non-reimbursable will be denied. Decision dates will be included for each code to address potential changes over time if payment or medical policy changes in the future. It should be noted that this process of determining which codes can be paid, and under what circumstances, is distinct from VA's determinations of what services are clinically available as part of the VA Medical Benefits Package.</P>
+                <P>Future releases of VAFS will occur annually, with an option for more frequent updates to ensure provider payment is aligned with industry standards. As new procedure codes are added or discontinued quarterly, VA evaluates the need for the associated rates based on the absence of an available Medicare rate or Medicare payment mechanism and adds them as appropriate to VAFS to ensure cost controls are maintained.</P>
+                <GPOTABLE COLS="3" OPTS="L2,nj,i1" CDEF="xs72,r100,r100">
+                    <TTITLE>Table of Methodologies</TTITLE>
+                    <BOXHD>
+                        <CHED H="1">Category</CHED>
+                        <CHED H="1">Methodology</CHED>
+                        <CHED H="1">Data sources</CHED>
+                    </BOXHD>
+                    <ROW>
+                        <ENT I="01">Status R, N, and I Codes with RVUs *</ENT>
+                        <ENT>Calculate rate based on RVUs and GPCI available through publicly available CMS resources</ENT>
+                        <ENT>CMS/Medicare Physician Fee Schedule Relative Value with Conversion Factor File (GPCI file used in calculations included in .zip).</ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="01">Status C Codes</ENT>
+                        <ENT>When data is sufficient (over 28 localities) and the variance coefficient of rates are low (less than 1.0) among localities, the base rate is set equal to median amounts from available MAC C-Status Fee Schedules and applied to localities where the rate is absent</ENT>
+                        <ENT>MAC Part B Fee Schedules (CGS Administrators, Noridian Healthcare Solutions, Novitas Solutions, Palmetto, First Coast Service Options, National Government Services, Wisconsin Physician Service Government Health Administrators).</ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="01">Benchmarked Codes</ENT>
+                        <ENT>Set base rate to benchmark national value of allowed amount</ENT>
+                        <ENT>FAIR Health, Truven MarketScan, Medicare Standard Analytical Files (5% Sample), Medicare OPPS rates, Medicare ASC rates, and TRICARE Fee Schedules.</ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="01">Cross Walked Services</ENT>
+                        <ENT>Set rate equal to comparable procedure code or group of procedure codes with available rate or data, and if required, adjusted for time, complexity, or other payment adjusting factors</ENT>
+                        <ENT>All current Medicare Fee Schedules, Average Sales Price Drug Pricing file, Geriatric and Extended Care Fee Schedule, FAIR Health Medical Allowed Amount Benchmarks, Truven MarketScan Data, Medicare Standard Analytical Files (5% Sample), and TRICARE Fee Schedules.</ENT>
+                    </ROW>
+                    <ROW>
+                        <PRTPAGE P="21423"/>
+                        <ENT I="01">75th Percentile of Billed Charge</ENT>
+                        <ENT>Used only as a last effort to set rate when other methods are unapplicable. Base rate is set at the national 75th percentile of billed charges computed from the 12 prior months provider billing data</ENT>
+                        <ENT>12 months of VA provider payment data from VA Veteran claims processing systems.</ENT>
+                    </ROW>
+                </GPOTABLE>
+                <HD SOURCE="HD1">Signing Authority</HD>
+                <P>Denis McDonough, Secretary of Veterans Affairs, approved and signed this document on March 15, 2024, and authorized the undersigned to sign and submit the document to the Office of the Federal Register for publication electronically as an official document of the Department of Veterans Affairs.</P>
+                <SIG>
+                    <NAME>Luvenia Potts,</NAME>
+                    <TITLE>Regulation Development Coordinator, Office of Regulation Policy &amp; Management, Office of General Counsel, Department of Veterans Affairs.</TITLE>
+                </SIG>
+            </SUPLINF>
+            <FRDOC>[FR Doc. 2024-06431 Filed 3-26-24; 8:45 am]</FRDOC>
+            <BILCOD>BILLING CODE 8320-01-P</BILCOD>
+        </NOTICE>

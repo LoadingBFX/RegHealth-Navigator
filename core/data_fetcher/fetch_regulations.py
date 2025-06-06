@@ -7,251 +7,312 @@ import requests
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
-def setup_logging(verbose: bool = False):
-    """Configure logging with both console and file handlers."""
-    log_dir = Path('log')
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / 'regulation_fetch.log'
+import json
+from lxml import etree
+
+# Constants
+BASE_URL = "https://www.federalregister.gov/api/v1"
+SEARCH_URL = f"{BASE_URL}/documents.json"
+DOCUMENT_URL = f"{BASE_URL}/documents/{{}}.json"
+
+def setup_logging(verbose: bool = False) -> logging.Logger:
+    """Setup logging configuration."""
     log_level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=log_level,
         format='%(asctime)s %(levelname)s %(message)s',
-        handlers=[
-            logging.FileHandler(log_file, encoding='utf-8'),
-            logging.StreamHandler(sys.stdout)
-        ]
+        datefmt='%Y-%m-%d %H:%M:%S'
     )
     return logging.getLogger(__name__)
 
-def get_latest_documents(days: int = 365) -> List[Dict]:
-    """Get latest documents from Federal Register API."""
-    # 计算日期范围
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=days)
-    
-    # API 参数
-    params = {
-        'conditions[type][]': ['RULE', 'PRORULE'],
-        'conditions[agencies][]': ['centers-for-medicare-medicaid-services'],
-        'order': 'newest',
-        'per_page': 100,
-        'conditions[publication_date][gte]': start_date.strftime('%Y-%m-%d'),
-        'conditions[publication_date][lte]': end_date.strftime('%Y-%m-%d')
-    }
-    
-    # 设置请求头
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5_2) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/123.0.0.0 Safari/537.36"
-        ),
-        "Accept": "application/json"
-    }
-    
-    try:
-        response = requests.get(
-            'https://www.federalregister.gov/api/v1/documents.json',
-            params=params,
-            headers=headers,
-            timeout=30
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data.get('results', [])
-    except Exception as e:
-        print(f"❌ Error fetching document list: {str(e)}")
-        return []
-
-def should_skip_document(doc: Dict) -> tuple[bool, str]:
-    """Check if a document should be skipped."""
-    # 跳过未来日期的文档
-    pub_date = datetime.strptime(doc.get('publication_date'), '%Y-%m-%d')
-    if pub_date > datetime.now():
-        return True, f"Future document ({doc.get('publication_date')})"
-    
-    # 跳过修订文档（C1-, C2-, etc.）
-    doc_number = doc.get('document_number', '')
-    if doc_number.startswith('C'):
-        return True, f"Correction document ({doc_number})"
-    
-    
-    return False, ""
-
-def detect_program_type(doc: Dict) -> tuple[bool, str]:
-    """
-    Detect program type from document title.
+def get_single_document(doc_number: str) -> Optional[Dict]:
+    """Fetch a single document by its document number.
     
     Args:
-        doc (Dict): Document data from API
+        doc_number (str): The document number to fetch (e.g., "2024-06431")
         
     Returns:
-        tuple[bool, str]: (是否识别到程序类型, 程序类型)
-    """
-    title = doc.get('title', '').lower()
-    
-    # 定义程序类型及其关键词
-    program_keywords = {
-        'MPFS': ['physician fee schedule', 'mpfs', 'pfs'],
-        'HOSPICE': ['hospice wage', 'hospice payment', 'hospice quality'],
-        'SNF': ['skilled nursing facility', 'snf', 'nursing facility']
-    }
-    
-    # 检查每个程序类型的关键词
-    for program_type, keywords in program_keywords.items():
-        if any(keyword in title for keyword in keywords):
-            return True, program_type
-            
-    return False, 'UNCLASSIFIED'
-
-def get_document_filename(doc: Dict) -> str:
-    """Generate standardized filename for a document."""
-    doc_number = doc.get('document_number', '')
-    doc_type = doc.get('type', '').lower()
-    pub_date = datetime.strptime(doc.get('publication_date'), '%Y-%m-%d')
-    year = pub_date.strftime('%Y')
-    
-    # 获取程序类型
-    has_program, program_type = detect_program_type(doc)
-    
-    # 规范化文档类型
-    if doc_type == 'rule':
-        doc_type = 'final'
-    elif doc_type == 'prorule':
-        doc_type = 'proposed'
-    else:
-        doc_type = 'other'
-    
-    # 生成文件名：年份_程序类型_类型_原始文档号.xml
-    return f"{year}_{program_type}_{doc_type}_{doc_number}.xml"
-
-def download_xml(doc: Dict, save_dir: Path, logger=None) -> bool:
-    """Download XML file using the verified URL format."""
-    doc_number = doc.get('document_number')
-    pub_date = datetime.strptime(doc.get('publication_date'), '%Y-%m-%d')
-    year = pub_date.strftime('%Y')
-    month = pub_date.strftime('%m')
-    day = pub_date.strftime('%d')
-    
-    # 构建 URL
-    url = f"https://www.federalregister.gov/documents/full_text/xml/{year}/{month}/{day}/{doc_number}.xml"
-    
-    # 设置浏览器样式的请求头
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5_2) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/123.0.0.0 Safari/537.36"
-        ),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0"
-    }
-
-    try:
-        # 发送请求
-        response = requests.get(url, headers=headers, timeout=30)
+        Optional[Dict]: Document data if successful, None if failed
         
-        # 检查响应
-        if response.status_code == 200:
-            # 检查是否是有效的 XML
-            content = response.content
-            if (b"<?xml" in content[:100] or 
-                b"<NOTICE>" in content[:100] or 
-                b"<RULE>" in content[:100] or 
-                b"<PRORULE>" in content[:100]):
-                # 生成标准文件名
-                filename = get_document_filename(doc)
-                save_path = save_dir / filename
-                
-                # 直接保存为标准文件名
-                save_path.write_bytes(content)
-                if logger:
-                    logger.info(f"✅ Successfully downloaded: {save_path}")
-                return True
-            else:
-                if logger:
-                    logger.warning(f"❌ Invalid XML content for {doc_number}")
-                return False
-        else:
-            if logger:
-                logger.warning(f"❌ Failed to download {doc_number}: HTTP {response.status_code}")
-            return False
-            
-    except Exception as e:
-        if logger:
-            logger.error(f"❌ Error downloading {doc_number}: {str(e)}")
-        return False
-
-def process_document(doc: Dict, save_dir: Path, logger=None) -> tuple[bool, str]:
-    """Process a single document."""
-    doc_number = doc.get('document_number')
-    pub_date = datetime.strptime(doc.get('publication_date'), '%Y-%m-%d')
-    
-    # 检查是否应该跳过
-    skip, reason = should_skip_document(doc)
-    if skip:
-        if logger:
-            logger.info(f"Skip {doc_number}: {reason}")
-        return False, reason
-    
-    # 检查程序类型
-    has_program, program_type = detect_program_type(doc)
-    if not has_program:
-        if logger:
-            logger.info(f"Unrecognized program type: {doc.get('title')}")
-        return False, f"Unrecognized program type: {doc.get('title')}"
-    
-    # 检查文档类型
-    doc_type = doc.get('type', '').lower()
-    if doc_type not in ['rule', 'prorule']:
-        if logger:
-            logger.info(f"Unsupported document type: {doc_type}")
-        return False, f"Unsupported document type: {doc_type}"
-    
-    # 创建程序类型目录
-    program_dir = save_dir / program_type
-    program_dir.mkdir(parents=True, exist_ok=True)
-    
-    # 生成标准文件名
-    filename = get_document_filename(doc)
-    save_path = program_dir / filename
-    
-    # 检查文件是否已存在
-    if save_path.exists():
-        if logger:
-            logger.info(f"Already exists: {save_path}")
-        return True, f"Already exists: {save_path}"
-    
-    # 下载文件
-    success = download_xml(doc, program_dir, logger=logger)
-    if success:
-        return True, f"Successfully downloaded: {save_path}"
-    else:
-        return False, f"Failed to download: {doc_number}"
-
-def get_single_document(doc_number: str) -> Optional[Dict]:
-    """Get a single document by document number."""
-    url = f"https://www.federalregister.gov/api/v1/documents/{doc_number}.json"
-    
+    Example response:
+        {
+            "document_number": "2024-06431",
+            "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+            "type": "Rule",
+            "publication_date": "2024-03-28",
+            "html_url": "https://www.federalregister.gov/documents/2024/03/28/2024-06431/...",
+            "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2024-03-28/pdf/2024-06431.pdf",
+            "full_text_xml_url": "https://www.federalregister.gov/documents/full_text/xml/2024/2024-06431.xml"
+        }
+    """
+    url = DOCUMENT_URL.format(doc_number)
     try:
         response = requests.get(url)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Error fetching document: {str(e)}")
+    except requests.RequestException as e:
+        logging.error(f"Error fetching document {doc_number}: {str(e)}")
         return None
 
-def main():
+def get_latest_documents(days: int = 365) -> List[Dict]:
+    """Fetch latest documents from Federal Register.
+    
+    Args:
+        days (int): Number of days to look back (default: 365)
+        
+    Returns:
+        List[Dict]: List of document data
+        
+    Example response:
+        {
+            "results": [
+                {
+                    "document_number": "2024-06431",
+                    "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+                    "type": "Rule",
+                    "publication_date": "2024-03-28",
+                    "html_url": "https://www.federalregister.gov/documents/2024/03/28/2024-06431/...",
+                    "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2024-03-28/pdf/2024-06431.pdf",
+                    "full_text_xml_url": "https://www.federalregister.gov/documents/full_text/xml/2024/2024-06431.xml"
+                },
+                {
+                    "document_number": "2024-06432",
+                    "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update; Proposed Rule",
+                    "type": "Proposed Rule",
+                    "publication_date": "2024-03-28",
+                    "html_url": "https://www.federalregister.gov/documents/2024/03/28/2024-06432/...",
+                    "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2024-03-28/pdf/2024-06432.pdf",
+                    "full_text_xml_url": "https://www.federalregister.gov/documents/full_text/xml/2024/2024-06432.xml"
+                }
+            ],
+            "count": 2,
+            "description": "Documents matching your search",
+            "next_page_url": null
+        }
+    """
+    all_docs = []
+    page = 1
+    
+    while True:
+        params = {
+            "conditions[publication_date][gte]": (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d"),
+            "conditions[type][]": ["RULE", "PRORULE"],
+            "conditions[agencies][]": "centers-for-medicare-medicaid-services",
+            "per_page": 100,
+            "page": page
+        }
+        
+        try:
+            response = requests.get(SEARCH_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            if not data.get("results"):
+                break
+                
+            all_docs.extend(data["results"])
+            page += 1
+            
+            # Add delay between pages
+            time.sleep(random.uniform(1, 2))
+            
+        except requests.RequestException as e:
+            logging.error(f"Error fetching page {page}: {str(e)}")
+            break
+            
+    return all_docs
+
+def is_valid_xml(filepath: Path) -> bool:
+    """Check if a file is a valid XML file.
+    
+    Args:
+        filepath (Path): Path to the XML file to validate
+        
+    Returns:
+        bool: True if file is valid XML, False otherwise
+        
+    Example XML structure:
+        <?xml version="1.0" encoding="UTF-8"?>
+        <FRDOC>
+            <PUBLISH>
+                <PRDOCNO>2024-06431</PRDOCNO>
+                <PUBDATE>2024-03-28</PUBDATE>
+                <DOCTYPE>Rule</DOCTYPE>
+                <TITLE>Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update</TITLE>
+                <TEXT>
+                    <PREAMB>
+                        <AGENCY>Centers for Medicare &amp; Medicaid Services (CMS), HHS.</AGENCY>
+                        <ACTION>Final rule.</ACTION>
+                    </PREAMB>
+                    <SUPLINF>
+                        <HED>Supplementary Information:</HED>
+                        <HD1>I. Executive Summary</HD1>
+                        <P>...</P>
+                    </SUPLINF>
+                </TEXT>
+            </PUBLISH>
+        </FRDOC>
+    """
+    try:
+        with open(filepath, 'rb') as f:
+            etree.parse(f)
+        return True
+    except (etree.XMLSyntaxError, IOError):
+        return False
+
+def detect_program_type(doc: Dict) -> Tuple[bool, str]:
+    """Detect program type from document title.
+    
+    Args:
+        doc (Dict): Document data containing title and other metadata
+        
+    Returns:
+        Tuple[bool, str]: (True if program type detected, program type name)
+        
+    Program Types:
+        1. MPFS (Medicare Physician Fee Schedule)
+           - Keywords: physician fee schedule, mpfs, pfs
+           - Example: Medicare Physician Fee Schedule Update
+        
+        2. HOSPICE (Hospice Payment)
+           - Keywords: hospice wage, hospice payment, hospice quality
+           - Example: Hospice Wage Index Update
+        
+        3. SNF (Skilled Nursing Facility)
+           - Keywords: skilled nursing facility, snf, nursing facility, consolidated billing
+           - Example: Prospective Payment System and Consolidated Billing for Skilled Nursing Facilities
+    
+    Example:
+        >>> doc = {
+        ...     "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+        ...     "type": "Rule",
+        ...     "document_number": "2024-06431"
+        ... }
+        >>> detect_program_type(doc)
+        (True, "MPFS")
+    """
+    title = doc.get("title", "").lower()
+    
+    # MPFS (Medicare Physician Fee Schedule)
+    if any(keyword in title for keyword in ["physician fee schedule", "mpfs", "pfs"]):
+        return True, "MPFS"
+    
+    # HOSPICE (Hospice Payment)
+    if any(keyword in title for keyword in ["hospice wage", "hospice payment", "hospice quality"]):
+        return True, "HOSPICE"
+    
+    # SNF (Skilled Nursing Facility)
+    if any(keyword in title for keyword in ["skilled nursing facility", "snf", "nursing facility", "consolidated billing"]):
+        return True, "SNF"
+    
+    return False, ""
+
+def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = None) -> bool:
+    """Download XML file for a document.
+    
+    Args:
+        doc (Dict): Document data containing metadata
+        save_dir (Path): Directory to save the XML file
+        logger (Optional[logging.Logger]): Logger instance for logging
+        
+    Returns:
+        bool: True if download successful, False otherwise
+        
+    File Naming Convention:
+        YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.xml
+        
+    Example:
+        >>> doc = {
+        ...     "document_number": "2024-06431",
+        ...     "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+        ...     "type": "Rule",
+        ...     "publication_date": "2024-03-28"
+        ... }
+        >>> download_xml(doc, Path("data"))
+        True  # Creates data/MPFS/2024_MPFS_final_2024-06431.xml
+    """
+    if logger is None:
+        logger = logging.getLogger(__name__)
+    
+    try:
+        doc_number = doc.get("document_number", "")
+        publication_date = doc.get("publication_date", "")
+        doc_type = doc.get("type", "")
+        
+        if not all([doc_number, publication_date, doc_type]):
+            logger.error(f"Missing required document information: {doc}")
+            return False
+        
+        # Get program type
+        has_program, program_type = detect_program_type(doc)
+        if not has_program:
+            logger.error(f"Could not detect program type for document {doc_number}")
+            return False
+        
+        # Create program type directory
+        program_dir = save_dir / program_type
+        program_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Construct filename
+        year = publication_date.split("-")[0]
+        doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
+        filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+        filepath = program_dir / filename
+        
+        # Check if file already exists and is valid
+        if filepath.exists() and is_valid_xml(filepath):
+            logger.info(f"Already exists and valid: {filepath}")
+            return True
+        
+        # Download XML
+        xml_url = f"https://www.federalregister.gov/documents/full_text/xml/{year}/{doc_number}.xml"
+        response = requests.get(xml_url)
+        response.raise_for_status()
+        
+        # Save file
+        with open(filepath, "wb") as f:
+            f.write(response.content)
+        
+        # Verify file
+        if not is_valid_xml(filepath):
+            logger.error(f"Downloaded file is not valid XML: {filepath}")
+            filepath.unlink()
+            return False
+        
+        logger.info(f"✅ Successfully downloaded: {filepath}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error downloading document {doc.get('document_number', '')}: {str(e)}")
+        return False
+
+def parse_args():
+    """Parse command line arguments.
+    
+    Returns:
+        argparse.Namespace: Parsed command line arguments
+        
+    Command Line Arguments:
+        --mode: Operation mode (single/latest)
+        --doc-number: Document number to download
+        --date: Publication date in YYYY-MM-DD format
+        --days: Number of days to look back
+        --output-dir: Output directory for downloaded files
+        --verbose: Enable verbose logging
+        
+    Example:
+        >>> parse_args()
+        Namespace(
+            mode='latest',
+            doc_number=None,
+            date=None,
+            days=365,
+            output_dir='data',
+            verbose=False
+        )
+    """
     parser = argparse.ArgumentParser(description='Federal Register document fetcher')
     parser.add_argument('--mode', choices=['single', 'latest'], default='latest',
                       help='Operation mode: single (one document) or latest (fetch latest documents)')
@@ -265,72 +326,160 @@ def main():
                       help='Output directory for downloaded files')
     parser.add_argument('--verbose', '-v', action='store_true',
                       help='Enable verbose logging')
+    return parser.parse_args()
+
+def main():
+    """Main function to fetch regulations.
     
-    args = parser.parse_args()
+    This function:
+    1. Parses command line arguments
+    2. Sets up logging
+    3. Creates output directory
+    4. Fetches and processes documents
+    5. Downloads XML files
+    6. Generates summary report
+    
+    Command Line Usage:
+        # Fetch latest documents
+        python fetch_regulations.py --mode latest --days 30
+        
+        # Download single document
+        python fetch_regulations.py --mode single --doc-number 2024-06431
+        
+        # Enable verbose logging
+        python fetch_regulations.py --mode latest --verbose
+        
+    Output:
+        Creates a directory structure:
+        data/
+        ├── MPFS/
+        │   ├── 2024_MPFS_final_2024-06431.xml
+        │   └── 2024_MPFS_proposed_2024-06432.xml
+        ├── HOSPICE/
+        │   ├── 2024_HOSPICE_final_2024-06433.xml
+        │   └── 2024_HOSPICE_proposed_2024-06434.xml
+        └── SNF/
+            ├── 2024_SNF_final_2024-06435.xml
+            └── 2024_SNF_proposed_2024-06436.xml
+    """
+    # Parse command line arguments
+    args = parse_args()
+    
+    # Setup logging
     logger = setup_logging(args.verbose)
     
+    # Create output directory
+    save_dir = Path(args.output_dir)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Initialize counters
+    total_docs = 0
+    downloaded = 0
+    already_existed = 0
+    unrecognized = 0
+    unsupported = 0
+    failed = 0
+    
     try:
-        # 创建输出目录
-        save_dir = Path(args.output_dir)
-        save_dir.mkdir(parents=True, exist_ok=True)
-        
-        if args.mode == 'single':
+        if args.mode == "single":
             if not args.doc_number:
-                logger.error("❌ Error: --doc-number is required for single mode")
-                sys.exit(1)
+                logger.error("Document number is required for single mode")
+                return
             
-            # 获取文档信息
+            # Fetch single document
             doc = get_single_document(args.doc_number)
-            if not doc:
-                logger.error(f"❌ Error: Document {args.doc_number} not found")
-                sys.exit(1)
-            
-            # 处理文档
-            success, message = process_document(doc, save_dir, logger=logger)
-            logger.info(message)
-            if not success:
-                sys.exit(1)
-                
-        elif args.mode == 'latest':
-            logger.info(f"Fetching latest documents from the past {args.days} days...")
-            documents = get_latest_documents(args.days)
-            logger.info(f"Found {len(documents)} documents")
-            
-            successful = 0
-            failed = 0
-            skipped = 0
-            unrecognized = 0
-            unsupported = 0
-            
-            for doc in documents:
-                success, message = process_document(doc, save_dir, logger=logger)
-                logger.info(f"{doc.get('document_number')}: {message}")
-                
-                if success:
-                    successful += 1
-                elif "Already exists" in message:
-                    skipped += 1
-                elif "Unrecognized program type" in message:
+            if doc:
+                total_docs = 1
+                has_program, program_type = detect_program_type(doc)
+                if has_program:
+                    program_dir = save_dir / program_type
+                    program_dir.mkdir(parents=True, exist_ok=True)
+                    success = download_xml(doc, program_dir, logger=logger)
+                    if success:
+                        downloaded += 1
+                    else:
+                        failed += 1
+                else:
                     unrecognized += 1
-                elif "Unsupported document type" in message:
+            else:
+                failed += 1
+        else:
+            # Fetch latest documents
+            logger.info(f"Fetching latest documents from the past {args.days} days...")
+            docs = get_latest_documents(args.days)
+            total_docs = len(docs)
+            logger.info(f"Found {total_docs} documents")
+            
+            # Process each document
+            for doc in docs:
+                doc_number = doc.get("document_number", "")
+                doc_type = doc.get("type", "")
+                title = doc.get("title", "")
+                
+                # Skip correction documents
+                if doc_number.startswith("C"):
+                    logger.info(f"Skip {doc_number}: Correction document ({doc_number})")
+                    continue
+                
+                # Skip future-dated documents
+                publication_date = doc.get("publication_date", "")
+                if publication_date and datetime.strptime(publication_date, "%Y-%m-%d") > datetime.now():
+                    logger.info(f"Skip {doc_number}: Future-dated document ({publication_date})")
+                    continue
+                
+                # Skip non-rule documents
+                if doc_type not in ["Rule", "Proposed Rule"]:
+                    logger.info(f"Skip {doc_number}: Unsupported document type ({doc_type})")
                     unsupported += 1
+                    continue
+                
+                # Detect program type
+                has_program, program_type = detect_program_type(doc)
+                if not has_program:
+                    logger.info(f"Unrecognized program type: {title}")
+                    logger.info(f"{doc_number}: Unrecognized program type: {title}")
+                    unrecognized += 1
+                    continue
+                
+                # Create program type directory
+                program_dir = save_dir / program_type
+                program_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Check if file already exists and is valid
+                year = publication_date.split("-")[0]
+                doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
+                filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+                filepath = program_dir / filename
+                
+                if filepath.exists() and is_valid_xml(filepath):
+                    logger.info(f"Already exists and valid: {filepath}")
+                    logger.info(f"{doc_number}: Already exists and valid: {filepath}")
+                    already_existed += 1
+                    continue
+                
+                # Download document
+                logger.info(f"{doc_number}: Need to download: {doc_number}")
+                success = download_xml(doc, program_dir, logger=logger)
+                if success:
+                    downloaded += 1
                 else:
                     failed += 1
                 
-                # 随机延迟，避免请求过快
+                # Add delay between downloads
                 time.sleep(random.uniform(2, 5))
-            
-            logger.info(f"\nDownload Summary:")
-            logger.info(f"Total documents: {len(documents)}")
-            logger.info(f"Successfully downloaded: {successful}")
-            logger.info(f"Already existed: {skipped}")
-            logger.info(f"Unrecognized program type: {unrecognized}")
-            logger.info(f"Unsupported document type: {unsupported}")
-            logger.info(f"Failed: {failed}")
-            
+    
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
-        sys.exit(1)
+        logger.error(f"Error occurred: {str(e)}")
+        return
+    
+    # Print summary
+    logger.info("\nDownload Summary:")
+    logger.info(f"Total documents: {total_docs}")
+    logger.info(f"Successfully downloaded: {downloaded}")
+    logger.info(f"Already existed: {already_existed}")
+    logger.info(f"Unrecognized program type: {unrecognized}")
+    logger.info(f"Unsupported document type: {unsupported}")
+    logger.info(f"Failed: {failed}")
 
 if __name__ == '__main__':
     main() 
