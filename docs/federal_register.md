@@ -4,6 +4,17 @@
 
 This tool fetches Medicare-related regulations from the Federal Register. It automatically identifies program types, standardizes file naming, and organizes documents in a structured directory.
 
+## API Integration
+
+### Base URL
+```
+https://www.federalregister.gov/api/v1
+```
+
+### Endpoints
+- Search: `/documents.json`
+- Single Document: `/documents/{document_number}.json`
+
 ## Program Type Detection
 
 The tool identifies the following Medicare program types:
@@ -171,11 +182,10 @@ python -m core.data_fetcher.fetch_regulations --mode latest --verbose
    - Filter Medicare-related documents
    - Note: No end date needed as API returns latest documents by default
 
-2. **Date Filtering**
-   - Start date: Current date minus specified days
-   - Example: If days=30, fetches documents from 30 days ago to now
-   - No end date needed as we always want the latest documents
-   - Future-dated documents are automatically excluded by the API
+2. **Document Filtering**
+   - Skip future-dated documents
+   - Skip correction documents (C1-, C2-, etc.)
+   - Skip non-rule documents
 
 3. **Program Type Detection**
    - Identify program type from document title
@@ -196,8 +206,8 @@ python -m core.data_fetcher.fetch_regulations --mode latest --verbose
    - Ensure complete document list
 
 2. **Rate Limiting**
-   - Add delay only when downloading files
-   - Delay: 2-5 seconds
+   - Add delay between pages: 1-2 seconds
+   - Add delay between downloads: 2-5 seconds
    - Prevent rate limiting
 
 3. **File Validation**
