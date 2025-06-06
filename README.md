@@ -1,182 +1,169 @@
-# 🏥 RegHealth Navigator 2
+# 🏥 RegHealth Navigator
 
 **Authors:**  
-Xiao Yan  
-Dhruv Tangri  
-Sarvesh Siras  
-Saicharan Emmadi  
-Seon Young Jhang  
-Fanxing Bu  
+Xiao Yan, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, Seon Young Jhang, Fanxing Bu
 
-**Last Updated:** 27 May 2025  
-**Status:** 🚧 Draft  
+**Last Updated:** March 2024  
+**Status:** 🚧 In Development
 
 [![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
 
-This repository is the **Summer 2025 CMU Capstone** project, continuing the work from **Spring 2025** ([GitHub Repo](https://github.com/PaulHuatingSun/RegHealth-Navigator)). [GitHub Page](https://loadingbfx.github.io/RegHealth-Navigator/)
+## 📖 Project Introduction
 
----
+RegHealth Navigator is an intelligent regulatory document analysis platform designed to help healthcare professionals, compliance officers, and policy analysts efficiently understand and analyze complex Medicare regulations. The system provides powerful tools for document comparison, semantic search, and AI-powered analysis.
 
-RegHealth Navigator is an intelligent regulatory document analysis platform designed to facilitate efficient understanding and analysis of complex healthcare regulatory policies. The system supports large-scale XML document partitioning, semantic retrieval, question answering, and visualization.
+## ✨ Key Features
 
-## Project Purpose
+### 1. Document Management
+- **Standardized File Organization**
+  - Format: `{year}_{program_type}_{type}_{document_number}`
+  - Example: `2024_MPFS_final_2024-14828`
+  - Program Types: MPFS, HOSPICE, SNF
+  - Document Types: final, proposed
 
-- Enable healthcare, compliance, and policy professionals to efficiently interpret and track U.S. federal regulatory content.
-- Provide structured parsing, section-based summarization, semantic search, question answering, comparison, and mind map visualization for large XML rule documents.
-- Support local caching and high-performance retrieval for multi-turn interactive analysis.
+### 2. Smart Analysis Tools
+- **Document Comparison**
+  - Side-by-side document comparison
+  - Color-coded change tracking:
+    - 🟢 Green: Added content
+    - 🔴 Red: Removed content
+    - 🟡 Yellow: Modified content
+  - Expandable sections for detailed review
 
-## System Architecture
+- **AI-Powered Features**
+  - Smart document summarization
+  - FAQ generation
+  - Key points extraction
+  - Context-aware chat assistance
 
-- **Frontend:** React 18, TypeScript, Tailwind CSS, Vite. Implements a three-column SPA interface for file selection, section operations, semantic Q&A, and visualization.
-- **Backend:** FastAPI (Python 3.8+). Handles XML partitioning, chunking, embedding generation, vector retrieval, and LLM orchestration.
-- **Static Site Deployment:** The frontend is built and deployed to GitHub Pages via GitHub Actions.
-- **Backend Exposure:** Cloudflare Tunnel or frp is recommended to securely expose the FastAPI backend for API access by the frontend.
+### 3. User Interface
+- **Modern Design**
+  - Clean, intuitive interface
+  - Responsive layout
+  - Dark/light mode support
+  - Accessible components
 
-## Technical Workflow
+- **Interactive Features**
+  - Real-time document search
+  - Citation system with modal view
+  - Chat history management
+  - Document selection interface
 
-1. **Document Ingestion:** Regulatory XML documents are ingested from the Federal Register or uploaded by users (≤ 200 MB). Documents are stored in a central repository.
-2. **XML Partitioning:** Large XML files are automatically partitioned into logical sections (e.g., "Medicare Physician Fee Schedule").
-3. **Chunking:** Each section is split into manageable text chunks for embedding and retrieval.
-4. **Embedding & Indexing:** Chunks are embedded (e.g., via OpenAI API) and stored in a vector database with section and location metadata.
-5. **Section-Level Operations:** All LLM-based features (Q&A, summarization, comparison) operate at the section level to optimize context and performance.
-6. **API & Frontend:** The backend API and frontend support section selection and section-level operations. Users can select a section for Q&A, summary, or comparison.
-7. **Caching:** Derived artifacts (summaries, embeddings, mind maps) are cached for efficient reuse.
+## 🚀 Getting Started
 
-## Recent Changes
+### Prerequisites
+- Node.js 18+
+- Python 3.9+
+- npm or yarn
 
-- Added GitHub Actions workflow for automated frontend build and deployment to GitHub Pages.
-- Updated Pages configuration to support static frontend and decoupled backend API deployment.
-- Node.js version is set to 18 (see `.nvmrc`).
+### Frontend Setup
 
-## Environment Requirements
-
-- Node.js 18 (see `.nvmrc`)
-- Python 3.8+
-- npm
-- Recommended: Cloudflare Tunnel or frp for backend exposure
-
-## Local Development
-
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/<your-username>/RegHealth-Navigator.git
+   git clone https://github.com/LoadingBFX/RegHealth-Navigator.git
    cd RegHealth-Navigator
    ```
-2. Install backend dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Install frontend dependencies:
+
+2. **Install dependencies**
    ```bash
    cd front
-   nvm use # Ensure Node.js 18 is active
    npm install
    ```
-4. Start the backend:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-5. Start the frontend:
+
+3. **Start development server**
    ```bash
    npm run dev
    ```
-6. Access the application at [http://localhost:5173](http://localhost:5173)
+   The application will be available at http://localhost:5173
 
-## Deployment
+### Backend Setup
 
-### Frontend (Static Site)
-- On push to the main or dev branch, GitHub Actions automatically builds the frontend and deploys the contents of `front/dist` to the `gh-pages` branch.
-- In the repository Settings > Pages, set Source to "GitHub Actions".
-- The deployed site is available at `https://<your-username>.github.io/RegHealth-Navigator/`.
+1. **Create and activate virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-### Backend (API Service)
-- Deploy the FastAPI backend to a server or cloud platform supporting Python 3.8+.
-- Use Cloudflare Tunnel or frp to securely expose the backend API endpoint to the public internet.
-- Configure the frontend to use the public API endpoint for all backend requests.
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Repository Structure
+3. **Start the server**
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
+## 📥 Document Download Instructions
+
+1. **Access Document Library**
+   - Click on the document selector in any tab
+   - Use the search bar to find specific documents
+   - Filter by year, program type, and document type
+
+2. **Download Process**
+   - Select the desired document(s)
+   - Click the download button
+   - Documents will be saved in your default download location
+
+3. **File Organization**
+   - Downloaded files follow the standard naming convention
+   - Store in a dedicated folder for easy access
+   - Use the application's file selector to load local documents
+
+## 🛠️ Development
+
+### Tech Stack
+- **Frontend**
+  - React 18
+  - TypeScript
+  - Tailwind CSS
+  - Vite
+  - Zustand (State Management)
+
+- **Backend**
+  - Python 3.9+
+  - FastAPI
+  - SQLAlchemy
+  - PostgreSQL
+  - Redis (for caching)
+
+### Project Structure
 ```
 RegHealth-Navigator/
-├── app/                # FastAPI backend application
-├── core/               # Core business logic
-├── front/              # React frontend application
+├── front/                 # Frontend React application
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── context/     # React context
-│   │   └── store/       # State management
-├── data/               # Data files
-├── docs/               # Documentation
-└── scripts/            # Utility scripts
+│   │   ├── components/   # React components
+│   │   ├── store/       # State management
+│   │   └── types/       # TypeScript types
+│   └── public/          # Static assets
+│
+├── backend/              # Python FastAPI application
+│   ├── app/
+│   │   ├── api/        # API endpoints
+│   │   ├── core/       # Core functionality
+│   │   └── models/     # Database models
+│   └── tests/          # Test suite
+│
+└── docs/                # Documentation
+    ├── api/            # API documentation
+    └── guides/         # Development guides
 ```
 
-## License
+## 🤝 Contributing
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Features
-
-- 🔄 **Real-time Regulation Updates & Parsing**: Continuously monitors and ingests newly published U.S. federal healthcare regulations (e.g., from Federal Register) in XML format and parses them into logical sections.
-- 🧠 **Semantic Search & Question Answering**: Enables users to perform semantic queries and section-specific Q&A using LLMs integrated with vector retrieval.
-- 📑 **Section-based Summarization**: Automatically summarizes selected regulatory sections with citations and metadata.
-- 🔄 **Version Comparison**: Allows side-by-side comparison of similar sections across different regulatory versions.
-- 🗺️ **Mind Map Visualization**: Generates interactive mind maps to visualize document structure and relationships between sections.
-- ⚡ **Local Caching for Performance**: Caches derived artifacts like embeddings, summaries, and visualizations to support fast, repeated access.
-- 🧩 **Frontend-Backend Integration**: SPA frontend interacts with FastAPI backend through a modular API interface supporting section-level operations.
-
-## Tech Stack
-
-### Frontend
-- React 18
-- TypeScript
-- Tailwind CSS
-- Vite
-- React Query
-- React Router
-
-### Backend
-- FastAPI
-- Python 3.8+
-- XML processing libraries
-- Vector database
-- LLM integration
-
-## Development Guidelines
-
-### Code Style
-- Use ESLint and Prettier
-- Enforce TypeScript strict mode
-- Use Python type hints
-- Write unit tests
-
-### Commit Convention
-Commit message format:
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-Types:
-- feat: New feature
-- fix: Bug fix
-- docs: Documentation
-- style: Code style (formatting)
-- refactor: Code refactoring
-- test: Adding tests
-- chore: Build process or tooling changes
-
-## Contribution Guide
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## Contact
+## 📝 License
 
-- Project Maintainers: Xiao Yan, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, Seon Young Jhang, Fanxing Bu
-- Repository: [https://github.com/LoadingBFX/RegHealth-Navigator](https://github.com/LoadingBFX/RegHealth-Navigator)docs
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Medicare.gov for regulation data
+- OpenAI for AI capabilities
+- All contributors and maintainers
