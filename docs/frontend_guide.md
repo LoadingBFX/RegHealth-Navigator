@@ -1,4 +1,274 @@
-# Frontend Development Guide
+# Frontend Guide
+
+## Overview
+
+The RegHealth Navigator frontend is built with React, TypeScript, and Tailwind CSS. It provides an intuitive interface for exploring and analyzing Medicare regulations.
+
+## Architecture
+
+### Tech Stack
+- React 18
+- TypeScript
+- Tailwind CSS
+- Vite
+- Zustand (State Management)
+- Lucide Icons
+
+### Component Structure
+```
+Layout
+├── Header
+│   ├── Logo
+│   ├── History Button (Clock)
+│   └── Settings Button
+├── Tab Navigation
+│   ├── Chat
+│   ├── Summary
+│   ├── FAQ
+│   └── Compare
+├── Tab Content
+│   ├── ChatPanel
+│   ├── SummaryTab
+│   ├── FAQTab
+│   └── ComparisonTab
+├── Modals
+│   ├── CitationModal
+│   └── HistoryModal
+└── Document Selector
+```
+
+## Features
+
+### 1. Document Management
+- **File Naming Convention**
+  - Format: `{year}_{program_type}_{type}_{document_number}`
+  - Example: `2024_MPFS_final_2024-14828`
+  - Program Types: MPFS, HOSPICE, SNF
+  - Document Types: final, proposed
+
+- **Document Selection**
+  - Available in all tabs
+  - Search with filters (Year, Program, Type)
+  - Selected file tags with remove option
+  - Required for content generation
+
+### 2. Chat Interface
+- **Document Context**
+  - Optional document selection via plus (+) button
+  - Visual indicators for selected documents
+  - Chat without documents or with specific files
+
+- **Message Display**
+  - User and AI messages
+  - Citation links
+  - Code blocks
+  - Markdown support
+
+### 3. Citation System
+- **Citation Modal**
+  - Click citation links to open
+  - Full content display
+  - Source attribution
+  - XML parsing simulation
+
+### 4. History Management
+- **History Modal**
+  - Access via clock icon
+  - Conversation previews
+  - Session restoration
+  - File context preservation
+  - Message count and preview
+
+### 5. Comparison View
+- **Side-by-side Layout**
+  - Left/right document comparison
+  - Color-coded highlighting:
+    - 🟢 Green: Added content
+    - 🔴 Red: Removed content
+    - 🟡 Yellow: Modified content
+  - Expandable sections
+  - Change tracking
+
+## Backend Integration Requirements
+
+### 1. Document Management API
+```typescript
+// Document List
+GET /api/documents
+Response: {
+  documents: Array<{
+    id: string;
+    name: string;
+    year: number;
+    programType: string;
+    type: string;
+    documentNumber: string;
+  }>;
+}
+
+// Document Content
+GET /api/documents/{id}
+Response: {
+  content: string;
+  metadata: {
+    title: string;
+    publicationDate: string;
+    type: string;
+  };
+}
+```
+
+### 2. Chat API
+```typescript
+// Chat Message
+POST /api/chat
+Request: {
+  message: string;
+  documentIds?: string[];
+  sessionId?: string;
+}
+Response: {
+  message: string;
+  citations: Citation[];
+}
+
+// Chat Session
+GET /api/chat/sessions
+Response: {
+  sessions: Array<{
+    id: string;
+    name: string;
+    date: string;
+    files: string[];
+    messageCount: number;
+  }>;
+}
+```
+
+### 3. Citation API
+```typescript
+// Citation Details
+GET /api/citations/{id}
+Response: {
+  id: string;
+  title: string;
+  content: string;
+  fullContent: string;
+  documentId: string;
+  documentName: string;
+}
+```
+
+### 4. Comparison API
+```typescript
+// Document Comparison
+POST /api/compare
+Request: {
+  documentIds: string[];
+}
+Response: {
+  changes: Array<{
+    type: 'added' | 'removed' | 'modified';
+    content: string;
+    section: string;
+  }>;
+}
+```
+
+### 5. Summary & FAQ API
+```typescript
+// Generate Summary
+POST /api/summary
+Request: {
+  documentIds: string[];
+}
+Response: {
+  summary: string;
+  keyPoints: string[];
+}
+
+// Generate FAQ
+POST /api/faq
+Request: {
+  documentIds: string[];
+}
+Response: {
+  questions: Array<{
+    question: string;
+    answer: string;
+    citations: Citation[];
+  }>;
+}
+```
+
+## State Management
+
+### Store Structure
+```typescript
+interface Store {
+  // UI State
+  activeTab: 'chat' | 'summary' | 'faq' | 'compare';
+  isProcessing: boolean;
+  processingProgress: number;
+  
+  // Modal State
+  showHistory: boolean;
+  showCitation: boolean;
+  showDocumentSelector: boolean;
+  
+  // Document State
+  selectedDocuments: string[];
+  availableDocuments: Document[];
+  
+  // Chat State
+  messages: ChatMessage[];
+  currentSession: string | null;
+  
+  // History State
+  sessions: ChatSession[];
+}
+```
+
+## Implementation Status
+
+### Completed
+- ✅ File naming convention
+- ✅ Document selection UI
+- ✅ Citation modal
+- ✅ History modal
+- ✅ Comparison view
+- ✅ Chat interface
+- ✅ Basic state management
+
+### Pending Backend Implementation
+- ⏳ Document management API
+- ⏳ Chat API with document context
+- ⏳ Citation system
+- ⏳ Comparison API
+- ⏳ Summary generation
+- ⏳ FAQ generation
+- ⏳ History management
+- ⏳ Session restoration
+
+## Development Guidelines
+
+### Code Style
+- Use TypeScript for type safety
+- Follow React best practices
+- Use Tailwind CSS for styling
+- Implement proper error handling
+- Add loading states for async operations
+
+### Testing
+- Unit tests for components
+- Integration tests for API calls
+- E2E tests for critical flows
+
+### Performance
+- Lazy loading for modals
+- Virtual scrolling for long lists
+- Optimized re-renders
+- Proper cleanup in useEffect
 
 ## Project Structure
 
@@ -31,33 +301,6 @@ front/
 - `SummaryTab.tsx`: Summary generation interface
 - `FAQTab.tsx`: FAQ generation interface
 - `ComparisonTab.tsx`: Document comparison interface
-
-## State Management
-
-The application uses Zustand for state management. The main store is defined in `store/store.ts`:
-
-```typescript
-interface Store {
-  // File Management
-  files: File[];
-  selectedFiles: string[];
-  
-  // UI State
-  activeTab: 'summary' | 'faq' | 'comparison';
-  activeSidebarTab: 'files' | 'history';
-  isProcessing: boolean;
-  processingProgress: number;
-  
-  // Chat
-  messages: Message[];
-  
-  // Actions
-  setSelectedFiles: (files: string[]) => void;
-  addMessage: (message: Message) => void;
-  clearMessages: () => void;
-  // ... other actions
-}
-```
 
 ## Backend Integration
 
