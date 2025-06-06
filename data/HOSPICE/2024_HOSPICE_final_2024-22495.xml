@@ -1,0 +1,217 @@
+<RULE>
+            <PREAMB>
+                <AGENCY TYPE="N">DEPARTMENT OF HEALTH AND HUMAN SERVICES</AGENCY>
+                <SUBAGY>Centers for Medicare &amp; Medicaid Services</SUBAGY>
+                <CFR>42 CFR Part 418</CFR>
+                <DEPDOC>[CMS-1810-CN]</DEPDOC>
+                <RIN>RIN 0938-AV29</RIN>
+                <SUBJECT>Medicare Program; FY 2025 Hospice Wage Index and Payment Rate Update, Hospice Conditions of Participation Updates, and Hospice Quality Reporting Program Requirements; Correction</SUBJECT>
+                <AGY>
+                    <HD SOURCE="HED">AGENCY:</HD>
+                    <P>Centers for Medicare &amp; Medicaid Services (CMS), Department of Health and Human Services (HHS).</P>
+                </AGY>
+                <ACT>
+                    <HD SOURCE="HED">ACTION:</HD>
+                    <P>Final rule; correction.</P>
+                </ACT>
+                <SUM>
+                    <HD SOURCE="HED">SUMMARY:</HD>
+                    <P>
+                        This document corrects technical and typographical errors in the final rule that appeared in the August 6, 2024 
+                        <E T="04">Federal Register</E>
+                         titled “Medicare Program; FY 2025 Hospice Wage Index and Payment Rate Update, Hospice Conditions of Participation Updates, and Hospice Quality Reporting Program Requirements”.
+                    </P>
+                </SUM>
+                <EFFDATE>
+                    <HD SOURCE="HED">DATES:</HD>
+                    <P>This correction is effective on October 1, 2024.</P>
+                </EFFDATE>
+                <FURINF>
+                    <HD SOURCE="HED">FOR FURTHER INFORMATION CONTACT:</HD>
+                    <P/>
+                    <P>For questions regarding the hospice wage index, contact Chantelle Caldwell, (410) 786-8743.</P>
+                    <P>
+                        For general questions about hospice payment policy, contact the hospice mailbox at: 
+                        <E T="03">hospicepolicy@cms.hhs.gov.</E>
+                    </P>
+                </FURINF>
+            </PREAMB>
+            <SUPLINF>
+                <HD SOURCE="HED">SUPPLEMENTARY INFORMATION:</HD>
+                <HD SOURCE="HD1">I. Background</HD>
+                <P>
+                    In FR Doc. 2024-16910 of August 6, 2024 (89 FR 64202), there were a number of technical and typographical errors that are identified and corrected in this correcting document. The provisions in this correction document are effective as if they had been included in the final rule that appeared in the August 6, 2024 
+                    <E T="04">Federal Register</E>
+                    . Accordingly, the corrections are effective October 1, 2024.
+                </P>
+                <HD SOURCE="HD1">II. Summary of Errors</HD>
+                <HD SOURCE="HD2">A. Summary of Errors in the Preamble</HD>
+                <P>On page 64207, we made a typographical error in the reported core-based statistical area (CBSA) name and wage index value for CBSA 25980, Hinesville, Georgia. We reported the CBSA name as Hinesville-Fort Stewart, Georgia instead of Hinesville, Georgia, and the FY 2025 hospice wage index value as 0.8872, instead of 0.8886.</P>
+                <P>On page 64210, in Table 3, titled “Urban Counties that Would Change to Rural Status”, we inadvertently omitted FIPS county 09015 Windham County from the list of counties that were previously urban but would gain rural status beginning in FY 2025. Table 3 contains the FIPS codes, county name, current CBSA number and name of the counties that will gain rural status in FY 2025. Windham County was previously designated in CBSA 49340 Worchester, MA-CT. However, beginning in FY 2025 this county is redesignated into rural Connecticut (rural area 99907). Accordingly, we are adding FIPS 09015 Windham County to the list of counties that will gain rural status beginning in FY 2025. We also reported a total of 53 counties and county equivalents that are currently considered urban that would be considered rural beginning in FY 2025. Therefore, with the addition of Windham County to the list, we are correcting that number to 54 counties and county equivalents.</P>
+                <P>Windham County is also experiencing a change to its county name beginning in FY 2025, as described in the FY 2025 hospice final rule (89 FR 64209) and will transition from FIPS county 09015 Windham County to 09150 Northeastern Connecticut planning region.</P>
+                <P>
+                    On page 64222, in Table 8, titled “Counties That Will Use a Wage Index Transition Code”, we inadvertently omitted FIPS county 09150 “Northeastern Connecticut Planning Region” from the list of counties that will use a transition code on hospice claims for FY 2025 instead of the CBSA number. Table 8 contains the FIPS codes, county name, current CBSA number and name, the redesignated FY 2025 CBSA number and name and the corresponding “500XX” transition code that must be submitted on hospice claims for FY 2025 to ensure that hospice providers who provide services in certain counties receive that county's appropriate wage index value. The omission of the Northeastern planning region from Table 8 and the subsequent unassigned transition code for that region resulted in two wage index values being assigned to statewide rural area 99907 in the FY 2025 hospice final wage index file located at: 
+                    <E T="03">https://www.cms.gov/medicare/payment/fee-for-service-providers/hospice/hospice-wage-index.</E>
+                     However, for hospice claims processing, each CBSA or statewide rural area can have only one wage index value assigned to that CBSA or statewide rural area. Therefore, hospices that serve beneficiaries in the Northeastern Connecticut planning region must use transition code 50030, instead of the rural statewide code 99907, on hospice claims beginning in FY 2025. Accordingly, we are adding FIPS county 09150 “Northeastern Connecticut Planning Region” to the list of counties in Table 8 that will use a transition code on hospice claims for FY 2025 instead of the CBSA number.
+                </P>
+                <P>This correction does not represent a change in policy and is consistent with the finalized transition policy outlined in the FY 2025 Hospice final rule (89 FR 64220-64224), where beginning in FY 2025, certain counties must use a 500XX transition code on hospice claims instead of the statewide rural area or CBSA code in circumstances where a county was redesignated into a new CBSA or rural area and has a different wage index than the constituent counties that make up that CBSA or rural area due to the calculation of the 5-percent cap.</P>
+                <P>On page 64239, we made a typographical error. We inadvertently included the word “Proposed” in the title of Section III.D.2, which therefore incorrectly read: “Implementation of Two Process Quality Measures Based on Proposed HOPE Data Collection”. As HOPE is finalized as of the FY 2025 final rule, it should not be referred to as “proposed”. Therefore, the title of this Section III.D.2 is corrected to read: “Implementation of Two Process Quality Measures Based on HOPE Data Collection.”</P>
+                <P>On page 64240, we made a typographical error in the sentence “CMS maintains to avoid creating unnecessary burden for hospice providers.” The sentence is corrected to read: “CMS maintains its commitment to avoid creating unnecessary burden for hospice providers.”</P>
+                <P>On page 64242, we made a typographical error in the sentence “Theses (SFVs) may be performed by RNs or LPNs/LVNs.” The sentence is corrected to read: “These SFVs may be performed by RNs or LPNs/LVNs.”</P>
+                <P>
+                    On page 64244, under the undesignated heading “Public Availability of Data Submitted”, we made two typographical errors. We stated the following: “We are finalizing the decision that the data from the first quarter Q4 CY 2025, if HOPE data 
+                    <PRTPAGE P="79765"/>
+                    collection begins in October 2025, it will not be used for assessing validity and reliability of the quality measures.” This sentence is corrected to read: “We are finalizing the decision that the data from the first quarter—Q4 CY 2025, if HOPE data collection begins in October 2025—will not be used for assessing validity and reliability of the quality measures.”
+                </P>
+                <P>We also inadvertently used the word “proposed” in our discussion of HOPE-based quality measures. HOPE-based quality measures are finalized as of the FY 2025 final rule; therefore, they should not be referred to as “proposed”. The sentence incorrectly read: “In light of all the steps required prior to data being publicly reported, we finalize the decision that public reporting of the proposed quality measures will be implemented no earlier than FY 2028, allowing ample time for data analysis, review of measures' appropriateness for use for public reporting, and allowing hospices the required time to review their own data prior to public reporting.”</P>
+                <P>As HOPE-based quality measures are finalized as of the FY 2025 final rule; they should not be referred to as “proposed”. Therefore, this sentence is corrected to read: “In light of all the steps required prior to data being publicly reported, we finalize the decision that public reporting of the HOPE-based quality measures will be implemented no earlier than FY 2028, allowing ample time for data analysis, review of measures' appropriateness for use for public reporting, and allowing hospices the required time to review their own data prior to public reporting.”</P>
+                <P>
+                    On page 64260, we made a typographical error inadvertently stating that under the Paperwork Reduction Act of 1995, we are required to provide “60-day notice” in the 
+                    <E T="04">Federal Register</E>
+                     and solicit public comment before a collection of information requirement is submitted to the Office of Management and Budget (OMB) for review and approval. Instead, we are required to provide a “30-day notice.”
+                </P>
+                <P>In addition, on page 64260, the sentence that reads “The OMB control number will remain 0938-1153.” and the parenthetical phrase that reads “(set out in the PRA accompanying this Rule, as well as the HOPE Guidance Manual finalized in this Rule)” are removed.</P>
+                <P>
+                    On page 64261, we referred readers to the HOPE Beta testing report and the PRA package associated with the rule. The “PRA package” should have been referred to as the “information collection request”. In addition, we inadvertently omitted the expiration date for the information collection request. The sentence is corrected to read: “For additional information regarding the calculation of HOPE time and cost burdens, please refer to the HOPE Beta Testing Report found on the HOPE web page at 
+                    <E T="03">https://www.cms.gov/medicare/quality/hospice/hope</E>
+                     and the information collection request (OMB control number 0938-1153/Expiration date: 1/31/2026) associated with this rule found at 
+                    <E T="03">https://www.cms.gov/medicare/regulations-guidance/legislation/paperwork-reduction-act-1995/pra-listing</E>
+                    .”
+                </P>
+                <P>On page 64262, we made a typographical error within Table 18. The cell “HUV Timepoint” is corrected to read: “HUV Timepoints.”</P>
+                <HD SOURCE="HD2">B. Summary of Errors and Corrections Posted on the CMS Website</HD>
+                <P>
+                    As discussed above, we inadvertently omitted FIPS county number 09150 Northeastern Connecticut planning region from the list of counties that must use a 500XX transition code beginning in FY 2025. That error was subsequently included in the FY 2025 Hospice wage index file exclusively on the CMS website at: 
+                    <E T="03">https://www.cms.gov/medicare/payment/fee-for-service-providers/hospice/hospice-wage-index</E>
+                    . In Tab 2 of the FY 2025 Hospice Wage Index file labeled “CT Counties”, we are correcting the erroneous assignment of the Northeastern Connecticut planning region to CBSA 99907 for FY 2025, to reflect the newly assigned wage index transition code 50030. We are also correcting the omission of the Northeastern Planning Region from Tab 3 of the file labeled “Transition Codes”, noting the addition of this region to the list of counties that must use a 500XX transition code instead of the statewide rural area code or CBSA number on the hospice claim beginning in FY 2025.
+                </P>
+                <P>
+                    Given these errors, we are republishing the FY 2025 Hospice Wage Index file accordingly on the CMS website at: 
+                    <E T="03">https://www.cms.gov/medicare/payment/fee-for-service-providers/hospice/hospice-wage-index</E>
+                     effective October 1, 2024.
+                </P>
+                <HD SOURCE="HD1">III. Waiver of Proposed Rulemaking and Delay in Effective Date</HD>
+                <P>
+                    Under 5 U.S.C. 553(b) of the Administrative Procedure Act (APA), the agency is required to publish a notice of the proposed rulemaking in the 
+                    <E T="04">Federal Register</E>
+                     before the provisions of a rule take effect. Similarly, section 1871(b)(1) of the Act requires the Secretary to provide for notice of the proposed rulemaking in the 
+                    <E T="04">Federal Register</E>
+                     and provide a period of not less than 60 days for public comment. In addition, section 553(d) of the APA, and section 1871(e)(1)(B)(i) of the Act mandate a 30-day delay in effective date after issuance or publication of a rule. Sections 553(b)(B) and 553(d)(3) of the APA provide for exceptions from the notice and comment and delay in effective date APA requirements; in cases in which these exceptions apply, sections 1871(b)(2)(C) and 1871(e)(1)(B)(ii) of the Act provide exceptions from the notice and 60-day comment period and delay in effective date requirements of the Act as well. Section 553(b)(B) of the APA and section 1871(b)(2)(C) of the Act authorize an agency to dispense with normal rulemaking requirements for good cause if the agency makes a finding that the notice and comment process is impracticable, unnecessary, or contrary to the public interest. In addition, both section 553(d)(3) of the APA and section 1871(e)(1)(B)(ii) of the Act allow the agency to avoid the 30-day delay in effective date where such delay is contrary to the public interest and an agency includes a statement of support. We believe that this correcting document does not constitute a rule that would be subject to the notice and comment or delayed effective date requirements. This correcting document corrects technical and typographical errors in the preamble, addenda, payment rates, and tables included or referenced in the FY 2025 Hospice final rule but does not make substantive changes to the policies or payment methodologies that were adopted in the FY 2025 Hospice final rule. As a result, this correcting document is intended to ensure that the information in the FY 2025 Hospice final rule accurately reflects the policies adopted in that document.
+                </P>
+                <P>
+                    In addition, even if this were a rule to which the notice and comment procedures and delayed effective date requirements applied, we find that there is good cause to waive such requirements. Undertaking further notice and comment procedures to incorporate the corrections in this correcting document into the final rule or delaying the effective date would be contrary to the public interest because it is in the public's interest for providers to receive appropriate payments in as timely a manner as possible, and to ensure that the FY 2025 Hospice final rule reflects our policies. Furthermore, such procedures would be unnecessary, as we are not altering our payment methodologies or policies, but rather, we are simply correctly implementing 
+                    <PRTPAGE P="79766"/>
+                    the policies that we previously proposed, requested comment on, and subsequently finalized. This correcting document is intended solely to ensure that the FY 2025 Hospice final rule accurately reflects these payment methodologies and policies. For these reasons, we believe we have good cause to waive the notice and comment and delayed effective date requirements.
+                </P>
+                <HD SOURCE="HD1">IV. Correction of Errors</HD>
+                <P>In FR Doc. 2024-16910 of August 6, 2024 (89 FR 64202) make the following corrections:</P>
+                <P>1. On page 64207, second column, second full paragraph:</P>
+                <P>a. In lines 17 and 18, “Hinesville-Fort Stewart, Georgia” is corrected to read “Hinesville, Georgia”.</P>
+                <P>b. In lines 19 and 20, “Hinesville-Fort Stewart, Georgia” is corrected to read “Hinesville, Georgia”.</P>
+                <P>c. In line 20, the figure “0.8872” is corrected to read: “0.8886”.</P>
+                <P>2. On page 64209, second column, paragraph below Table 2, “53 counties (and county equivalents)” is corrected to read “54 counties and county equivalents”.</P>
+                <P>3. On page 64210, Table 3 is corrected by adding an entry at the beginning of the table for FIPS County code “09015” to read as follows:</P>
+                <GPOTABLE COLS="05" OPTS="L1,nj,i1" CDEF="xs60,r50,xls36,12,r100">
+                    <TTITLE>Table 3—Urban Counties That Would Change to Rural Status</TTITLE>
+                    <BOXHD>
+                        <CHED H="1">
+                            FIPS county 
+                            <LI>code</LI>
+                        </CHED>
+                        <CHED H="1">County name</CHED>
+                        <CHED H="1">State</CHED>
+                        <CHED H="1">
+                            Current 
+                            <LI>CBSA</LI>
+                        </CHED>
+                        <CHED H="1">Current CBSA name</CHED>
+                    </BOXHD>
+                    <ROW>
+                        <ENT I="01">09015</ENT>
+                        <ENT>WINDHAM</ENT>
+                        <ENT>CT</ENT>
+                        <ENT>49340</ENT>
+                        <ENT>Worchester, MA-CT.</ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="22"> </ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="28">*         *         *         *         *         *         *</ENT>
+                    </ROW>
+                </GPOTABLE>
+                <P>4. On page 64222, Table 8 is corrected by adding an entry at the beginning of the table for FIPS code “09150”code to read as follows:</P>
+                <GPOTABLE COLS="07" OPTS="L1,nj,i1" CDEF="xs36,r50,8,r50,8,r50,10">
+                    <TTITLE>Table 8—Counties That Will Use a Wage Index Transition Code</TTITLE>
+                    <BOXHD>
+                        <CHED H="1">FIPS code</CHED>
+                        <CHED H="1">County name</CHED>
+                        <CHED H="1">
+                            FY 2024 
+                            <LI>CBSA</LI>
+                        </CHED>
+                        <CHED H="1">FY 2024 CBSA name</CHED>
+                        <CHED H="1">
+                            FY 2025 
+                            <LI>CBSA</LI>
+                        </CHED>
+                        <CHED H="1">FY 2025 CBSA name</CHED>
+                        <CHED H="1">
+                            FY 2025 
+                            <LI>transition </LI>
+                            <LI>code</LI>
+                        </CHED>
+                    </BOXHD>
+                    <ROW>
+                        <ENT I="01">09150</ENT>
+                        <ENT>NORTHEASTERN CONNECTICUT</ENT>
+                        <ENT>49340</ENT>
+                        <ENT>Worchester, MA-CT</ENT>
+                        <ENT>99907</ENT>
+                        <ENT>CONNECTICUT</ENT>
+                        <ENT>50030</ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="22"> </ENT>
+                    </ROW>
+                    <ROW>
+                        <ENT I="28">*         *         *         *         *         *         *</ENT>
+                    </ROW>
+                </GPOTABLE>
+                <P>5. On page 64239, in the first column, the header “2. Implementation of Two Process Quality Measures Based on Proposed HOPE Data Collection” is corrected to read</P>
+                <P>“2. Implementation of Two Process Quality Measures Based on HOPE Data Collection”.</P>
+                <P>6. On page 64240, third column, first full paragraph, in lines 4 through 6, the sentence “CMS maintains to avoid creating unnecessary burden for hospice providers.” is corrected to read “CMS maintains its commitment to avoid creating unnecessary burden for hospice providers.”</P>
+                <P>7. On page 64242, third column, last partial paragraph, in lines 11 and 12, the sentence “Theses (SFVs) may be performed by RNs or LPNs/LVNs.” is corrected to read “These SFVs may be performed by RNs or LPNs/LVNs.”</P>
+                <P>8. On page 64244, second column:</P>
+                <P>a. First partial paragraph, the final sentence, “We are finalizing the decision that the data from the first quarter Q4 CY 2025, if HOPE data collection begins in October 2025, it will not be used for assessing validity and reliability of the quality measures.”, is corrected to read “We are finalizing the decision that the data from the first quarter—Q4 CY 2025, if HOPE data collection begins in October 2025—will not be used for assessing validity and reliability of the quality measures.”</P>
+                <P>b. Second full paragraph, in lines 7 through 17, the sentence that reads “In light of all the steps required prior to data being publicly reported, we finalize the decision that public reporting of the proposed quality measures will be implemented no earlier than FY 2028, allowing ample time for data analysis, review of measures' appropriateness for use for public reporting, and allowing hospices the required time to review their own data prior to public reporting.” is corrected to read “In light of all the steps required prior to data being publicly reported, we finalize the decision that public reporting of the HOPE-based quality measures will be implemented no earlier than FY 2028, allowing ample time for data analysis, review of measures' appropriateness for use for public reporting, and allowing hospices the required time to review their own data prior to public reporting.”</P>
+                <P>9. On page 64260:</P>
+                <P>a. First column, first partial paragraph under the heading “IV. Collection of Information Requirements”, in lines 2 and 3, “60-day” is corrected to read “30-day”.</P>
+                <P>b. Third column, first partial paragraph:</P>
+                <P>i. In lines 3 and 4, the sentence that reads “The OMB control number will remain 0938-1153.” is removed.</P>
+                <P>ii. In lines 11 through 14, the parenthetical phrase “(set out in the PRA accompanying this Rule, as well as the HOPE Guidance Manual finalized in this Rule)” is removed.</P>
+                <P>10. On page 64261:</P>
+                <P>
+                    a. First column, first partial paragraph, in lines 1 through 11, the sentence that reads “For additional information regarding the calculation of HOPE time and cost burdens, please refer to the HOPE Beta Testing Report found on the HOPE web page at 
+                    <E T="03">https://www.cms.gov/medicare/quality/hospice/hope</E>
+                     and the PRA package associated with this rule found at 
+                    <E T="03">https://www.cms.gov/medicare/regulations-guidance/legislation/paperwork-reduction-act-1995/pra-listing.”</E>
+                     is corrected to read “For additional information regarding the calculation of HOPE time and cost burdens, please refer to the HOPE Beta Testing Report found on the HOPE web page at 
+                    <E T="03">
+                        https://www.cms.gov/medicare/
+                        <PRTPAGE P="79767"/>
+                        quality/hospice/hope
+                    </E>
+                     and the information collection request (OMB control number 0938-1153/Expiration date: 1/31/2026) associated with this rule found at 
+                    <E T="03">https://www.cms.gov/medicare/regulations-guidance/legislation/paperwork-reduction-act-1995/pra-listing.”</E>
+                </P>
+                <P>b. Third column, lines 15 through 21, the sentence that reads “This increase in incremental burden is explained further in the Regulatory Impact Analysis (RIA) section of this Rule, and is also discussed in detail in the Information Collection Request and PRA accompanying this Rule.” is corrected to read “This increase in incremental burden is explained further in the Regulatory Impact Analysis (RIA) section of this rule, and is also discussed in detail in the information collection request accompanying this rule (OMB control number (0938-1153/Expiration date: 1/31/2026).”</P>
+                <P>11. On page 64262, in Table 18, titled “Summary of Changes in Burden”, the entry “HUV Timepoint” is corrected to read “HUV Timepoints”.</P>
+                <SIG>
+                    <NAME>Elizabeth J. Gramling,</NAME>
+                    <TITLE>Executive Secretary to the Department, Department of Health and Human Services.</TITLE>
+                </SIG>
+            </SUPLINF>
+            <FRDOC>[FR Doc. 2024-22495 Filed 9-27-24; 4:15 pm]</FRDOC>
+            <BILCOD>BILLING CODE 4120-01-P</BILCOD>
+        </RULE>
