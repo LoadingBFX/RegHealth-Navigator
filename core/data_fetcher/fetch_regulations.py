@@ -194,9 +194,10 @@ def detect_program_type(doc: Dict) -> Tuple[bool, str]:
         (True, "MPFS")
     """
     title = doc.get("title", "").lower()
+    print("Detecting program type from title:", title)
     
     # MPFS (Medicare Physician Fee Schedule)
-    if any(keyword in title for keyword in ["physician fee schedule", "mpfs", "pfs"]):
+    if any(keyword in title for keyword in ["physician fee schedule", "mpfs", "pfs", "physician fee"]):
         return True, "MPFS"
     
     # HOSPICE (Hospice Payment)
@@ -252,11 +253,13 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
             return False
         
         # Create program type directory
-        program_dir = save_dir / program_type
+        program_dir = save_dir #/ program_type
         program_dir.mkdir(parents=True, exist_ok=True)
         
         # Construct filename
         year = publication_date.split("-")[0]
+        month = publication_date.split("-")[1]
+        date = publication_date.split("-")[2]
         doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
         filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
         filepath = program_dir / filename
@@ -267,7 +270,7 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
             return True
         
         # Download XML
-        xml_url = f"https://www.federalregister.gov/documents/full_text/xml/{year}/{doc_number}.xml"
+        xml_url = f"https://www.federalregister.gov/documents/full_text/xml/{year}/{month}/{date}/{doc_number}.xml"
         response = requests.get(xml_url)
         response.raise_for_status()
         
@@ -394,6 +397,7 @@ def main():
                 if has_program:
                     program_dir = save_dir / program_type
                     program_dir.mkdir(parents=True, exist_ok=True)
+                    print("Program Directory:", program_dir)
                     success = download_xml(doc, program_dir, logger=logger)
                     if success:
                         downloaded += 1
@@ -435,6 +439,8 @@ def main():
                 
                 # Detect program type
                 has_program, program_type = detect_program_type(doc)
+                print("Detected program type:", program_type)
+                print("Has program type:", has_program)
                 if not has_program:
                     logger.info(f"Unrecognized program type: {title}")
                     logger.info(f"{doc_number}: Unrecognized program type: {title}")
@@ -447,6 +453,8 @@ def main():
                 
                 # Check if file already exists and is valid
                 year = publication_date.split("-")[0]
+                #month = publication_date.split("-")[1]
+                #date = publication_date.split("-")[2]
                 doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
                 filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
                 filepath = program_dir / filename
