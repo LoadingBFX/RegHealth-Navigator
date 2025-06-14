@@ -197,7 +197,7 @@ def detect_program_type(doc: Dict) -> Tuple[bool, str]:
     print("Detecting program type from title:", title)
     
     # MPFS (Medicare Physician Fee Schedule)
-    if any(keyword in title for keyword in ["physician fee schedule", "mpfs", "pfs", "physician fee"]):
+    if any(keyword in title for keyword in ["medicare physician fee schedule","physician fee schedule", "mpfs", "pfs", "physician fee"]):
         return True, "MPFS"
     
     # HOSPICE (Hospice Payment)
