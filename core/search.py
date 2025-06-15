@@ -10,12 +10,8 @@ import openai
 import json
 from typing import List, Tuple, Dict, Any
 import logging
-# from key import OPENAI_API_KEY
-from dotenv import load_dotenv
-
+from key import OPENAI_API_KEY 
 logger = logging.getLogger(__name__)
-load_dotenv()
-OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
 
 
 class ChatSearchService:
@@ -287,15 +283,15 @@ Answer:"""
         
         logger.info(f"Answer generation completed, confidence: {result['confidence']}")
         return result
-    
+
     def ask_simple_question(self, query: str, top_k: int = 3) -> str:
         """
         Simplified Q&A interface, only returns answer text
-        
+
         Args:
             query: User's question
             top_k: Number of chunks to retrieve
-            
+
         Returns:
             Answer text
         """
@@ -317,8 +313,7 @@ Answer:"""
         else:
             raise IndexError(f"Index {index} out of range")
 
-
-if __name__ == "__main__":
+def ask_query(query):
     # Example usage
     try:
         # Initialize service with actual FAISS index and metadata files
@@ -334,7 +329,7 @@ if __name__ == "__main__":
         #query = "What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?"
         #query = "Summarize CY 2024 Medicare Physician Fee Schedule final rule?"
         #query = "Summarize  Correction of Errors in the Preambleof the CY 2025 PFS Final Rule"
-        print("=== Complete RAG Q&A Test ===")
+        '''
         while True:
             query = input("Enter your question: \n")
             if not query.strip():
@@ -343,16 +338,16 @@ if __name__ == "__main__":
             if query.lower() == "exit":
                 print("Exiting...")
                 break
-        
-            result = service.ask_question(query, top_k=10)
-            print(f"Question: {result['query']}")
-            print(f"Answer: {result['answer']}")
-            print(f"Confidence: {result['confidence']}")
-            print(f"Number of sources used: {len(result['sources_used'])}")
-            print("\nSource details:")
-            for source in result['sources_used']:
-                print(f"  - Source {source['source_id']}: {source['text_preview']}")
-                print(f"    Similarity: {1-source['distance']:.3f}")
+        '''
+        result = service.ask_question(query, top_k=10)
+        print(f"Question: {result['query']}")
+        print(f"Answer: {result['answer']}")
+        print(f"Confidence: {result['confidence']}")
+        print(f"Number of sources used: {len(result['sources_used'])}")
+        print("\nSource details:")
+        for source in result['sources_used']:
+            print(f"  - Source {source['source_id']}: {source['text_preview']}")
+            print(f"    Similarity: {1-source['distance']:.3f}")
         
         
         #print("\n=== Retrieval Only Test (no answer generation) ===")
@@ -361,8 +356,16 @@ if __name__ == "__main__":
         #print(f"Number of retrieved chunks: {len(chunks)}")
         #for i, chunk in enumerate(chunks):
         #    print(f"Chunk {i+1}: {chunk['text'][:100]}...")
+
+        # prepare final output
+        final_output = result['answer']
+
+        return final_output
         
     except Exception as e:
         print(f"Error: {e}")
         print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
+
+query = "When did the SNF Prospective Payment System transition end?"
+response = ask_query(query)
