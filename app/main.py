@@ -1,125 +1,159 @@
 """
 main.py
 
-FastAPI app entry point for RegHealth Navigator backend.
+Flask app entry point for RegHealth Navigator backend.
 """
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
-import uvicorn
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from werkzeug.exceptions import BadRequest
 import sys
 from pathlib import Path
-
+import yaml
+from core.search import ChatSearchService
 # Add parent directory to Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from core.xml_partition import XMLPartitioner
-from core.xml_chunker import XMLChunker
-from core.embedding import EmbeddingManager
-from core.llm import LLMManager
-from core.chat_engine import ChatEngine
-from pydantic import BaseModel
-import json
+# from core.xml_partition import XMLPartitioner
+# from core.xml_chunker import XMLChunker
+# from core.embedding import EmbeddingManager
+# from core.llm import LLMManager
+# from core.chat_engine import ChatEngine
+# import json
 
-app = FastAPI(title="RegHealth Navigator API")
+app = Flask(__name__)
 
-# CORS middleware for development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Update this for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS setup for development
+CORS(app, origins=["*"])  # Update this for production
 
-class SectionRequest(BaseModel):
-    section_id: str
-    query: Optional[str] = None
+# Initialize your components (you may need to adjust based on your actual implementation)
+# partitioner = XMLPartitioner()
+# chunker = XMLChunker()
+# embedding_manager = EmbeddingManager()
+# llm_manager = LLMManager()
 
-class ComparisonRequest(BaseModel):
-    doc1_id: str
-    doc2_id: str
-    section_ids: Optional[List[str]] = None
+def validate_json_request(required_fields=None):
+    """Helper function to validate JSON requests"""
+    if not request.is_json:
+        raise BadRequest("Request must be JSON")
 
-class SimpleChatRequest(BaseModel):
-    message: str
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Request body cannot be empty")
 
-@app.post("/api/upload")
-async def upload_document(file: UploadFile = File(...)):
+    if required_fields:
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
+
+    return data
+
+@app.route("/api/upload", methods=["POST"])
+def upload_document():
     """Upload and process a new XML document"""
-    try:
-        content = await file.read()
-        sections = partitioner.partition(content)
-        return {"message": "Document uploaded and partitioned", "sections": sections}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # try:
+    #     if 'file' not in request.files:
+    #         raise BadRequest("No file provided")
+    #
+    #     file = request.files['file']
+    #     if file.filename == '':
+    #         raise BadRequest("No file selected")
+    #
+    #     content = file.read()
+    #     sections = partitioner.partition(content)
+    #     return jsonify({"message": "Document uploaded and partitioned", "sections": sections})
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 400
 
-@app.post("/api/sections/{section_id}/process")
-async def process_section(section_id: str):
+@app.route("/api/sections/<section_id>/process", methods=["POST"])
+def process_section(section_id):
     """Process a specific section (chunk, embed, index)"""
-    try:
-        chunks = chunker.chunk_section(section_id)
-        embeddings = embedding_manager.embed_chunks(chunks)
-        return {"message": "Section processed", "chunks": len(chunks)}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # try:
+    #     chunks = chunker.chunk_section(section_id)
+    #     embeddings = embedding_manager.embed_chunks(chunks)
+    #     return jsonify({"message": "Section processed", "chunks": len(chunks)})
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 400
 
-@app.post("/api/sections/{section_id}/summarize")
-async def summarize_section(section_id: str):
+@app.route("/api/sections/<section_id>/summarize", methods=["POST"])
+def summarize_section(section_id):
     """Generate summary for a section"""
-    try:
-        summary = llm_manager.summarize_section(section_id)
-        return {"summary": summary}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # try:
+    #     summary = llm_manager.summarize_section(section_id)
+    #     return jsonify({"summary": summary})
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 400
 
-@app.post("/api/chat")
-async def chat(request: SectionRequest):
+@app.route("/api/chat", methods=["POST"])
+def chat():
     """
     Chat endpoint that demonstrates frontend-backend interaction.
-    
-    Args:
-        request (SectionRequest): Request containing section_id and query
-        
+
+    Request body should contain:
+        {
+            "section_id": "demo_section",
+            "query": "What are the requirements?" (optional)
+        }
+
     Returns:
-        dict: Response containing the chat message
-        
-    Example:
-        Request:
-            {
-                "section_id": "demo_section",
-                "query": "What are the requirements?"
-            }
-        Response:
-            {
-                "response": "Hello! You asked about section demo_section. Your query was: What are the requirements?"
-            }
+        {
+            "response": "Hello! You asked about section demo_section. Your query was: What are the requirements?"
+        }
     """
     try:
+        data = validate_json_request(required_fields=["query"])
+
+        # section_id = data["section_id"]
+        query = data.get("query")
+
         # Return a hardcoded response for demonstration
         # In a real implementation, this would process the query using LLM or other services
-        response = f"Hello! You asked about section {request.section_id}. Your query was: {request.query}"
-        return {"response": response}
+        chat_service = ChatSearchService(API_KEY)
+        response = chat_service.ask_query(f"Hello! Your query was: {query}")
+        return jsonify({"response": response})
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return jsonify({"error": str(e)}), 400
 
-@app.post("/api/compare")
-async def compare_documents(request: ComparisonRequest):
+@app.route("/api/compare", methods=["POST"])
+def compare_documents():
     """Compare two documents or specific sections"""
-    try:
-        comparison = llm_manager.compare_documents(
-            request.doc1_id, 
-            request.doc2_id,
-            request.section_ids
-        )
-        return {"comparison": comparison}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # try:
+    #     data = validate_json_request(required_fields=["doc1_id", "doc2_id"])
+    #
+    #     doc1_id = data["doc1_id"]
+    #     doc2_id = data["doc2_id"]
+    #     section_ids = data.get("section_ids")
+    #
+    #     comparison = llm_manager.compare_documents(doc1_id, doc2_id, section_ids)
+    #     return jsonify({"comparison": comparison})
+    # except BadRequest as e:
+    #     return jsonify({"error": str(e)}), 400
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 400
 
-@app.post("/api/simple-chat")
-async def simple_chat(request: SimpleChatRequest):
+@app.route("/api/simple-chat", methods=["POST"])
+def simple_chat():
     """Simple chat endpoint that returns hello world"""
-    return {"response": "hello world!"}
+    try:
+        data = validate_json_request(required_fields=["message"])
+        return jsonify({"response": "hello world!"})
+    except BadRequest as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Endpoint not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True) 
+    with open('../config.yml', 'r') as file:
+        config = yaml.safe_load(file)
+        API_KEY = config['OPENAI_API_KEY']  # Method 1
+
+    app.run(host="0.0.0.0", port=8000, debug=True)
