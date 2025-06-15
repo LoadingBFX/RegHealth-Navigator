@@ -1,0 +1,70 @@
+{
+  "total_tokens": 12308289,
+  "estimated_total_cost": 1.2308,
+  "per_document": {
+    "2024_SNF_final_2024-07522.xml": {
+      "tokens": 1323,
+      "cost": 0.0001
+    },
+    "2024_SNF_final_2024-22504.xml": {
+      "tokens": 1234,
+      "cost": 0.0001
+    },
+    "2024_SNF_proposed_2024-06812.xml": {
+      "tokens": 214838,
+      "cost": 0.0215
+    },
+    "2023_SNF_final_2023-22050.xml": {
+      "tokens": 2341,
+      "cost": 0.0002
+    },
+    "2024_SNF_final_2024-16907.xml": {
+      "tokens": 301541,
+      "cost": 0.0302
+    },
+    "2025_SNF_proposed_2025-06348.xml": {
+      "tokens": 72428,
+      "cost": 0.0072
+    },
+    "2023_SNF_final_2023-16249.xml": {
+      "tokens": 465514,
+      "cost": 0.0466
+    },
+    "2025_MPFS_final_2025-08676.xml": {
+      "tokens": 11088,
+      "cost": 0.0011
+    },
+    "2023_MPFS_final_2023-24184.xml": {
+      "tokens": 5450507,
+      "cost": 0.5451
+    },
+    "2024_MPFS_proposed_2024-14828.xml": {
+      "tokens": 5534930,
+      "cost": 0.5535
+    },
+    "2024_MPFS_final_2024-02705.xml": {
+      "tokens": 4580,
+      "cost": 0.0005
+    },
+    "2025_HOSPICE_proposed_2025-06317.xml": {
+      "tokens": 31701,
+      "cost": 0.0032
+    },
+    "2024_HOSPICE_final_2024-22495.xml": {
+      "tokens": 3490,
+      "cost": 0.0003
+    },
+    "2024_HOSPICE_proposed_2024-06921.xml": {
+      "tokens": 64766,
+      "cost": 0.0065
+    },
+    "2024_HOSPICE_final_2024-16910.xml": {
+      "tokens": 96572,
+      "cost": 0.0097
+    },
+    "2023_HOSPICE_final_2023-16116.xml": {
+      "tokens": 51436,
+      "cost": 0.0051
+    }
+  }
+}
