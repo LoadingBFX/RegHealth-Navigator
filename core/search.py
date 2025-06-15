@@ -10,8 +10,12 @@ import openai
 import json
 from typing import List, Tuple, Dict, Any
 import logging
-from key import OPENAI_API_KEY 
+# from key import OPENAI_API_KEY
+from dotenv import load_dotenv
+
 logger = logging.getLogger(__name__)
+load_dotenv()
+OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
 
 
 class ChatSearchService:
