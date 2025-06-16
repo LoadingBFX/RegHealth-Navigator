@@ -1,0 +1,12 @@
+server:
+  host: 127.0.0.1
+  port: 8080
+  debug: true
+
+cors:
+  origins:
+    - http://localhost:5173
+    - http://127.0.0.1:5173
+
+rag_data:
+  faiss_index: rag_data/faiss.index
