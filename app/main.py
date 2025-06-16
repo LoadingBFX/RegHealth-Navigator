@@ -11,8 +11,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
-from core.search import ChatSearchService
-from config import config
+from .core.search import ChatSearchService
+from .config import config
 from dotenv import load_dotenv
 
 # Configure logging
