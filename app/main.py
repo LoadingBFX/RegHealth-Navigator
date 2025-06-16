@@ -3,15 +3,15 @@ main.py
 
 Flask app entry point for RegHealth Navigator backend.
 """
+import sys
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
-import sys
-from pathlib import Path
 import yaml
 from core.search import ChatSearchService
-# Add parent directory to Python path
-sys.path.append(str(Path(__file__).parent.parent))
+from config import config
+from dotenv import load_dotenv
 
 # from core.xml_partition import XMLPartitioner
 # from core.xml_chunker import XMLChunker
@@ -20,10 +20,23 @@ sys.path.append(str(Path(__file__).parent.parent))
 # from core.chat_engine import ChatEngine
 # import json
 
+# 加载 .env
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+
+# 只初始化一次
+chat_service = ChatSearchService(
+    openai_api_key=api_key,
+    faiss_index_path=config.faiss_index_path,
+    metadata_path=config.faiss_metadata_path
+)
+
 app = Flask(__name__)
 
 # CORS setup for development
-CORS(app, origins=["*"])  # Update this for production
+CORS(app, origins=config.cors_origins)  # Update this for production
 
 # Initialize your components (you may need to adjust based on your actual implementation)
 # partitioner = XMLPartitioner()
@@ -101,14 +114,8 @@ def chat():
     """
     try:
         data = validate_json_request(required_fields=["query"])
-
-        # section_id = data["section_id"]
         query = data.get("query")
-
-        # Return a hardcoded response for demonstration
-        # In a real implementation, this would process the query using LLM or other services
-        chat_service = ChatSearchService(API_KEY)
-        response = chat_service.ask_query(f"Hello! Your query was: {query}")
+        response = chat_service.ask_query(query)
         return jsonify({"response": response})
     except BadRequest as e:
         return jsonify({"error": str(e)}), 400
@@ -151,9 +158,9 @@ def not_found(error):
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
-if __name__ == "__main__":
-    with open('../config.yml', 'r') as file:
-        config = yaml.safe_load(file)
-        API_KEY = config['OPENAI_API_KEY']  # Method 1
+# if __name__ == "__main__":
+#     with open('../config.yml', 'r') as file:
+#         config = yaml.safe_load(file)
+#         API_KEY = config['OPENAI_API_KEY']  # Method 1
 
-    app.run(host="0.0.0.0", port=8000, debug=True)
+#     app.run(host="0.0.0.0", port=8000, debug=True)
