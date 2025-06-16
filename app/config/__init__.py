@@ -46,4 +46,10 @@ class Config:
         rel_path = self.config['docs_data']['path']
         return str(project_root / rel_path)
 
+    @property
+    def build_faiss_output_folder(self):
+        project_root = Path(__file__).parent.parent.parent.resolve()
+        rel_path = self.config['build_faiss']['output_folder']
+        return str(project_root / rel_path)
+
 config = Config()
