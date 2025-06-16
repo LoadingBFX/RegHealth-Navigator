@@ -5,162 +5,168 @@ Flask app entry point for RegHealth Navigator backend.
 """
 import sys
 import os
+import logging
+from typing import Dict, Any, Optional
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
 from core.search import ChatSearchService
 from config import config
 from dotenv import load_dotenv
 
-# from core.xml_partition import XMLPartitioner
-# from core.xml_chunker import XMLChunker
-# from core.embedding import EmbeddingManager
-# from core.llm import LLMManager
-# from core.chat_engine import ChatEngine
-# import json
-
-# 加载 .env
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
-
-# 只初始化一次
-chat_service = ChatSearchService(
-    openai_api_key=api_key,
-    faiss_index_path=config.faiss_index_path,
-    metadata_path=config.faiss_metadata_path
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-
-# CORS setup for development
-CORS(app, origins=config.cors_origins)  # Update this for production
-
-# Initialize your components (you may need to adjust based on your actual implementation)
-# partitioner = XMLPartitioner()
-# chunker = XMLChunker()
-# embedding_manager = EmbeddingManager()
-# llm_manager = LLMManager()
-
-def validate_json_request(required_fields=None):
-    """Helper function to validate JSON requests"""
-    if not request.is_json:
-        raise BadRequest("Request must be JSON")
-
-    data = request.get_json()
-    if not data:
-        raise BadRequest("Request body cannot be empty")
-
-    if required_fields:
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
-
-    return data
-
-@app.route("/api/upload", methods=["POST"])
-def upload_document():
-    """Upload and process a new XML document"""
-    # try:
-    #     if 'file' not in request.files:
-    #         raise BadRequest("No file provided")
-    #
-    #     file = request.files['file']
-    #     if file.filename == '':
-    #         raise BadRequest("No file selected")
-    #
-    #     content = file.read()
-    #     sections = partitioner.partition(content)
-    #     return jsonify({"message": "Document uploaded and partitioned", "sections": sections})
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 400
-
-@app.route("/api/sections/<section_id>/process", methods=["POST"])
-def process_section(section_id):
-    """Process a specific section (chunk, embed, index)"""
-    # try:
-    #     chunks = chunker.chunk_section(section_id)
-    #     embeddings = embedding_manager.embed_chunks(chunks)
-    #     return jsonify({"message": "Section processed", "chunks": len(chunks)})
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 400
-
-@app.route("/api/sections/<section_id>/summarize", methods=["POST"])
-def summarize_section(section_id):
-    """Generate summary for a section"""
-    # try:
-    #     summary = llm_manager.summarize_section(section_id)
-    #     return jsonify({"summary": summary})
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 400
-
-@app.route("/api/chat", methods=["POST"])
-def chat():
+def create_app() -> Flask:
     """
-    Chat endpoint that demonstrates frontend-backend interaction.
-
-    Request body should contain:
-        {
-            "section_id": "demo_section",
-            "query": "What are the requirements?" (optional)
-        }
-
+    Create and configure the Flask application.
+    
     Returns:
-        {
-            "response": "Hello! You asked about section demo_section. Your query was: What are the requirements?"
-        }
+        Flask: Configured Flask application instance
     """
-    try:
-        data = validate_json_request(required_fields=["query"])
-        query = data.get("query")
-        response = chat_service.ask_query(query)
-        return jsonify({"response": response})
-    except BadRequest as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    # Load environment variables
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(f"API Key: {api_key[:5]}...{api_key[-5:]}")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY environment variable is not set")
 
-@app.route("/api/compare", methods=["POST"])
-def compare_documents():
-    """Compare two documents or specific sections"""
-    # try:
-    #     data = validate_json_request(required_fields=["doc1_id", "doc2_id"])
-    #
-    #     doc1_id = data["doc1_id"]
-    #     doc2_id = data["doc2_id"]
-    #     section_ids = data.get("section_ids")
-    #
-    #     comparison = llm_manager.compare_documents(doc1_id, doc2_id, section_ids)
-    #     return jsonify({"comparison": comparison})
-    # except BadRequest as e:
-    #     return jsonify({"error": str(e)}), 400
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 400
+    # Initialize Flask app
+    app = Flask(__name__)
+    
+    # Configure CORS
+    CORS(app, origins=config.cors_origins)
+    
+    # Initialize services
+    chat_service = ChatSearchService(
+        openai_api_key=api_key,
+        faiss_index_path=config.faiss_index_path,
+        metadata_path=config.faiss_metadata_path
+    )
+    
+    # Register error handlers
+    register_error_handlers(app)
+    
+    # Register routes
+    register_routes(app, chat_service)
+    
+    return app
 
-@app.route("/api/simple-chat", methods=["POST"])
-def simple_chat():
-    """Simple chat endpoint that returns hello world"""
-    try:
-        data = validate_json_request(required_fields=["message"])
-        return jsonify({"response": "hello world!"})
-    except BadRequest as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+def register_error_handlers(app: Flask) -> None:
+    """
+    Register error handlers for the Flask application.
+    
+    Args:
+        app: Flask application instance
+    """
+    @app.errorhandler(404)
+    def not_found(error: HTTPException) -> tuple[Dict[str, str], int]:
+        return jsonify({"error": "Endpoint not found"}), 404
 
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({"error": "Endpoint not found"}), 404
+    @app.errorhandler(500)
+    def internal_error(error: HTTPException) -> tuple[Dict[str, str], int]:
+        logger.error(f"Internal server error: {str(error)}")
+        return jsonify({"error": "Internal server error"}), 500
 
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({"error": "Internal server error"}), 500
+    @app.errorhandler(BadRequest)
+    def handle_bad_request(error: BadRequest) -> tuple[Dict[str, str], int]:
+        return jsonify({"error": str(error)}), 400
 
-# if __name__ == "__main__":
-#     with open('../config.yml', 'r') as file:
-#         config = yaml.safe_load(file)
-#         API_KEY = config['OPENAI_API_KEY']  # Method 1
+def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
+    """
+    Register routes for the Flask application.
+    
+    Args:
+        app: Flask application instance
+        chat_service: ChatSearchService instance
+    """
+    def validate_json_request(required_fields: Optional[list[str]] = None) -> Dict[str, Any]:
+        """
+        Validate JSON request and required fields.
+        
+        Args:
+            required_fields: List of required field names
+            
+        Returns:
+            Dict[str, Any]: Validated request data
+            
+        Raises:
+            BadRequest: If request is not JSON or missing required fields
+        """
+        if not request.is_json:
+            raise BadRequest("Request must be JSON")
 
-#     app.run(host="0.0.0.0", port=8000, debug=True)
+        data = request.get_json()
+        if not data:
+            raise BadRequest("Request body cannot be empty")
+
+        if required_fields:
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
+
+        return data
+
+    @app.route("/api/chat", methods=["POST"])
+    def chat() -> tuple[Dict[str, Any], int]:
+        """
+        Chat endpoint for querying the RAG system.
+        
+        Request body:
+            {
+                "query": str  # The user's question
+            }
+            
+        Returns:
+            {
+                "response": str  # The system's response
+            }
+        """
+        try:
+            data = validate_json_request(required_fields=["query"])
+            query = data.get("query")
+            response = chat_service.ask_query(query)
+            return jsonify({"response": response})
+        except Exception as e:
+            logger.error(f"Error in chat endpoint: {str(e)}")
+            return jsonify({"error": str(e)}), 400
+
+    @app.route("/api/simple-chat", methods=["POST"])
+    def simple_chat() -> tuple[Dict[str, str], int]:
+        """
+        Simple test endpoint.
+        
+        Request body:
+            {
+                "message": str  # Any message
+            }
+            
+        Returns:
+            {
+                "response": str  # Always returns "hello world!"
+            }
+        """
+        try:
+            data = validate_json_request(required_fields=["message"])
+            return jsonify({"response": "hello world!"})
+        except Exception as e:
+            logger.error(f"Error in simple-chat endpoint: {str(e)}")
+            return jsonify({"error": str(e)}), 400
+
+def main() -> None:
+    """Main entry point for the Flask application."""
+    app = create_app()
+    logger.info("Starting Flask app...")
+    app.run(
+        host=config.api_host,
+        port=config.api_port,
+        debug=config.debug
+    )
+
+if __name__ == "__main__":
+    main()

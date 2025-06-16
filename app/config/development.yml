@@ -11,3 +11,6 @@ cors:
 rag_data:
   faiss_index: rag_data/faiss.index
   metadata: rag_data/faiss_metadata.json
+
+docs_data:
+  path: data/
