@@ -3,167 +3,119 @@
 **Authors:**  
 Xiao Yan, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, Seon Young Jhang, Fanxing Bu
 
-**Last Updated:** March 2024  
+**Last Updated:** March 2025
 **Status:** 🚧 In Development
 
 [![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
+
+---
 
 ## 📖 Project Introduction
 
 RegHealth Navigator is an intelligent regulatory document analysis platform designed to help healthcare professionals, compliance officers, and policy analysts efficiently understand and analyze complex Medicare regulations. The system provides powerful tools for document comparison, semantic search, and AI-powered analysis.
 
-## ✨ Key Features
+---
 
-### 1. Document Management
-- **Standardized File Organization**
-  - Format: `{year}_{program_type}_{type}_{document_number}`
-  - Example: `2024_MPFS_final_2024-14828`
-  - Program Types: MPFS, HOSPICE, SNF
-  - Document Types: final, proposed
+## 📁 Project Structure
+```
+RegHealth-Navigator/
+├── app/                  # Backend Flask application
+│   ├── core/             # Core backend logic (RAG, search, etc.)
+│   ├── config/           # YAML config files for environment/resource paths
+│   └── main.py           # Flask entry point
+│   └── ...               # (other backend modules)
+│
+├── front/                # Frontend React application
+│   ├── src/
+│   └── ...               # (components, store, etc.)
+│
+├── rag_data/             # FAISS index and metadata files (not in git)
+│
+├── docs/                 # Documentation
+│
+├── .env                  # Backend sensitive config (not committed)
+├── requirements.txt      # Backend dependencies
+└── README.md
+```
 
-### 2. Smart Analysis Tools
-- **Document Comparison**
-  - Side-by-side document comparison
-  - Color-coded change tracking:
-    - 🟢 Green: Added content
-    - 🔴 Red: Removed content
-    - 🟡 Yellow: Modified content
-  - Expandable sections for detailed review
+---
 
-- **AI-Powered Features**
-  - Smart document summarization
-  - FAQ generation
-  - Key points extraction
-  - Context-aware chat assistance
+## ⚙️ Configuration & Environment Variables
 
-### 3. User Interface
-- **Modern Design**
-  - Clean, intuitive interface
-  - Responsive layout
-  - Dark/light mode support
-  - Accessible components
+### Backend
+- **.env**: Stores sensitive info (e.g., `OPENAI_API_KEY`). Not committed. See `.env.example` for template.
+- **app/config/*.yml**: Stores resource paths, CORS, and other environment-specific settings. See example files.
+- **rag_data/**: Stores FAISS index and metadata files. Not committed.
 
-- **Interactive Features**
-  - Real-time document search
-  - Citation system with modal view
-  - Chat history management
-  - Document selection interface
+**Example: Loading API key from .env in Python**
+```python
+from dotenv import load_dotenv
+import os
 
-## 🚀 Getting Started
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+```
 
-### Prerequisites
-- Node.js 18+
-- Python 3.9+
-- npm or yarn
+### Frontend
+- **front/.env.development**, **front/.env.production**: Store API base URL and feature flags. See `front/.env.example` for required variables.
 
-### Frontend Setup
+**Example: Accessing API URL in React/Vite**
+```typescript
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/LoadingBFX/RegHealth-Navigator.git
-   cd RegHealth-Navigator
-   ```
+---
 
-2. **Install dependencies**
-   ```bash
-   cd front
-   npm install
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
-   The application will be available at http://localhost:5173
-
-### Backend Setup
-
-1. **Create and activate virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-2. **Install dependencies**
+## 🚀 Backend Setup (Flask)
+1. Copy `.env.example` to `.env` and fill in your OpenAI API key.
+2. Copy `app/config/development.yml.example` to `app/config/development.yml` and adjust paths if needed.
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-
-3. **Start the server**
+4. Start the Flask server:
    ```bash
-   uvicorn app.main:app --reload
+   export FLASK_APP=app/main.py
+   export FLASK_ENV=development
+   flask run --host=127.0.0.1 --port=8080
    ```
 
-## 📥 Document Download Instructions
+---
 
-1. **Access Document Library**
-   - Click on the document selector in any tab
-   - Use the search bar to find specific documents
-   - Filter by year, program type, and document type
+## 🚀 Frontend Setup
+1. Copy `front/.env.example` to `front/.env.development` and set the backend API URL.
+2. Install dependencies and run:
+   ```bash
+   cd front
+   npm install
+   npm run dev
+   ```
 
-2. **Download Process**
-   - Select the desired document(s)
-   - Click the download button
-   - Documents will be saved in your default download location
+---
 
-3. **File Organization**
-   - Downloaded files follow the standard naming convention
-   - Store in a dedicated folder for easy access
-   - Use the application's file selector to load local documents
+## 🤝 Team Collaboration & Best Practices
+- Do **not** commit `.env`, `rag_data/`, or actual config files to git. Only commit `.example` templates.
+- All resource paths and sensitive info are managed via config and env files for security and flexibility.
+- New developers should always start by copying `.env.example` and config example files.
 
-## 🛠️ Development
+---
 
-### Tech Stack
-- **Frontend**
-  - React 18
-  - TypeScript
-  - Tailwind CSS
-  - Vite
-  - Zustand (State Management)
+## ❓ FAQ / Troubleshooting
+- **Q: API key not set error?**
+  - A: Check your `.env` file and ensure `OPENAI_API_KEY` is set and has no extra spaces.
+- **Q: rag_data path error?**
+  - A: Check `app/config/development.yml` for correct paths and ensure `rag_data/` exists.
+- **Q: Frontend cannot connect to backend?**
+  - A: Check `VITE_API_BASE_URL` in your frontend env file and CORS settings in backend config.
 
-- **Backend**
-  - Python 3.9+
-  - FastAPI
-  - SQLAlchemy
-  - PostgreSQL
-  - Redis (for caching)
-
-### Project Structure
-```
-RegHealth-Navigator/
-├── front/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── store/       # State management
-│   │   └── types/       # TypeScript types
-│   └── public/          # Static assets
-│
-├── backend/              # Python FastAPI application
-│   ├── app/
-│   │   ├── api/        # API endpoints
-│   │   ├── core/       # Core functionality
-│   │   └── models/     # Database models
-│   └── tests/          # Test suite
-│
-└── docs/                # Documentation
-    ├── api/            # API documentation
-    └── guides/         # Development guides
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+---
 
 ## 📝 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
-
 - Medicare.gov for regulation data
 - OpenAI for AI capabilities
 - All contributors and maintainers
