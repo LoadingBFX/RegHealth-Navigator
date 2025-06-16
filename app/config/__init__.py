@@ -40,4 +40,10 @@ class Config:
         rel_path = self.config['rag_data']['metadata']
         return str(project_root / rel_path)
 
+    @property
+    def docs_data_path(self):
+        project_root = Path(__file__).parent.parent.parent.resolve()
+        rel_path = self.config['docs_data']['path']
+        return str(project_root / rel_path)
+
 config = Config()
