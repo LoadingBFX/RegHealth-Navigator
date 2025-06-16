@@ -84,7 +84,7 @@ const ChatPanel: React.FC = () => {
             setInput('');
 
             // Use the correct API URL - match the Flask app port
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/chat';
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080/api/chat';
 
             try {
                 const response = await fetch(API_URL, {
