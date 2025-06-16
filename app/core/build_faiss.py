@@ -6,6 +6,7 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 import openai
 import tiktoken
+from config import config
 
 
 
@@ -121,11 +122,12 @@ if __name__ == "__main__":
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
     # Ensure output folder exists
-    os.makedirs("./rag_data", exist_ok=True)
+    output_folder = os.path.dirname(config.faiss_index_path)
+    os.makedirs(output_folder, exist_ok=True)
 
     # Load preprocessed chunks
     print("📁 Loading preprocessed chunks...")
-    with open("./rag_data/chunks.json", "r") as f:
+    with open(os.path.join(output_folder, "chunks.json"), "r") as f:
         chunks = json.load(f)
 
     texts = [chunk["text"] for chunk in chunks]
@@ -154,8 +156,8 @@ if __name__ == "__main__":
         batch_end = min(i + batch_size, len(embedding_matrix))
         index.add(embedding_matrix[i:batch_end])
 
-    faiss.write_index(index, "./rag_data/faiss.index")
-    print("✅ FAISS index saved as ./rag_data/faiss.index")
+    faiss.write_index(index, config.faiss_index_path)
+    print("✅ FAISS index saved as " + config.faiss_index_path)
 
     # Save metadata and track per-document token usage
     print("💾 Preparing metadata...")
@@ -191,9 +193,9 @@ if __name__ == "__main__":
             pbar.set_postfix({'embeddings': embedding_index})
 
     # Save metadata
-    with open("./rag_data/faiss_metadata.json", "w") as f:
+    with open(os.path.join(output_folder, "faiss_metadata.json"), "w") as f:
         json.dump(faiss_metadata, f, indent=2)
-    print("✅ Metadata saved as ./rag_data/faiss_metadata.json")
+    print("✅ Metadata saved as " + os.path.join(output_folder, "faiss_metadata.json"))
 
     # Print token usage per document
     print("\n📄 Token usage by document:")
@@ -204,11 +206,11 @@ if __name__ == "__main__":
         print(f"- {doc}: {tokens} tokens ≈ ${cost:.4f}")
 
     # Save cost summary
-    with open("./rag_data/embedding_cost_summary.json", "w") as f:
+    with open(os.path.join(output_folder, "embedding_cost_summary.json"), "w") as f:
         json.dump({
             "total_tokens": total_tokens,
             "estimated_total_cost": round(total_tokens / 1000 * 0.0001, 4),
             "per_document": doc_costs
         }, f, indent=2)
-    print("💾 Cost summary saved as rag_data/embedding_cost_summary.json")
+    print("💾 Cost summary saved as " + os.path.join(output_folder, "embedding_cost_summary.json"))
     print("\n🎉 RAG embedding pipeline completed successfully!")
