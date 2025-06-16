@@ -122,7 +122,7 @@ if __name__ == "__main__":
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
     # Ensure output folder exists
-    output_folder = os.path.dirname(config.faiss_index_path)
+    output_folder = config.build_faiss_output_folder
     os.makedirs(output_folder, exist_ok=True)
 
     # Load preprocessed chunks
