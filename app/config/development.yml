@@ -12,5 +12,8 @@ rag_data:
   faiss_index: rag_data/faiss.index
   metadata: rag_data/faiss_metadata.json
 
+build_faiss:
+  output_folder: rag_data
+
 docs_data:
   path: data/
