@@ -13,19 +13,18 @@ else:
     print("Error: OPENAI_API_KEY environment variable not set. Please set it before running.")
     exit(1)
 
-# -------- ADVANCED PROMPT TEMPLATES (Tailored to your example documents) --------
+# -------- ADVANCED PROMPT TEMPLATES (V3 - Added Flexibility) --------
 
-# This prompt now primes the AI to think like an analyst for a specific company.
-# You can customize the "company focus" for different clients.
+# 1단계 프롬프트: '조건'과 '예외' 같은 뉘앙스 추출을 강조하도록 개선
 COMPANY_SPECIFIC_CHUNK_PROMPT = """
-You are a senior compliance analyst for a healthcare technology company. Our company provides software solutions for outpatient therapy (Physical Therapy, Occupational Therapy, Speech-Language Pathology), wound care, and telehealth.
+You are a senior compliance analyst for a healthcare technology company specializing in software for outpatient therapy (PT, OT, SLP), wound care, and telehealth.
 
-Analyze the following section of the Medicare Physician Fee Schedule (MPFS) Final Rule. From the text, extract the key changes and data points relevant to our business focus.
+Analyze the following section of the Medicare Physician Fee Schedule (MPFS) Final Rule. From this text, extract key data points relevant to our business.
 
 For the provided text chunk, extract the following information:
 1.  **topic**: Identify the main regulatory topic (e.g., "Conversion Factor", "Telehealth Modifiers", "Therapy Supervision", "Skin Substitutes Payment").
-2.  **key_changes**: In a bulleted list, summarize the specific policy changes, payment rate updates, new/deleted codes, or deadline changes. Be precise.
-3.  **quantitative_data**: List any specific numbers, percentages, dollar amounts, or dates mentioned (e.g., "Conversion factor is $33.06", "Payment reduction of 3.37%", "Threshold is $2330", "Effective January 1, 2024").
+2.  **key_changes**: In a bulleted list, summarize the specific policy changes. **Pay close attention to conditions, exceptions, and expiration dates (e.g., "temporary through 2024", "permanent", "does not apply to...") and include them in this summary.**
+3.  **quantitative_data**: List all specific numbers, percentages, dollar amounts, CPT/HCPCS codes, or dates mentioned (e.g., "Conversion factor is $32.7442", "3.37% decrease", "Threshold is $2330", "Codes 97550-97552").
 4.  **stakeholders_affected**: List the primary groups impacted (e.g., "Physical Therapists", "Physicians", "Hospitals", "Billing Staff").
 
 Provide the response as a single, valid JSON object.
@@ -35,58 +34,70 @@ Provide the response as a single, valid JSON object.
 [End of text]
 """
 
-# This prompt synthesizes the structured data into a full report mimicking your examples.
-# The {amount} placeholders have been escaped as {{amount}} to fix the KeyError.
+# 2단계 프롬프트: 유연성 확보를 위해 'Additional Notable Updates' 섹션을 추가
 FINAL_REPORT_PROMPT = """
-You are an expert regulatory analyst creating a business intelligence report for internal company use. The report summarizes the key impacts of the new Medicare Physician Fee Schedule (MPFS) Final Rule.
+You are a senior regulatory analyst producing a final, client-ready business intelligence report on the new Medicare Physician Fee Schedule (MPFS) Final Rule. Your audience consists of executives and product managers at a healthcare tech company focused on therapy, wound care, and telehealth.
 
-Using the provided structured data extracted from the rule, generate a comprehensive report. The report must be clear, well-organized, and targeted to an audience of product managers and executives in a company specializing in therapy, wound care, and telehealth software.
+Synthesize the provided JSON data into a comprehensive, professional report. Your tone must be direct, confident, and factual.
 
-The final report must have the following structure:
+**CRITICAL INSTRUCTIONS:**
+1.  **Integrate Specific Data:** You MUST integrate the specific quantitative data (dollar amounts, percentages, codes, dates) from the JSON into your narrative. DO NOT use vague phrases like "was updated" or "was revised." State the facts.
+2.  **Distinguish Nuances:** Clearly distinguish between permanent policies and temporary flexibilities. ALWAYS state expiration dates explicitly (e.g., "this policy is extended through the end of CY {year}").
+3.  **Follow the Structure Precisely:** Generate the report using the exact structure and headings below.
+
+============================================================
+### **Business Intelligence Report: CY {year} MPFS Final Rule**
+============================================================
+
+### **Key Dates**
+- **Rule Released:** (Find and state the release date from the source text)
+- **Final Rule Effective:** (Find and state the effective date from the source text)
+
+---
 
 ### **Executive Summary**
-A high-level overview of the most critical updates. Start with the change to the payment conversion factor. Then, briefly mention 2-3 other major policy changes, such as telehealth extensions, new caregiver codes, or E/M visit complexity changes.
+Provide a high-level overview of the most critical updates. Start with the most important financial impact: the exact new conversion factor and its percentage change from the previous year. Then, briefly summarize 2-3 other major policy shifts, such as the temporary extension of telehealth flexibilities for therapy and the introduction of new service codes.
 
 ---
 
 ### **Detailed Regulatory Analysis**
-Organize all relevant extracted information under the following specific subheadings. Combine related points and present the information in a coherent way. Use bullet points for lists of changes.
 
 **1. Payment and Reimbursement Updates**
-   - **Conversion Factor:** State the new CF and compare it to the previous year.
-   - **Therapy Threshold (KX Modifier):** Detail the new threshold amounts for PT/SLP and OT. Mention the medical review threshold.
-   - **Clinical Labor & RVUs:** Briefly mention any updates to clinical labor rates or RVUs.
+   - **Conversion Factor:** State the exact new CY {year} conversion factor. Compare it to the previous year's factor and state the precise percentage decrease.
+   - **Therapy Threshold (KX Modifier):** State the exact new dollar thresholds for PT/SLP services and for OT services. Mention the medical review threshold amount and its effective period.
+   - **Potentially Misvalued Codes:** List the key therapy codes nominated as potentially misvalued and briefly explain the reason for the review.
 
 **2. Telehealth Policies**
-   - **Service Eligibility:** Explain the status of therapy services on the telehealth list (e.g., provisional, temporary).
-   - **Practitioner Eligibility:** Clarify the status of therapists (PT, OT, SLP) as eligible telehealth providers.
-   - **Supervision:** Describe the policy for virtual direct supervision.
-   - **Modifiers and POS Codes:** Summarize the rules for using POS 02, POS 10, and Modifier 95, especially for therapy services.
+   - **Service & Practitioner Eligibility for Therapy:** Clarify the exact status of therapists (PT, OT, SLP) and therapy codes on the telehealth list. Emphasize that this is a **temporary flexibility extended through the end of CY {year}** and that these practitioners are **not** on the permanent telehealth provider list.
+   - **Supervision:** Describe the current policy for virtual direct supervision, including its expiration date at the end of CY {year}.
+   - **Modifiers and Place of Service (POS) Codes:** Explain the specific billing rules for outpatient therapy, including the continued use of Modifier 95 and the appropriate POS code through CY {year}.
 
-**3. Therapy-Specific Updates (PT, OT, SLP)**
-   - **New or Revised Codes:** Detail any new codes relevant to therapy, such as Caregiver Training (97550, 97551, 97552).
-   - **Potentially Misvalued Codes:** Mention if therapy codes have been nominated for review.
+**3. New & Updated CPT/HCPCS Codes**
+   - **Caregiver Training Services:** Detail the new CPT codes (97550, 97551, 97552), their status as "sometimes therapy," and who is eligible to bill for them.
+   - **E/M Visit Complexity (G2211):** Explain the implementation of the E/M complexity add-on code G2211 and its impact on budget neutrality.
 
 **4. Other Key Policy Changes**
-   - **Split (or Shared) E/M Visits:** Explain the current definition of "substantive portion."
-   - **Drug-Related Modifiers (JW/JZ):** Briefly mention any updates related to tracking discarded drugs.
-   - **Skin Substitutes:** Describe the latest CMS stance on payment and coding for these products.
+   - **Split (or Shared) E/M Visits:** State the revised definition of "substantive portion" for billing these visits.
+   - **Skin Substitutes:** Summarize the current CMS position on coding and payment for skin substitutes for CY {year}, noting that major changes are deferred to future rulemaking.
+
+**5. Additional Notable Updates**
+   - **(Summarize any other significant topics found in the source text that do not fit into the predefined categories above. This is your place to capture novel or unexpected regulatory changes, such as policies on EPCS, the AUC program, or MSSP.)**
 
 ---
 
 ### **Action Items for Stakeholders**
-Based on the analysis, create a bulleted list of actionable tasks for our company and our customers. For example:
-- "Update billing systems with the CY {year} conversion factor of ${{amount}}."
-- "Educate therapy providers on the continued use of Modifier 95 for telehealth claims through the end of {year}."
-- "Incorporate new Caregiver Training CPT codes (97550-97552) into the therapy software platform."
-- "Notify customers about the increased KX modifier threshold of ${{amount}} for PT/SLP and OT."
+Create a concise, actionable checklist for our company and customers. Use the specific data you've analyzed.
+- Example: "Update billing systems with the CY {year} conversion factor of $32.7442, a 3.37% decrease from CY 2023."
+- Example: "Educate therapy providers that their eligibility to furnish telehealth services expires on December 31, {year}, unless new legislation is passed."
+- Example: "Incorporate new Caregiver Training CPT codes (97550-97552) into the billing platform and provide guidance on their use."
+- Example: "Notify customers that the KX modifier threshold for CY {year} is now $2,330 for PT/SLP and $2,330 for OT."
 
-[Start of structured data]
+[Start of structured JSON data]
 {summaries}
-[End of structured data]
+[End of structured JSON data]
 """
 
-# -------- Summarization Function (Handles new prompts) --------
+# -------- Summarization Function --------
 def generate_report(chunks_data: List[Dict], file_name: str) -> str:
     global client
     if not client: return "Error: OpenAI API key not set."
@@ -118,16 +129,16 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
     if not individual_summaries:
         return "No report could be generated; analysis of chunks failed."
 
-    # Note: The 'year' is passed into the format string here.
+    year_str = file_name.split('_')[0] if '_' in file_name else "latest"
     joined_summaries = json.dumps(individual_summaries, indent=2)
-    final_prompt = FINAL_REPORT_PROMPT.format(summaries=joined_summaries, year=file_name[:4])
+    final_prompt = FINAL_REPORT_PROMPT.format(summaries=joined_summaries, year=year_str)
 
     try:
-        print("\n🔄 Generating final intelligence report...")
+        print("\n🔄 Generating final, client-ready intelligence report...")
         final_response = client.chat.completions.create(
             model="gpt-4-turbo",
             messages=[{"role": "user", "content": final_prompt}],
-            temperature=0.2,
+            temperature=0.1,
         )
         final_report = final_response.choices[0].message.content.strip()
         print("✅ Final report generated successfully.")
@@ -136,7 +147,7 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
         print(f"❌ An unexpected error occurred during final report generation: {e}")
         return f"Final synthesis failed. Raw chunk data below:\n\n{joined_summaries}"
 
-# -------- Main Execution Block (with File Selection) --------
+# -------- Main Execution Block --------
 if __name__ == "__main__":
     CHUNKS_FILE_PATH = Path("../../rag_data/faiss_metadata.json")
     print(f"Loading pre-processed chunks from {CHUNKS_FILE_PATH}...")
@@ -158,7 +169,7 @@ if __name__ == "__main__":
         print("⚠️ No processable documents found in the chunks file.")
         exit(0)
 
-    source_files_list = sorted(list(chunks_by_source_file.keys())) # Sort for consistent order
+    source_files_list = sorted(list(chunks_by_source_file.keys()))
     print("\n--- Available Documents for Summarization ---")
     for i, file_name in enumerate(source_files_list):
         print(f"  [{i + 1}] {file_name}")
@@ -177,26 +188,10 @@ if __name__ == "__main__":
     selected_file = source_files_list[selected_index]
     chunks_for_selected_file = chunks_by_source_file[selected_file]
 
-    # Heuristic to find dates. A more robust solution might involve a dedicated metadata extraction step.
-    release_date = "Not Found"
-    effective_date = "Not Found"
-    for chunk in chunks_for_selected_file[:10]: # Check first 10 chunks for speed
-        text = (chunk.get('page_content') or chunk.get('text', '')).lower()
-        if "released:" in text:
-            release_date = text.split("released:")[1].split("\n")[0].strip()
-        if "effective:" in text:
-            effective_date = text.split("effective:")[1].split("\n")[0].strip()
-
     print(f"\n--- Starting processing for: {selected_file} ---")
     report_result = generate_report(chunks_for_selected_file, selected_file)
 
-    # --- Display Final Report ---
-    print(f"\n============================================================")
-    print(f" Business Intelligence Report: {selected_file}")
-    print(f"============================================================")
-    print(f"**Rule Released:** {release_date.title()}")
-    print(f"**Effective Date:** {effective_date.title()}")
-    print("---")
+    print("\n")
     print(report_result)
     print("\n------------------------------------------------------------\n")
 
