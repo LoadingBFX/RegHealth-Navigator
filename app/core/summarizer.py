@@ -138,7 +138,7 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
 
 # -------- Main Execution Block (with File Selection) --------
 if __name__ == "__main__":
-    CHUNKS_FILE_PATH = Path("../rag_data/faiss_metadata.json")
+    CHUNKS_FILE_PATH = Path("../../rag_data/faiss_metadata.json")
     print(f"Loading pre-processed chunks from {CHUNKS_FILE_PATH}...")
 
     try:
