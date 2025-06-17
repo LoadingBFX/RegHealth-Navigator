@@ -188,3 +188,58 @@ cython_debug/
 
 # Ignore node_modules
 node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific
+faiss.index
+rag_data/chunks.json
+*.log
+old_front/
+*.zip
+test_download.xml
+data/*.pdf
+data/*.xml
+data/*/2025_*_proposed_*.xml
+data/*/2024_*_proposed_*.xml
