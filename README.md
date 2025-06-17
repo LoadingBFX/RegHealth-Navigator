@@ -77,10 +77,8 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
    ```
 4. Start the Flask server:
    ```bash
-   export FLASK_APP=app/main.py
    export FLASK_ENV=development
-   export FLASK_APP=app.main:create_app
-   flask run --host=127.0.0.1 --port=8080
+   python -m app.main
    ```
 
 ---
