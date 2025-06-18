@@ -172,8 +172,8 @@ class ChatSearchService:
         for i, chunk in enumerate(chunks):
             chunk_text = f"[Source {i+1}] {chunk['text']}"
 
-            if current_length + len(chunk_text) > max_context_length:
-                break
+            # if current_length + len(chunk_text) > max_context_length:
+            #     break
 
             context_parts.append(chunk_text)
             current_length += len(chunk_text)
@@ -371,3 +371,15 @@ Answer:"""
 
 # query = "When did the SNF Prospective Payment System transition end?"
 # response = ask_query(query)
+
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+    service = ChatSearchService(
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        faiss_index_path="./rag_data/faiss.index",
+        metadata_path="./rag_data/faiss_metadata.json"
+    )
+    query = "When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?"
+    result = service.ask_query(query)
+    print(result)
