@@ -6,12 +6,14 @@ Flask app entry point for RegHealth Navigator backend.
 import sys
 import os
 import logging
+import json
 from typing import Dict, Any, Optional
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
 from .core.search import ChatSearchService
+from .core.summarizer import generate_report
 from .config import config
 from dotenv import load_dotenv
 
@@ -157,6 +159,91 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         except Exception as e:
             logger.error(f"Error in simple-chat endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
+
+    @app.route("/api/summarize/list", methods=["GET"])
+    def list_available_documents() -> tuple[Dict[str, Any], int]:
+        """
+        Get list of available documents for summarization.
+        
+        Returns:
+            {
+                "documents": [
+                    {
+                        "source_file": str,
+                        "program": str,
+                        "rule_type": str,
+                        "year": int,
+                        "title": str
+                    }
+                ]
+            }
+        """
+        try:
+            with open(config.faiss_metadata_path, 'r', encoding='utf-8') as f:
+                all_chunks = json.load(f)
+            
+            # Get unique documents
+            documents = set()
+            for chunk in all_chunks:
+                metadata = chunk.get('metadata', {})
+                doc_info = {
+                    'source_file': metadata.get('source_file', 'unknown'),
+                    'program': metadata.get('program', 'Unknown'),
+                    'rule_type': metadata.get('rule_type', 'Unknown'),
+                    'year': metadata.get('year'),
+                    'title': metadata.get('title', '')
+                }
+                documents.add(json.dumps(doc_info, sort_keys=True))
+            
+            # Convert back to list of dicts and sort
+            document_list = [json.loads(doc) for doc in documents]
+            document_list.sort(key=lambda x: (x['year'] or 0, x['program'], x['rule_type']))
+            
+            return jsonify({
+                'documents': document_list
+            })
+        except Exception as e:
+            logger.error(f"Error in list_available_documents: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+
+    @app.route("/api/summarize", methods=["POST"])
+    def summarize_document() -> tuple[Dict[str, Any], int]:
+        """
+        Generate summary for a document.
+        
+        Request body:
+            {
+                "source_file": str  # The source file to summarize
+            }
+            
+        Returns:
+            {
+                "report": str  # The generated summary report
+            }
+        """
+        try:
+            data = validate_json_request(required_fields=["source_file"])
+            source_file = data.get('source_file')
+            
+            with open(config.faiss_metadata_path, 'r', encoding='utf-8') as f:
+                all_chunks = json.load(f)
+            
+            # Filter chunks for the selected document
+            document_chunks = [
+                chunk for chunk in all_chunks 
+                if chunk['metadata'].get('source_file') == source_file
+            ]
+            
+            if not document_chunks:
+                return jsonify({'error': 'Document not found'}), 404
+                
+            # Generate summary
+            report = generate_report(document_chunks, source_file)
+            return jsonify({'report': report})
+            
+        except Exception as e:
+            logger.error(f"Error in summarize_document: {str(e)}")
+            return jsonify({'error': str(e)}), 500
 
 def main() -> None:
     """Main entry point for the Flask application."""

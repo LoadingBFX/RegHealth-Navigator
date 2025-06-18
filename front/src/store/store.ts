@@ -1,20 +1,21 @@
 import { create } from 'zustand';
+import config from '../config';
 
 // Sample data with new naming convention
 const sampleFiles = [
-  { id: '1', name: '2024_MPFS_final_2024-14828', size: '156 MB', date: '2024-11-08' },
-  { id: '2', name: '2024_MPFS_proposed_2024-12345', size: '187 MB', date: '2024-05-15' },
-  { id: '3', name: '2024_HOSPICE_final_2024-15678', size: '92 MB', date: '2024-10-30' },
-  { id: '4', name: '2023_SNF_final_2023-23456', size: '134 MB', date: '2023-11-15' },
-  { id: '5', name: '2024_QPP_proposed_2024-16789', size: '98 MB', date: '2024-06-20' },
+  { id: '1', name: '[sample]2024_MPFS_final_2024-14828', size: '156 MB', date: '2024-11-08' },
+  { id: '2', name: '[sample]2024_MPFS_proposed_2024-12345', size: '187 MB', date: '2024-05-15' },
+  { id: '3', name: '[sample]2024_HOSPICE_final_2024-15678', size: '92 MB', date: '2024-10-30' },
+  { id: '4', name: '[sample]2023_SNF_final_2023-23456', size: '134 MB', date: '2023-11-15' },
+  { id: '5', name: '[sample]2024_QPP_proposed_2024-16789', size: '98 MB', date: '2024-06-20' },
 ];
 
 const sampleHistory = [
   { 
     id: '1', 
-    name: 'MPFS Payment Updates Analysis', 
+    name: '[sample]MPFS Payment Updates Analysis', 
     date: '2024-11-25', 
-    files: ['2024_MPFS_final_2024-14828', '2024_MPFS_proposed_2024-12345'],
+    files: ['[sample]2024_MPFS_final_2024-14828', '[sample]2024_MPFS_proposed_2024-12345'],
     messages: [
       { id: '1', role: 'user', content: 'What are the key changes in the 2024 MPFS final rule?' },
       { id: '2', role: 'assistant', content: 'The 2024 MPFS final rule includes several significant changes...', citations: ['§3.2', '§4.1'] }
@@ -22,9 +23,9 @@ const sampleHistory = [
   },
   { 
     id: '2', 
-    name: 'Hospice Care Regulations Review', 
+    name: '[sample]Hospice Care Regulations Review', 
     date: '2024-11-22', 
-    files: ['2024_HOSPICE_final_2024-15678'],
+    files: ['[sample]2024_HOSPICE_final_2024-15678'],
     messages: [
       { id: '1', role: 'user', content: 'What are the new hospice payment rates?' },
       { id: '2', role: 'assistant', content: 'The new hospice payment rates for 2024...', citations: ['§5.1'] }
@@ -32,9 +33,9 @@ const sampleHistory = [
   },
   { 
     id: '3', 
-    name: 'SNF Quality Measures Discussion', 
+    name: '[sample]SNF Quality Measures Discussion', 
     date: '2024-11-20', 
-    files: ['2023_SNF_final_2023-23456'],
+    files: ['[sample]2023_SNF_final_2023-23456'],
     messages: [
       { id: '1', role: 'user', content: 'How do the new quality measures affect SNF payments?' },
       { id: '2', role: 'assistant', content: 'The quality measures impact SNF payments through...', citations: ['§7.3', '§8.1'] }
@@ -46,91 +47,91 @@ const sampleChat = [
   { 
     id: '1', 
     role: 'user', 
-    content: 'What are the key changes in the 2024 MPFS final rule?' 
+    content: '[sample]What are the key changes in the 2024 MPFS final rule?' 
   },
   { 
     id: '2', 
     role: 'assistant', 
-    content: 'The 2024 MPFS final rule includes several significant changes: enhanced monitoring protocols for adverse events [§3.2], expanded safety reporting timelines [§4.1], and additional risk assessment documentation [§6.3]. The conversion factor has been updated to reflect current economic conditions.',
+    content: '[sample]The 2024 MPFS final rule includes several significant changes: enhanced monitoring protocols for adverse events [§3.2], expanded safety reporting timelines [§4.1], and additional risk assessment documentation [§6.3]. The conversion factor has been updated to reflect current economic conditions.',
     citations: ['§3.2', '§4.1', '§6.3'] 
   },
   {
     id: '3',
     role: 'user',
-    content: 'Can you explain the new payment methodology for evaluation and management services?'
+    content: '[sample]Can you explain the new payment methodology for evaluation and management services?'
   },
   {
     id: '4',
     role: 'assistant',
-    content: 'The new payment methodology introduces a simplified approach for E/M services [§2.1.4]. Key changes include: revised work RVUs for office visits [§2.1.5], updated practice expense calculations [§2.2.1], and new add-on codes for complex cases [§2.3.2].',
+    content: '[sample]The new payment methodology introduces a simplified approach for E/M services [§2.1.4]. Key changes include: revised work RVUs for office visits [§2.1.5], updated practice expense calculations [§2.2.1], and new add-on codes for complex cases [§2.3.2].',
     citations: ['§2.1.4', '§2.1.5', '§2.2.1', '§2.3.2']
   }
 ];
 
 const sampleSummary = {
-  title: '2024 MPFS Final Rule - Summary',
+  title: '[sample]2024 MPFS Final Rule - Summary',
   sections: [
     {
       id: '1',
-      title: 'Payment Updates',
+      title: '[sample]Payment Updates',
       bullets: [
-        { id: '1.1', content: 'Conversion factor updated to $32.75 for 2024', citation: '§1.1' },
-        { id: '1.2', content: 'New payment methodology for E/M services', citation: '§1.2' },
-        { id: '1.3', content: 'Updated practice expense calculations', citation: '§1.3' },
+        { id: '1.1', content: '[sample]Conversion factor updated to $32.75 for 2024', citation: '§1.1' },
+        { id: '1.2', content: '[sample]New payment methodology for E/M services', citation: '§1.2' },
+        { id: '1.3', content: '[sample]Updated practice expense calculations', citation: '§1.3' },
       ]
     },
     {
       id: '2',
-      title: 'Quality Measures',
+      title: '[sample]Quality Measures',
       bullets: [
-        { id: '2.1', content: 'MIPS performance threshold increased to 82.5 points', citation: '§3.2' },
-        { id: '2.2', content: 'New quality measures for chronic care management', citation: '§3.3' },
-        { id: '2.3', content: 'Updated reporting requirements for telehealth services', citation: '§3.4' },
+        { id: '2.1', content: '[sample]MIPS performance threshold increased to 82.5 points', citation: '§3.2' },
+        { id: '2.2', content: '[sample]New quality measures for chronic care management', citation: '§3.3' },
+        { id: '2.3', content: '[sample]Updated reporting requirements for telehealth services', citation: '§3.4' },
       ]
     },
     {
       id: '3',
-      title: 'Telehealth Provisions',
+      title: '[sample]Telehealth Provisions',
       bullets: [
-        { id: '3.1', content: 'Extended telehealth flexibilities through 2024', citation: '§4.1' },
-        { id: '3.2', content: 'New reimbursement rates for remote patient monitoring', citation: '§4.2' },
-        { id: '3.3', content: 'Updated geographic restrictions for telehealth services', citation: '§4.3' },
+        { id: '3.1', content: '[sample]Extended telehealth flexibilities through 2024', citation: '§4.1' },
+        { id: '3.2', content: '[sample]New reimbursement rates for remote patient monitoring', citation: '§4.2' },
+        { id: '3.3', content: '[sample]Updated geographic restrictions for telehealth services', citation: '§4.3' },
       ]
     }
   ]
 };
 
 const sampleFAQ = {
-  title: '2024 MPFS Final Rule - FAQ',
+  title: '[sample]2024 MPFS Final Rule - FAQ',
   sections: [
     {
       id: '1',
-      title: 'Payment Changes',
+      title: '[sample]Payment Changes',
       questions: [
         {
-          question: 'What is the conversion factor for 2024?',
-          answer: 'The 2024 conversion factor is $32.75, representing a 3.4% decrease from 2023.',
+          question: '[sample]What is the conversion factor for 2024?',
+          answer: '[sample]The 2024 conversion factor is $32.75, representing a 3.4% decrease from 2023.',
           citation: '§2.1'
         },
         {
-          question: 'How do the new E/M payment rates affect my practice?',
-          answer: 'The new E/M payment methodology simplifies billing and may increase payments for complex visits while standardizing payments for routine visits.',
+          question: '[sample]How do the new E/M payment rates affect my practice?',
+          answer: '[sample]The new E/M payment methodology simplifies billing and may increase payments for complex visits while standardizing payments for routine visits.',
           citation: '§2.3'
         }
       ]
     },
     {
       id: '2',
-      title: 'Quality Reporting',
+      title: '[sample]Quality Reporting',
       questions: [
         {
-          question: 'What are the key MIPS changes for 2024?',
-          answer: 'The performance threshold has increased to 82.5 points, and there are 12 new quality measures focused on chronic care management.',
+          question: '[sample]What are the key MIPS changes for 2024?',
+          answer: '[sample]The performance threshold has increased to 82.5 points, and there are 12 new quality measures focused on chronic care management.',
           citation: '§3.1'
         },
         {
-          question: 'Are there new reporting requirements?',
-          answer: 'Yes, clinicians must now report on at least two high-priority measures and demonstrate improvement activities.',
+          question: '[sample]Are there new reporting requirements?',
+          answer: '[sample]Yes, clinicians must now report on at least two high-priority measures and demonstrate improvement activities.',
           citation: '§3.2'
         }
       ]
@@ -142,7 +143,7 @@ const sampleFAQ = {
 const sampleCitations = {
   '§1.1': {
     id: '§1.1',
-    title: 'Conversion Factor Update',
+    title: '[sample]Conversion Factor Update',
     content: 'For CY 2024, we are finalizing a conversion factor of $32.75. This represents a decrease of 3.4 percent from the CY 2023 conversion factor of $33.89.',
     fullContent: 'For CY 2024, we are finalizing a conversion factor of $32.75. This represents a decrease of 3.4 percent from the CY 2023 conversion factor of $33.89. The decrease is primarily due to the expiration of the 0 percent update that was provided in CY 2023 under the Consolidated Appropriations Act, 2023. We note that this conversion factor reflects the statutory payment update of 0.25 percent for CY 2024, as well as the required budget neutrality adjustments for changes to the relative value units (RVUs) and other payment policy changes finalized in this rule.',
     documentId: '1',
@@ -150,7 +151,7 @@ const sampleCitations = {
   },
   '§1.2': {
     id: '§1.2',
-    title: 'E/M Payment Methodology',
+    title: '[sample]E/M Payment Methodology',
     content: 'We are finalizing our proposal to implement a new payment methodology for evaluation and management (E/M) services that will simplify billing and reduce administrative burden...',
     fullContent: 'We are finalizing our proposal to implement a new payment methodology for evaluation and management (E/M) services that will simplify billing and reduce administrative burden while ensuring appropriate payment for the complexity of services provided. This new methodology will be based on medical decision making or time, allowing practitioners greater flexibility in documenting and billing for their services.',
     documentId: '1',
@@ -158,7 +159,7 @@ const sampleCitations = {
   },
   '§2.1': {
     id: '§2.1',
-    title: 'Payment Update Framework',
+    title: '[sample]Payment Update Framework',
     content: 'The Medicare physician fee schedule payment amounts are updated annually based on the Medicare Economic Index (MEI) and other factors...',
     fullContent: 'The Medicare physician fee schedule payment amounts are updated annually based on the Medicare Economic Index (MEI) and other factors as specified in section 1848(d) of the Social Security Act. For CY 2024, the update is 0.25 percent, which reflects the current statutory framework for physician payment updates.',
     documentId: '1',
@@ -166,7 +167,7 @@ const sampleCitations = {
   },
   '§3.2': {
     id: '§3.2',
-    title: 'MIPS Performance Threshold',
+    title: '[sample]MIPS Performance Threshold',
     content: 'The MIPS performance threshold for the 2024 performance period is 82.5 points.',
     fullContent: 'The MIPS performance threshold for the 2024 performance period is 82.5 points. This represents an increase from the 2023 threshold of 75 points. Clinicians who score below this threshold will receive a negative payment adjustment, while those who score above will receive positive adjustments based on their performance.',
     documentId: '1',
@@ -326,6 +327,10 @@ type StoreState = {
   // Document selection for chat
   showDocumentSelector: boolean;
   setShowDocumentSelector: (show: boolean) => void;
+  
+  // API functions
+  fetchAvailableDocuments: () => Promise<void>;
+  generateSummary: (sourceFile: string) => Promise<void>;
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -396,4 +401,70 @@ export const useStore = create<StoreState>((set, get) => ({
   // Document selection for chat
   showDocumentSelector: false,
   setShowDocumentSelector: (show) => set({ showDocumentSelector: show }),
+  
+  // API functions
+  fetchAvailableDocuments: async () => {
+    try {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.summarize.list}`);
+      const data = await response.json();
+      
+      // Transform API response to match our FileType
+      const transformedFiles = data.documents.map((doc: any) => ({
+        id: doc.source_file,
+        name: doc.source_file,
+        size: 'N/A',
+        date: doc.year
+      }));
+      
+      set({ files: transformedFiles });
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      // Fallback to sample data
+      set({ files: sampleFiles });
+    }
+  },
+  
+  generateSummary: async (sourceFile: string) => {
+    set({ isProcessing: true, processingProgress: 0 });
+    
+    try {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.summarize.generate}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ source_file: sourceFile })
+      });
+      
+      const data = await response.json();
+      
+      // Transform API response to match our Summary type
+      const transformedSummary = {
+        title: data.report.title,
+        sections: data.report.sections.map((section: any) => ({
+          id: section.id,
+          title: section.title,
+          bullets: section.bullets.map((bullet: any) => ({
+            id: bullet.id,
+            content: bullet.content,
+            citation: bullet.citation
+          }))
+        }))
+      };
+      
+      set({ 
+        summary: transformedSummary,
+        isProcessing: false,
+        processingProgress: 100
+      });
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      // Fallback to sample data
+      set({ 
+        summary: sampleSummary,
+        isProcessing: false,
+        processingProgress: 100
+      });
+    }
+  }
 }));

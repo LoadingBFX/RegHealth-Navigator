@@ -1,6 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../../store/store';
-import { RefreshCw, Download, Copy, FileText, Search, Filter, X } from 'lucide-react';
+import { RefreshCw, Download, Copy, FileText, Search, Filter, X, AlertCircle } from 'lucide-react';
+import { config } from '../../config';
+
+interface Document {
+  id: string;
+  name: string;
+  program: string;
+  ruleType: string;
+  sourceFile: string;
+  title: string;
+  year: string;
+}
 
 const SummaryTab: React.FC = () => {
   const { 
@@ -23,23 +34,27 @@ const SummaryTab: React.FC = () => {
     typeFilter,
     setTypeFilter,
     showFilters,
-    setShowFilters
+    setShowFilters,
   } = useStore();
   
   const [expandedSections, setExpandedSections] = useState<string[]>(['1']);
   const [showDocumentSelector, setShowDocumentSelector] = useState(false);
+  const [availableDocuments, setAvailableDocuments] = useState<Document[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [hasGeneratedSummary, setHasGeneratedSummary] = useState(false);
   
   const programs = ['MPFS', 'HOSPICE', 'SNF', 'QPP'];
   const types = ['final', 'proposed'];
   const years = ['2024', '2023', '2022', '2021'];
   
-  const selectedFileNames = selectedFiles
-    .map(id => files.find(file => file.id === id)?.name || '')
-    .filter(Boolean);
+  const selectedFileName = selectedFiles.length > 0 
+    ? availableDocuments.find(file => file.id === selectedFiles[0])?.name || ''
+    : '';
   
   // Filter files based on search and filters
-  const filteredFiles = files.filter(file => {
+  const filteredFiles = availableDocuments.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesYear = yearFilter === 'all' || file.name.includes(yearFilter);
     const matchesProgram = programFilter === 'all' || file.name.includes(programFilter);
@@ -59,6 +74,36 @@ const SummaryTab: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
+  // Fetch documents on mount
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.summarize.list}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch documents');
+        }
+        const data = await response.json();
+        setAvailableDocuments(data.documents || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+        setError('Failed to fetch documents. Using sample data instead.');
+        // Use sample data if fetch fails
+        setAvailableDocuments(files.map(file => ({
+          id: file.id,
+          name: file.name,
+          program: '',
+          ruleType: '',
+          sourceFile: file.name,
+          title: file.name,
+          year: ''
+        })));
+      }
+    };
+    
+    fetchDocuments();
+  }, []);
+  
   const toggleSection = (sectionId: string) => {
     if (expandedSections.includes(sectionId)) {
       setExpandedSections(expandedSections.filter(id => id !== sectionId));
@@ -67,20 +112,74 @@ const SummaryTab: React.FC = () => {
     }
   };
   
-  const handleGenerateSummary = () => {
-    setProcessing(true);
-    let progress = 0;
+  const handleGenerateSummary = async () => {
+    if (selectedFiles.length === 0) return;
     
-    const interval = setInterval(() => {
-      progress += 5;
-      setProcessingProgress(progress);
+    setIsLoading(true);
+    setProcessing(true);
+    setProcessingProgress(0);
+    setError(null);
+    
+    try {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.summarize.generate}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source_file: availableDocuments.find(doc => doc.id === selectedFiles[0])?.sourceFile
+        })
+      });
       
-      if (progress >= 100) {
-        clearInterval(interval);
-        setProcessing(false);
-        setProcessingProgress(0);
+      if (!response.ok) {
+        throw new Error('Failed to generate summary');
       }
-    }, 300);
+      
+      const data = await response.json();
+      setSummary(data);
+      setProcessingProgress(100);
+      setHasGeneratedSummary(true);
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      setError('Failed to generate summary. Using sample data instead.');
+      // Use sample summary from store if generation fails
+      setSummary({
+        title: '[sample]2024 MPFS Final Rule - Summary',
+        sections: [
+          {
+            id: '1',
+            title: '[sample]Payment Updates',
+            bullets: [
+              { id: '1.1', content: '[sample]Conversion factor updated to $32.75 for 2024', citation: '§1.1' },
+              { id: '1.2', content: '[sample]New payment methodology for E/M services', citation: '§1.2' },
+              { id: '1.3', content: '[sample]Updated practice expense calculations', citation: '§1.3' },
+            ]
+          },
+          {
+            id: '2',
+            title: '[sample]Quality Measures',
+            bullets: [
+              { id: '2.1', content: '[sample]MIPS performance threshold increased to 82.5 points', citation: '§3.2' },
+              { id: '2.2', content: '[sample]New quality measures for chronic care management', citation: '§3.3' },
+              { id: '2.3', content: '[sample]Updated reporting requirements for telehealth services', citation: '§3.4' },
+            ]
+          },
+          {
+            id: '3',
+            title: '[sample]Telehealth Provisions',
+            bullets: [
+              { id: '3.1', content: '[sample]Extended telehealth flexibilities through 2024', citation: '§4.1' },
+              { id: '3.2', content: '[sample]New reimbursement rates for remote patient monitoring', citation: '§4.2' },
+              { id: '3.3', content: '[sample]Updated geographic restrictions for telehealth services', citation: '§4.3' },
+            ]
+          }
+        ]
+      });
+      setHasGeneratedSummary(true);
+    } finally {
+      setIsLoading(false);
+      setProcessing(false);
+    }
   };
   
   const handleCopySummary = () => {
@@ -108,15 +207,13 @@ const SummaryTab: React.FC = () => {
   };
 
   const handleFileSelect = (fileId: string) => {
-    if (selectedFiles.includes(fileId)) {
-      setSelectedFiles(selectedFiles.filter(id => id !== fileId));
-    } else {
-      setSelectedFiles([...selectedFiles, fileId]);
-    }
+    // Only allow one file selection
+    setSelectedFiles([fileId]);
+    setShowDocumentSelector(false);
   };
   
-  const removeSelectedFile = (fileId: string) => {
-    setSelectedFiles(selectedFiles.filter(id => id !== fileId));
+  const removeSelectedFile = () => {
+    setSelectedFiles([]);
   };
   
   const clearAllFilters = () => {
@@ -128,7 +225,7 @@ const SummaryTab: React.FC = () => {
   
   const hasActiveFilters = searchTerm || yearFilter !== 'all' || programFilter !== 'all' || typeFilter !== 'all';
 
-  if (!summary || selectedFiles.length === 0) {
+  if (!summary || !hasGeneratedSummary) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="bg-primary-50 p-6 rounded-full mb-6">
@@ -136,8 +233,16 @@ const SummaryTab: React.FC = () => {
         </div>
         <h3 className="text-2xl font-medium text-neutral-800 mb-4">Generate Summary</h3>
         <p className="text-neutral-500 mb-8 text-center max-w-md">
-          Select documents and create a comprehensive summary with citations to source material.
+          Select a document to generate a comprehensive summary with citations to source material.
         </p>
+        
+        {/* Error Alert */}
+        {error && (
+          <div className="w-full max-w-md mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
         
         {/* Document Selection */}
         <div className="w-full max-w-md mb-6">
@@ -147,8 +252,8 @@ const SummaryTab: React.FC = () => {
               className="w-full p-3 border border-neutral-300 rounded-lg text-left hover:bg-neutral-50 transition-colors"
             >
               {selectedFiles.length > 0 
-                ? `${selectedFiles.length} document(s) selected`
-                : 'Select documents to summarize'
+                ? selectedFileName
+                : 'Select a document to summarize'
               }
             </button>
             
@@ -156,7 +261,7 @@ const SummaryTab: React.FC = () => {
             {showDocumentSelector && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-50">
                 <div className="p-4">
-                  <h3 className="text-sm font-medium text-neutral-700 mb-3">Select Documents</h3>
+                  <h3 className="text-sm font-medium text-neutral-700 mb-3">Select Document</h3>
                   
                   {/* Search Input */}
                   <div className="relative mb-3">
@@ -248,26 +353,22 @@ const SummaryTab: React.FC = () => {
                             key={file.id}
                             className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
                               selectedFiles.includes(file.id)
-                                ? 'bg-primary-50 border border-primary-200'
+                                ? 'bg-primary-50 text-primary-700'
                                 : 'hover:bg-neutral-50'
                             }`}
                             onClick={() => handleFileSelect(file.id)}
                           >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-neutral-800 truncate">{file.name}</p>
-                              <div className="flex text-xs text-neutral-500 mt-1">
-                                <span className="mr-2">{file.size}</span>
-                                <span>{file.date}</span>
-                              </div>
-                            </div>
+                            <span className="text-sm">{file.name}</span>
                             {selectedFiles.includes(file.id) && (
-                              <div className="ml-2 w-2 h-2 bg-primary-600 rounded-full"></div>
+                              <div className="h-4 w-4 rounded-full bg-primary-600 flex items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-white" />
+                              </div>
                             )}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="p-4 text-center text-neutral-500 text-sm">
+                      <div className="text-center py-4 text-neutral-500">
                         No documents found
                       </div>
                     )}
@@ -277,131 +378,121 @@ const SummaryTab: React.FC = () => {
             )}
           </div>
           
-          {/* Selected Files Tags */}
+          {/* Selected File */}
           {selectedFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {selectedFiles.map(fileId => {
-                const file = files.find(f => f.id === fileId);
-                if (!file) return null;
-                
-                return (
-                  <div
-                    key={fileId}
-                    className="inline-flex items-center px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
-                  >
-                    <span className="truncate max-w-xs">{file.name}</span>
-                    <button
-                      onClick={() => removeSelectedFile(fileId)}
-                      className="ml-2 hover:text-primary-900"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                );
-              })}
+            <div className="mt-4">
+              <div className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg">
+                <span className="text-sm text-neutral-700">{selectedFileName}</span>
+                <button
+                  onClick={removeSelectedFile}
+                  className="text-neutral-400 hover:text-neutral-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           )}
-        </div>
-        
-        {selectedFiles.length > 0 && (
-          <button 
-            className="px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-lg transition-colors flex items-center"
+          
+          {/* Generate Button */}
+          <button
             onClick={handleGenerateSummary}
+            disabled={selectedFiles.length === 0 || isLoading}
+            className={`w-full mt-4 p-3 rounded-lg transition-colors flex items-center justify-center ${
+              selectedFiles.length === 0 || isLoading
+                ? 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+                : 'bg-primary-600 text-white hover:bg-primary-700'
+            }`}
           >
-            <RefreshCw className="h-5 w-5 mr-2" />
-            Generate Summary
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                Generating Summary...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-5 w-5 mr-2" />
+                Generate Summary
+              </>
+            )}
           </button>
-        )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
-      {/* Header */}
-      <div className="p-6 border-b border-neutral-200 bg-white">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-semibold text-neutral-800">{summary.title}</h2>
-            {selectedFiles.length > 0 && (
-              <p className="text-sm text-neutral-500 mt-1">
-                Based on: {selectedFileNames.join(', ')}
-              </p>
-            )}
-          </div>
-          <div className="flex space-x-2">
-            <button 
-              className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-              title="Copy summary"
-              onClick={handleCopySummary}
-            >
-              <Copy className="h-5 w-5" />
-            </button>
-            <button 
-              className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-              title="Download as markdown"
-            >
-              <Download className="h-5 w-5" />
-            </button>
-            <button 
-              className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-              title="Regenerate summary"
-              onClick={handleGenerateSummary}
-            >
-              <RefreshCw className="h-5 w-5" />
-            </button>
-          </div>
+    <div className="w-full max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-medium text-neutral-800">{summary.title}</h2>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleCopySummary}
+            className="p-2 text-neutral-600 hover:text-neutral-800 transition-colors"
+            title="Copy to clipboard"
+          >
+            <Copy className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => {
+              const element = document.createElement('a');
+              const file = new Blob([JSON.stringify(summary, null, 2)], {type: 'application/json'});
+              element.href = URL.createObjectURL(file);
+              element.download = 'summary.json';
+              document.body.appendChild(element);
+              element.click();
+              document.body.removeChild(element);
+            }}
+            className="p-2 text-neutral-600 hover:text-neutral-800 transition-colors"
+            title="Download as JSON"
+          >
+            <Download className="h-5 w-5" />
+          </button>
         </div>
       </div>
       
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {summary.sections.map((section) => (
-            <div 
-              key={section.id} 
-              className="border border-neutral-200 rounded-lg overflow-hidden bg-white shadow-sm"
+      <div className="space-y-6">
+        {summary.sections.map(section => (
+          <div key={section.id} className="bg-white rounded-lg border border-neutral-200">
+            <button
+              onClick={() => toggleSection(section.id)}
+              className="w-full p-4 flex items-center justify-between text-left"
             >
-              <div 
-                className="flex items-center justify-between p-4 bg-neutral-50 cursor-pointer hover:bg-neutral-100 transition-colors"
-                onClick={() => toggleSection(section.id)}
-              >
-                <h3 className="text-lg font-medium text-neutral-800">{section.title}</h3>
-                <svg 
-                  className={`h-5 w-5 text-neutral-500 transition-transform ${
-                    expandedSections.includes(section.id) ? 'transform rotate-180' : ''
-                  }`} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
+              <h3 className="text-lg font-medium text-neutral-800">{section.title}</h3>
+              <div className={`transform transition-transform ${
+                expandedSections.includes(section.id) ? 'rotate-180' : ''
+              }`}>
+                <svg className="h-5 w-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              
-              {expandedSections.includes(section.id) && (
-                <div className="p-4 bg-white">
-                  <ul className="space-y-3">
-                    {section.bullets.map((bullet) => (
-                      <li key={bullet.id} className="flex items-start">
-                        <span className="text-primary-500 mr-3 mt-1">•</span>
-                        <div className="flex-1">
-                          <span className="text-neutral-800 leading-relaxed">{bullet.content}</span>
-                          <button 
-                            className="ml-2 inline-flex items-center text-primary-600 hover:text-primary-700 text-sm font-medium hover:underline transition-colors"
+            </button>
+            
+            {expandedSections.includes(section.id) && (
+              <div className="p-4 border-t border-neutral-200">
+                <ul className="space-y-3">
+                  {section.bullets.map(bullet => (
+                    <li key={bullet.id} className="flex items-start">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs mr-3 mt-0.5">
+                        •
+                      </span>
+                      <div>
+                        <p className="text-neutral-700">{bullet.content}</p>
+                        {bullet.citation && (
+                          <button
                             onClick={() => handleCitationClick(bullet.citation)}
+                            className="mt-1 text-sm text-primary-600 hover:text-primary-700"
                           >
                             {bullet.citation}
                           </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

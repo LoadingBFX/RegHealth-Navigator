@@ -1,8 +1,12 @@
-const config = {
+export const config = {
     api: {
       baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8080',
       endpoints: {
-        chat: '/api/chat',
+        summarize: {
+          list: '/api/summarize/list',
+          generate: '/api/summarize'
+        },
+        chat: '/api/chat'
       }
     }
   };
