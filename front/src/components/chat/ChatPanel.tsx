@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {useStore} from '../../store/store';
-import {SendHorizontal, RefreshCw, Plus, X, Search, Filter} from 'lucide-react';
+import {SendHorizontal, RefreshCw, Plus, X, Search, Filter, MessageSquare} from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import config from '../../config';
 
@@ -216,9 +216,29 @@ const ChatPanel: React.FC = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map(message => (
-                    <ChatMessage key={message.id} message={message}/>
-                ))}
+                {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                        <div className="bg-primary-50 p-4 rounded-full mb-4">
+                            <MessageSquare className="h-8 w-8 text-primary-700" />
+                        </div>
+                        <h3 className="text-lg font-medium text-neutral-800 mb-2">Start a Conversation</h3>
+                        <p className="text-neutral-500 mb-4 max-w-md">
+                            You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
+                        </p>
+                        <div className="text-sm text-neutral-600 max-w-md">
+                            <p className="mb-2 font-medium">Example questions:</p>
+                            <ul className="text-left space-y-1 text-xs">
+                                <li>• When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?</li>
+                                <li>• What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?</li>
+                                <li>• Why did CMS implement HCPCS code G2211 in 2024?</li>
+                            </ul>
+                        </div>
+                    </div>
+                ) : (
+                    messages.map(message => (
+                        <ChatMessage key={message.id} message={message}/>
+                    ))
+                )}
                 <div ref={messagesEndRef}/>
             </div>
 

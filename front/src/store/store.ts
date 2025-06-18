@@ -276,6 +276,7 @@ type StoreState = {
   
   messages: ChatMessage[];
   addMessage: (message: ChatMessage) => void;
+  setMessages: (messages: ChatMessage[]) => void;
   clearMessages: () => void;
   
   summary: Summary | null;
@@ -344,8 +345,10 @@ export const useStore = create<StoreState>((set, get) => ({
   selectedFiles: [],
   setSelectedFiles: (fileIds) => set({ selectedFiles: fileIds }),
   
-  messages: sampleChat,
+  // messages: sampleChat,
+  messages: [],
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+  setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),
   
   summary: sampleSummary,
