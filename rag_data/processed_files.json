@@ -1,0 +1,53 @@
+{
+  "SNF/2024_SNF_final_2024-16907.xml": {
+    "hash": "2d9d3776a253621d8b5142b040215e2edb2d501c04a8c7cb576cf709e9860094",
+    "processed_at": "1749247320.2168067",
+    "chunks_count": 103,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/SNF/2024_SNF_final_2024-16907.xml"
+  },
+  "SNF/2025_SNF_proposed_2025-06348.xml": {
+    "hash": "9fa9969a5addecb40315bb1a8c3a32136ed6261c8113d49004eb74ea5972aee9",
+    "processed_at": "1749247298.6140049",
+    "chunks_count": 41,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/SNF/2025_SNF_proposed_2025-06348.xml"
+  },
+  "MPFS/2025_MPFS_final_2025-08676.xml": {
+    "hash": "1d0d25e44d593d2a179036a6e404446a42a204b5439f8a23a998fbce01d9f6a5",
+    "processed_at": "1749256521.6015716",
+    "chunks_count": 12,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/MPFS/2025_MPFS_final_2025-08676.xml"
+  },
+  "MPFS/2024_MPFS_final_2024-25382.xml": {
+    "hash": "58afa489b543ade55eec20224085c511b7b6dededcf59db86de7ea00569a0340",
+    "processed_at": "1749256521.5965044",
+    "chunks_count": 836,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/MPFS/2024_MPFS_final_2024-25382.xml"
+  },
+  "HOSPICE/2025_HOSPICE_proposed_2025-06317.xml": {
+    "hash": "bcfa6d3963dcb4b6743b9bcfb3be1d9152d73f5d807ca6d4ba6caf468a44d084",
+    "processed_at": "1749247300.8619373",
+    "chunks_count": 25,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/HOSPICE/2025_HOSPICE_proposed_2025-06317.xml"
+  },
+  "HOSPICE/2024_HOSPICE_final_2024-16910.xml": {
+    "hash": "32e3cb46280495d9aa6349dd86606fd4be476e74f3dea65336a8ad75ed268e3f",
+    "processed_at": "1750010654.875812",
+    "chunks_count": 52,
+    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/HOSPICE/2024_HOSPICE_final_2024-16910.xml"
+  },
+  "SNF/2024_SNF_final_2024-22504.xml": {
+    "hash": "2d901f14af5e3e318e8f02693ce28538569e947c80e2762ea6ffdc93f4ae545a",
+    "processed_at": "1750992679.7729607",
+    "chunks_count": 2
+  },
+  "HOSPICE/2024_HOSPICE_final_2024-22495.xml": {
+    "hash": "ba722efca12678f2473830e4b4d795385a5096a6b9c0a10a3f78f51ba3a9a4f2",
+    "processed_at": "1750992682.4970968",
+    "chunks_count": 5
+  },
+  "MPFS/2024_MPFS_proposed_2024-14828.xml": {
+    "hash": "ac9cd0b44e7f9c21bb4cf790799de024b7176b61381eabdc0496a21636c74ece",
+    "processed_at": "1750993953.7459521",
+    "chunks_count": 699
+  }
+}
