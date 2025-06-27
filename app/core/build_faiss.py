@@ -6,6 +6,10 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 import openai
 import tiktoken
+import sys
+
+# Add the app directory to Python path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
 
@@ -125,9 +129,10 @@ if __name__ == "__main__":
     output_folder = config.build_faiss_output_folder
     os.makedirs(output_folder, exist_ok=True)
 
-    # Load preprocessed chunks
+    # Load preprocessed chunks from config path
+    chunks_path = os.path.join(output_folder, "chunks.json")
     print("📁 Loading preprocessed chunks...")
-    with open(os.path.join(output_folder, "chunks.json"), "r") as f:
+    with open(chunks_path, "r") as f:
         chunks = json.load(f)
 
     texts = [chunk["text"] for chunk in chunks]
