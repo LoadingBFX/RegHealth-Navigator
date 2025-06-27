@@ -13,6 +13,20 @@ class Config:
             return yaml.safe_load(f)
 
     @property
+    def _project_root(self):
+        """Get the project root directory, regardless of where the script is run from."""
+        # Start from config file location and go up to find project root
+        config_dir = Path(__file__).parent
+        # Look for project root indicators (README.md, requirements.txt, etc.)
+        current = config_dir
+        while current.parent != current:  # Stop at filesystem root
+            if (current / "README.md").exists() or (current / "requirements.txt").exists():
+                return current.resolve()
+            current = current.parent
+        # Fallback: go up 3 levels from config (app/config -> app -> project_root)
+        return config_dir.parent.parent.resolve()
+
+    @property
     def api_port(self):
         return self.config['server']['port']
 
@@ -30,25 +44,25 @@ class Config:
 
     @property
     def faiss_index_path(self):
-        project_root = Path(__file__).parent.parent.parent.resolve()
+        project_root = self._project_root
         rel_path = self.config['rag_data']['faiss_index']
         return str(project_root / rel_path)
 
     @property
     def faiss_metadata_path(self):
-        project_root = Path(__file__).parent.parent.parent.resolve()
+        project_root = self._project_root
         rel_path = self.config['rag_data']['metadata']
         return str(project_root / rel_path)
 
     @property
     def docs_data_path(self):
-        project_root = Path(__file__).parent.parent.parent.resolve()
+        project_root = self._project_root
         rel_path = self.config['docs_data']['path']
         return str(project_root / rel_path)
 
     @property
     def build_faiss_output_folder(self):
-        project_root = Path(__file__).parent.parent.parent.resolve()
+        project_root = self._project_root
         rel_path = self.config['build_faiss']['output_folder']
         return str(project_root / rel_path)
 
