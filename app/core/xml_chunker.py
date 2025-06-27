@@ -11,13 +11,19 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import List, Dict
 import logging
+import sys
+
+# Add the app directory to Python path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # -------- CONFIG --------
-INPUT_DIR = Path("./data")
+# Use config for input directory path
+INPUT_DIR = Path(config.docs_data_path)
 CHUNK_WORDS = 500
 OVERLAP_SENTENCES = 1
 OUTPUT_CHUNKS = "./rag_data/chunks.json"
@@ -33,18 +39,21 @@ class XMLChunker:
         output_chunks (str): Path to save chunked data
     """
     
-    def __init__(self, input_dir: str = "./data", chunk_words: int = 500, 
+    def __init__(self, input_dir: str = None, chunk_words: int = 500, 
                  overlap_sentences: int = 1, output_chunks: str = "./rag_data/chunks.json"):
         """
         Initialize XMLChunker.
         
         Args:
-            input_dir: Directory containing XML files
+            input_dir: Directory containing XML files (defaults to config.docs_data_path)
             chunk_words: Maximum words per chunk
             overlap_sentences: Number of sentences to overlap between chunks
             output_chunks: Path to save chunked data
         """
-        self.input_dir = Path(input_dir)
+        if input_dir is None:
+            self.input_dir = Path(config.docs_data_path)
+        else:
+            self.input_dir = Path(input_dir)
         self.chunk_words = chunk_words
         self.overlap_sentences = overlap_sentences
         self.output_chunks = output_chunks
