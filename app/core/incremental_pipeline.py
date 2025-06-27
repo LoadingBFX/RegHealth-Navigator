@@ -32,11 +32,20 @@ class IncrementalPipeline:
     4. Update metadata files
     """
     
-    def __init__(self):
-        """Initialize the incremental pipeline."""
+    def __init__(self, model: str = "text-embedding-3-small"):
+        """
+        Initialize the incremental pipeline.
+        
+        Args:
+            model: Embedding model to use. Options:
+                   - "text-embedding-3-small": $0.00002 per 1K tokens (recommended)
+                   - "text-embedding-ada-002": $0.0001 per 1K tokens (legacy)
+                   - "text-embedding-3-large": $0.00013 per 1K tokens (highest quality)
+        """
         self.chunker = IncrementalChunker()
-        self.faiss_updater = IncrementalFAISS()
-        logger.info("🚀 Initialized Incremental Pipeline")
+        self.faiss_updater = IncrementalFAISS(model=model)
+        self.model = model
+        logger.info(f"🚀 Initialized Incremental Pipeline with model: {model}")
 
     def process_single_file(self, file_path: str) -> Dict:
         """
@@ -232,100 +241,93 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Incremental processing pipeline")
-    parser.add_argument("--file", "-f", help="Process specific file (relative to data directory)")
-    parser.add_argument("--all", "-a", action="store_true", help="Process all new/modified files")
-    parser.add_argument("--status", "-s", action="store_true", help="Show system status")
-    parser.add_argument("--validate", "-v", action="store_true", help="Validate system state")
-    parser.add_argument("--list", "-l", action="store_true", help="List new/modified files")
-    parser.add_argument("--cleanup", "-c", action="store_true", help="Cleanup deleted files and process new/modified files")
+    parser.add_argument("--cleanup", action="store_true", 
+                      help="Clean up deleted files and rebuild index")
+    parser.add_argument("--model", "-m", 
+                      choices=["text-embedding-3-small", "text-embedding-ada-002", "text-embedding-3-large"],
+                      default="text-embedding-3-small",
+                      help="Embedding model to use")
+    parser.add_argument("--file", "-f", type=str,
+                      help="Process a single file")
+    parser.add_argument("--status", action="store_true",
+                      help="Show system status")
+    parser.add_argument("--validate", action="store_true",
+                      help="Validate system state")
     
     args = parser.parse_args()
     
-    pipeline = IncrementalPipeline()
+    # Initialize pipeline with specified model
+    pipeline = IncrementalPipeline(model=args.model)
     
-    if args.validate:
-        validation = pipeline.validate_system()
-        print("System Validation:")
-        print(f"  Valid: {validation['valid']}")
-        if validation['issues']:
-            print("  Issues:")
-            for issue in validation['issues']:
-                print(f"    ❌ {issue}")
-        if validation['warnings']:
-            print("  Warnings:")
-            for warning in validation['warnings']:
-                print(f"    ⚠️ {warning}")
-    
-    elif args.status:
+    if args.status:
         status = pipeline.get_system_status()
-        print("System Status:")
-        print(f"  Processed files: {status['processed_files_count']}")
-        print(f"  Total chunks: {status['total_chunks']}")
-        print(f"  FAISS index size: {status['faiss_index_size']}")
-        print(f"  FAISS index dimension: {status['faiss_index_dimension']}")
-        print(f"  Metadata entries: {status['metadata_entries']}")
-        print(f"  New files: {status['new_files_count']}")
-        print(f"  Deleted files: {status['deleted_files_count']}")
-        if status['new_files']:
-            print("  New files list:")
-            for file in status['new_files']:
-                print(f"    - {file}")
-        if status['deleted_files']:
-            print("  Deleted files list:")
-            for file in status['deleted_files']:
-                print(f"    - {file}")
-    
-    elif args.list:
-        new_files = pipeline.chunker.find_new_files()
-        deleted_files = pipeline.chunker.find_deleted_files()
+        print("\n=== System Status ===")
+        print(f"Model: {args.model}")
+        print(f"Processed files: {status['processed_files_count']}")
+        print(f"Total chunks: {status['total_chunks']}")
+        print(f"FAISS index size: {status['faiss_index_size']}")
+        print(f"FAISS dimension: {status['faiss_index_dimension']}")
+        print(f"New files: {len(status['new_files'])}")
+        print(f"Deleted files: {len(status['deleted_files'])}")
         
-        if new_files or deleted_files:
-            if new_files:
-                print(f"Found {len(new_files)} new/modified files:")
-                for file_path in new_files:
-                    print(f"  - {file_path.relative_to(pipeline.chunker.input_dir)}")
-            if deleted_files:
-                print(f"Found {len(deleted_files)} deleted files:")
-                for file in deleted_files:
-                    print(f"  - {file}")
-        else:
-            print("No new, modified, or deleted files found")
+        if status['new_files']:
+            print(f"\nNew files: {status['new_files']}")
+        if status['deleted_files']:
+            print(f"\nDeleted files: {status['deleted_files']}")
+    
+    elif args.validate:
+        validation = pipeline.validate_system()
+        print("\n=== System Validation ===")
+        print(f"Model: {args.model}")
+        print(f"Issues: {len(validation['issues'])}")
+        print(f"Warnings: {len(validation['warnings'])}")
+        
+        if validation['issues']:
+            print("\nIssues:")
+            for issue in validation['issues']:
+                print(f"  ❌ {issue}")
+        
+        if validation['warnings']:
+            print("\nWarnings:")
+            for warning in validation['warnings']:
+                print(f"  ⚠️ {warning}")
+        
+        if not validation['issues'] and not validation['warnings']:
+            print("✅ System is healthy!")
     
     elif args.file:
         result = pipeline.process_single_file(args.file)
-        print(f"Processing result: {result}")
-    
-    elif args.all:
-        results = pipeline.process_new_files()
-        print(f"Batch processing completed: {len(results)} files processed")
-        for result in results:
-            print(f"  {result['file']}: {result['chunks_created']} chunks, ${result['estimated_cost']}")
+        print(f"\n=== Single File Processing ===")
+        print(f"File: {result['file']}")
+        print(f"Status: {result['status']}")
+        print(f"Chunks: {result['chunks_created']}")
+        print(f"Embeddings: {result['embeddings_added']}")
+        print(f"Cost: ${result['estimated_cost']}")
     
     elif args.cleanup:
         result = pipeline.cleanup_and_process()
-        print("Cleanup and Incremental Processing Results:")
-        print(f"  Deleted files cleaned: {len(result['deleted_files'])}")
-        if result['deleted_files']:
-            for file in result['deleted_files']:
-                print(f"    - {file}")
-        print(f"  New files processed: {len(result['new_files'])}")
-        if result['new_files']:
-            for file in result['new_files']:
-                print(f"    - {file}")
-        print(f"  Processing results:")
-        for r in result['processing_results']:
-            print(f"    {r['file']}: {r['chunks_created']} chunks, {r['embeddings_added']} embeddings, ${r.get('estimated_cost', 0)}")
-        print(f"  Rebuild results:")
-        rebuild = result['rebuild_result']
-        if 'embeddings_kept' in rebuild:
-            print(f"    Embeddings kept: {rebuild['embeddings_kept']}")
-            print(f"    Embeddings removed: {rebuild['embeddings_removed']}")
-            print(f"    Rebuild cost: ${rebuild.get('estimated_cost', 0)}")
-        else:
-            print(f"    Rebuild status: {rebuild}")
-        print(f"  Final system status:")
-        for k, v in result['final_status'].items():
-            print(f"    {k}: {v}")
+        print(f"\n=== Cleanup and Processing ===")
+        print(f"Model: {args.model}")
+        print(f"Deleted files: {len(result['deleted_files'])}")
+        print(f"New files: {len(result['new_files'])}")
+        print(f"Processing results: {len(result['processing_results'])}")
+        
+        if result['processing_results']:
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            total_chunks = sum(r['chunks_created'] for r in result['processing_results'])
+            print(f"Total chunks: {total_chunks}")
+            print(f"Total cost: ${total_cost:.4f}")
+    
     else:
-        print("Please specify one of: --file, --all, --status, --validate, --list, or --cleanup")
-        parser.print_help() 
+        results = pipeline.process_new_files()
+        print(f"\n=== Batch Processing ===")
+        print(f"Model: {args.model}")
+        print(f"Files processed: {len(results)}")
+        
+        if results:
+            total_cost = sum(r['estimated_cost'] for r in results)
+            total_chunks = sum(r['chunks_created'] for r in results)
+            print(f"Total chunks: {total_chunks}")
+            print(f"Total cost: ${total_cost:.4f}")
+        else:
+            print("No new files to process") 
