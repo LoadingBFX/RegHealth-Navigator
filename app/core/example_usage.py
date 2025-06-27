@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 from incremental_pipeline import IncrementalPipeline
 from auto_update_pipeline import AutoUpdatePipeline
-from scheduled_updater import ScheduledUpdater
+from scheduled_updater import run_scheduled_update
 
 def demonstrate_model_comparison():
     """Demonstrate cost comparison between different models."""
@@ -24,22 +24,24 @@ def demonstrate_model_comparison():
     # Sample data: 1000 chunks with average 1000 tokens each
     sample_tokens = 1000000  # 1M tokens
     
-    models = {
-        "text-embedding-3-small": 0.00002,
-        "text-embedding-ada-002": 0.0001,
-        "text-embedding-3-large": 0.00013
-    }
+    # Get models from config
+    models = config.embedding_models
     
     print(f"Cost comparison for {sample_tokens:,} tokens:")
-    print("-" * 50)
+    print("-" * 60)
+    print(f"{'Model':<25} | {'Price/1K':<10} | {'Cost':<10} | {'Savings vs ada-002':<20}")
+    print("-" * 60)
     
-    for model, price in models.items():
+    ada_002_price = config.get_embedding_model_price("text-embedding-ada-002")
+    
+    for model_name, model_config in models.items():
+        price = model_config['price_per_1k_tokens']
         cost = sample_tokens / 1000 * price
-        savings_vs_ada = (models["text-embedding-ada-002"] - price) / models["text-embedding-ada-002"] * 100
-        print(f"{model:25} | ${cost:8.4f} | {savings_vs_ada:5.1f}% savings vs ada-002")
+        savings_vs_ada = (ada_002_price - price) / ada_002_price * 100
+        print(f"{model_name:<25} | ${price:<9.5f} | ${cost:<9.4f} | {savings_vs_ada:>5.1f}%")
     
-    print("-" * 50)
-    print("💡 Recommendation: Use text-embedding-3-small for best cost-effectiveness")
+    print("-" * 60)
+    print(f"💡 Recommendation: Use {config.default_embedding_model} for best cost-effectiveness")
     print()
 
 def demonstrate_single_file_processing():
@@ -49,9 +51,10 @@ def demonstrate_single_file_processing():
     # Example file path (adjust as needed)
     example_file = "MPFS/2024_MPFS_proposed_2024-14828.xml"
     
-    models = ["text-embedding-3-small", "text-embedding-ada-002"]
+    # Test with default model and ada-002 for comparison
+    models_to_test = [config.default_embedding_model, "text-embedding-ada-002"]
     
-    for model in models:
+    for model in models_to_test:
         print(f"\n🔄 Processing with model: {model}")
         try:
             pipeline = IncrementalPipeline(model=model)
@@ -74,8 +77,8 @@ def demonstrate_batch_processing():
     print("=== Batch Processing ===")
     
     try:
-        # Use the recommended model
-        pipeline = IncrementalPipeline(model="text-embedding-3-small")
+        # Use the default model from config
+        pipeline = IncrementalPipeline()
         
         print("🔄 Processing all new/modified files...")
         results = pipeline.process_new_files()
@@ -105,7 +108,7 @@ def demonstrate_cleanup_and_processing():
     print("=== Cleanup and Processing ===")
     
     try:
-        pipeline = IncrementalPipeline(model="text-embedding-3-small")
+        pipeline = IncrementalPipeline()
         
         print("🔄 Running cleanup and processing...")
         result = pipeline.cleanup_and_process()
@@ -131,8 +134,8 @@ def demonstrate_auto_update():
     print("=== Automated Update Pipeline ===")
     
     try:
-        # Use the recommended model for cost efficiency
-        pipeline = AutoUpdatePipeline(days_back=30, model="text-embedding-3-small")
+        # Use the default model from config
+        pipeline = AutoUpdatePipeline(days_back=30)
         
         print("🔄 Running automated update...")
         result = pipeline.run_full_update()
@@ -156,24 +159,21 @@ def demonstrate_scheduled_updates():
     print("=== Scheduled Updates ===")
     
     try:
-        # Initialize with recommended model
-        updater = ScheduledUpdater(
-            days_back=30,
-            model="text-embedding-3-small",
-            update_interval_hours=24
-        )
-        
         print("🔄 Running scheduled update...")
-        result = updater.run_update()
+        result = run_scheduled_update(days_back=30)
         
         print(f"✅ Scheduled update completed:")
         print(f"   - Status: {result['status']}")
-        print(f"   - New regulations: {len(result.get('new_regulations', []))}")
-        print(f"   - Files processed: {len(result.get('processing_results', []))}")
+        print(f"   - Timestamp: {result['timestamp']}")
         
-        if result.get('processing_results'):
-            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
-            print(f"   - Total cost: ${total_cost:.4f}")
+        if result.get('stats'):
+            stats = result['stats']
+            print(f"   - Regulations found: {len(stats.get('regulations', []))}")
+            print(f"   - Files processed: {len(stats.get('processing_results', []))}")
+            
+            if stats.get('processing_results'):
+                total_cost = sum(r.get('estimated_cost', 0) for r in stats['processing_results'])
+                print(f"   - Total cost: ${total_cost:.4f}")
             
     except Exception as e:
         print(f"❌ Error: {e}")
@@ -185,13 +185,13 @@ def demonstrate_system_status():
     print("=== System Status ===")
     
     try:
-        pipeline = IncrementalPipeline(model="text-embedding-3-small")
+        pipeline = IncrementalPipeline()
         
         print("🔄 Checking system status...")
         status = pipeline.get_system_status()
         
         print(f"✅ System Status:")
-        print(f"   - Model: text-embedding-3-small")
+        print(f"   - Model: {pipeline.model}")
         print(f"   - Processed files: {status['processed_files_count']}")
         print(f"   - Total chunks: {status['total_chunks']}")
         print(f"   - FAISS index size: {status['faiss_index_size']}")
@@ -237,10 +237,11 @@ def main():
     
     print("🎉 All demonstrations completed!")
     print("\n💡 Tips:")
-    print("   - Use text-embedding-3-small for best cost-effectiveness")
+    print(f"   - Default model: {config.default_embedding_model}")
     print("   - Use --cleanup flag to handle deleted files")
     print("   - Use --model flag to specify different models")
     print("   - Monitor costs with the detailed logging")
+    print("   - Model configuration is in config files")
 
 if __name__ == "__main__":
     main() 
