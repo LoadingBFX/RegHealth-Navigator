@@ -1,126 +1,246 @@
 #!/usr/bin/env python3
 """
-example_usage.py
+Example usage of the incremental processing system.
 
-Example usage of the automated regulation update system.
-This script demonstrates how to use the various components.
+This script demonstrates various ways to use the incremental processing system
+for adding new XML files to the RAG database.
 """
+
 import sys
 import os
+from pathlib import Path
 
 # Add the app directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import config
+from incremental_pipeline import IncrementalPipeline
+from auto_update_pipeline import AutoUpdatePipeline
+from scheduled_updater import ScheduledUpdater
 
-def example_manual_processing():
-    """Example of manual processing workflow."""
-    print("=== Manual Processing Example ===")
+def demonstrate_model_comparison():
+    """Demonstrate cost comparison between different models."""
+    print("=== Model Cost Comparison ===")
     
-    from incremental_pipeline import IncrementalPipeline
+    # Sample data: 1000 chunks with average 1000 tokens each
+    sample_tokens = 1000000  # 1M tokens
     
-    # Initialize pipeline
-    pipeline = IncrementalPipeline()
+    models = {
+        "text-embedding-3-small": 0.00002,
+        "text-embedding-ada-002": 0.0001,
+        "text-embedding-3-large": 0.00013
+    }
     
-    # Check system status
-    status = pipeline.get_system_status()
-    print(f"System has {status['processed_files_count']} processed files")
-    print(f"Total chunks: {status['total_chunks']}")
-    print(f"FAISS index size: {status['faiss_index_size']}")
+    print(f"Cost comparison for {sample_tokens:,} tokens:")
+    print("-" * 50)
     
-    # Check for new files
-    new_files = pipeline.chunker.find_new_files()
-    if new_files:
-        print(f"Found {len(new_files)} new/modified files:")
-        for file_path in new_files:
-            print(f"  - {file_path.relative_to(pipeline.chunker.input_dir)}")
-    else:
-        print("No new files found")
+    for model, price in models.items():
+        cost = sample_tokens / 1000 * price
+        savings_vs_ada = (models["text-embedding-ada-002"] - price) / models["text-embedding-ada-002"] * 100
+        print(f"{model:25} | ${cost:8.4f} | {savings_vs_ada:5.1f}% savings vs ada-002")
+    
+    print("-" * 50)
+    print("💡 Recommendation: Use text-embedding-3-small for best cost-effectiveness")
+    print()
 
-def example_automated_update():
-    """Example of automated update workflow."""
-    print("\n=== Automated Update Example ===")
+def demonstrate_single_file_processing():
+    """Demonstrate processing a single file with different models."""
+    print("=== Single File Processing ===")
     
-    from auto_update_pipeline import AutoUpdatePipeline
+    # Example file path (adjust as needed)
+    example_file = "MPFS/2024_MPFS_proposed_2024-14828.xml"
     
-    # Initialize auto update pipeline
-    pipeline = AutoUpdatePipeline(days_back=30)
+    models = ["text-embedding-3-small", "text-embedding-ada-002"]
     
-    # Check for updates
-    has_updates = pipeline.check_for_updates()
-    if has_updates:
-        print("🆕 Updates available!")
-        
-        # Run full update (commented out to avoid actual processing)
-        # stats = pipeline.run_full_update()
-        # print(f"Update completed: {stats}")
-    else:
-        print("✅ System is up to date")
+    for model in models:
+        print(f"\n🔄 Processing with model: {model}")
+        try:
+            pipeline = IncrementalPipeline(model=model)
+            result = pipeline.process_single_file(example_file)
+            
+            print(f"✅ Result:")
+            print(f"   - File: {result['file']}")
+            print(f"   - Status: {result['status']}")
+            print(f"   - Chunks: {result['chunks_created']}")
+            print(f"   - Embeddings: {result['embeddings_added']}")
+            print(f"   - Cost: ${result['estimated_cost']}")
+            
+        except Exception as e:
+            print(f"❌ Error: {e}")
+    
+    print()
 
-def example_scheduled_update():
-    """Example of scheduled update workflow."""
-    print("\n=== Scheduled Update Example ===")
-    
-    from scheduled_updater import run_scheduled_update, get_update_history
-    
-    # Run scheduled update (commented out to avoid actual processing)
-    # result = run_scheduled_update(days_back=30)
-    # print(f"Scheduled update result: {result}")
-    
-    # Show update history
-    history = get_update_history(limit=5)
-    if history:
-        print(f"Recent update history ({len(history)} entries):")
-        for entry in history:
-            timestamp = entry["timestamp"]
-            status = entry.get("status", "unknown")
-            print(f"  {timestamp}: {status}")
-    else:
-        print("No update history found")
-
-def example_single_file_processing():
-    """Example of processing a single file."""
-    print("\n=== Single File Processing Example ===")
-    
-    from incremental_pipeline import IncrementalPipeline
-    
-    pipeline = IncrementalPipeline()
-    
-    # Example: process a specific file (if it exists)
-    # This is just an example - the file might not exist
-    example_file = "SNF/2024_SNF_final_2024-16907.xml"
-    
-    # Check if file exists
-    file_path = pipeline.chunker.input_dir / example_file
-    if file_path.exists():
-        print(f"Processing example file: {example_file}")
-        # result = pipeline.process_single_file(example_file)
-        # print(f"Processing result: {result}")
-    else:
-        print(f"Example file not found: {example_file}")
-
-def main():
-    """Run all examples."""
-    print("RegHealth-Navigator Automated Update System Examples")
-    print("=" * 60)
+def demonstrate_batch_processing():
+    """Demonstrate batch processing of new files."""
+    print("=== Batch Processing ===")
     
     try:
-        example_manual_processing()
-        example_automated_update()
-        example_scheduled_update()
-        example_single_file_processing()
+        # Use the recommended model
+        pipeline = IncrementalPipeline(model="text-embedding-3-small")
         
-        print("\n" + "=" * 60)
-        print("Examples completed successfully!")
-        print("\nTo run actual updates:")
-        print("  python auto_update_pipeline.py --check")
-        print("  python auto_update_pipeline.py")
-        print("  python scheduled_updater.py")
+        print("🔄 Processing all new/modified files...")
+        results = pipeline.process_new_files()
         
+        if results:
+            print(f"✅ Processed {len(results)} files:")
+            total_cost = sum(r['estimated_cost'] for r in results)
+            total_chunks = sum(r['chunks_created'] for r in results)
+            
+            for result in results:
+                print(f"   - {result['file']}: {result['chunks_created']} chunks, ${result['estimated_cost']}")
+            
+            print(f"\n📊 Summary:")
+            print(f"   - Total files: {len(results)}")
+            print(f"   - Total chunks: {total_chunks}")
+            print(f"   - Total cost: ${total_cost:.4f}")
+        else:
+            print("✅ No new files to process")
+            
     except Exception as e:
-        print(f"Error running examples: {e}")
-        print("Make sure you have:")
-        print("  1. Run initial processing (xml_chunker.py + build_faiss.py)")
-        print("  2. Set up OPENAI_API_KEY environment variable")
-        print("  3. Installed all required dependencies")
+        print(f"❌ Error: {e}")
+    
+    print()
+
+def demonstrate_cleanup_and_processing():
+    """Demonstrate cleanup and processing workflow."""
+    print("=== Cleanup and Processing ===")
+    
+    try:
+        pipeline = IncrementalPipeline(model="text-embedding-3-small")
+        
+        print("🔄 Running cleanup and processing...")
+        result = pipeline.cleanup_and_process()
+        
+        print(f"✅ Results:")
+        print(f"   - Deleted files: {len(result['deleted_files'])}")
+        print(f"   - New files: {len(result['new_files'])}")
+        print(f"   - Processing results: {len(result['processing_results'])}")
+        
+        if result['processing_results']:
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            total_chunks = sum(r['chunks_created'] for r in result['processing_results'])
+            print(f"   - Total chunks: {total_chunks}")
+            print(f"   - Total cost: ${total_cost:.4f}")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    
+    print()
+
+def demonstrate_auto_update():
+    """Demonstrate automated update pipeline."""
+    print("=== Automated Update Pipeline ===")
+    
+    try:
+        # Use the recommended model for cost efficiency
+        pipeline = AutoUpdatePipeline(days_back=30, model="text-embedding-3-small")
+        
+        print("🔄 Running automated update...")
+        result = pipeline.run_full_update()
+        
+        print(f"✅ Update completed:")
+        print(f"   - Regulations found: {len(result['regulations'])}")
+        print(f"   - Files downloaded: {len(result['downloaded_files'])}")
+        print(f"   - Processing results: {len(result['processing_results'])}")
+        
+        if result['processing_results']:
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            print(f"   - Total cost: ${total_cost:.4f}")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    
+    print()
+
+def demonstrate_scheduled_updates():
+    """Demonstrate scheduled update functionality."""
+    print("=== Scheduled Updates ===")
+    
+    try:
+        # Initialize with recommended model
+        updater = ScheduledUpdater(
+            days_back=30,
+            model="text-embedding-3-small",
+            update_interval_hours=24
+        )
+        
+        print("🔄 Running scheduled update...")
+        result = updater.run_update()
+        
+        print(f"✅ Scheduled update completed:")
+        print(f"   - Status: {result['status']}")
+        print(f"   - New regulations: {len(result.get('new_regulations', []))}")
+        print(f"   - Files processed: {len(result.get('processing_results', []))}")
+        
+        if result.get('processing_results'):
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            print(f"   - Total cost: ${total_cost:.4f}")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    
+    print()
+
+def demonstrate_system_status():
+    """Demonstrate system status checking."""
+    print("=== System Status ===")
+    
+    try:
+        pipeline = IncrementalPipeline(model="text-embedding-3-small")
+        
+        print("🔄 Checking system status...")
+        status = pipeline.get_system_status()
+        
+        print(f"✅ System Status:")
+        print(f"   - Model: text-embedding-3-small")
+        print(f"   - Processed files: {status['processed_files_count']}")
+        print(f"   - Total chunks: {status['total_chunks']}")
+        print(f"   - FAISS index size: {status['faiss_index_size']}")
+        print(f"   - FAISS dimension: {status['faiss_index_dimension']}")
+        print(f"   - New files: {len(status['new_files'])}")
+        print(f"   - Deleted files: {len(status['deleted_files'])}")
+        
+        if status['new_files']:
+            print(f"   - New files: {status['new_files']}")
+        if status['deleted_files']:
+            print(f"   - Deleted files: {status['deleted_files']}")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    
+    print()
+
+def main():
+    """Run all demonstrations."""
+    print("🚀 Incremental Processing System - Example Usage")
+    print("=" * 60)
+    
+    # Model comparison
+    demonstrate_model_comparison()
+    
+    # System status
+    demonstrate_system_status()
+    
+    # Single file processing
+    demonstrate_single_file_processing()
+    
+    # Batch processing
+    demonstrate_batch_processing()
+    
+    # Cleanup and processing
+    demonstrate_cleanup_and_processing()
+    
+    # Auto update
+    demonstrate_auto_update()
+    
+    # Scheduled updates
+    demonstrate_scheduled_updates()
+    
+    print("🎉 All demonstrations completed!")
+    print("\n💡 Tips:")
+    print("   - Use text-embedding-3-small for best cost-effectiveness")
+    print("   - Use --cleanup flag to handle deleted files")
+    print("   - Use --model flag to specify different models")
+    print("   - Monitor costs with the detailed logging")
 
 if __name__ == "__main__":
     main() 

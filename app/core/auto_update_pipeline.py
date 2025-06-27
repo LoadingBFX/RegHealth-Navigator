@@ -47,18 +47,24 @@ class AutoUpdatePipeline:
     4. Update FAISS index with new embeddings
     """
     
-    def __init__(self, days_back: int = 365):
+    def __init__(self, days_back: int = 365, model: str = "text-embedding-3-small"):
         """
         Initialize AutoUpdatePipeline.
         
         Args:
             days_back: Number of days to look back for new regulations
+            model: Embedding model to use. Options:
+                   - "text-embedding-3-small": $0.00002 per 1K tokens (recommended)
+                   - "text-embedding-ada-002": $0.0001 per 1K tokens (legacy)
+                   - "text-embedding-3-large": $0.00013 per 1K tokens (highest quality)
         """
         self.days_back = days_back
+        self.model = model
         self.data_dir = Path(config.docs_data_path)
-        self.incremental_pipeline = IncrementalPipeline()
+        self.incremental_pipeline = IncrementalPipeline(model=model)
         
         logger.info(f"🚀 Initialized AutoUpdatePipeline (looking back {days_back} days)")
+        logger.info(f"💰 Using model: {model}")
 
     def fetch_new_regulations(self) -> List[Dict]:
         """
@@ -326,16 +332,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automated regulation update pipeline")
     parser.add_argument("--days", "-d", type=int, default=365, 
                       help="Number of days to look back for new regulations")
+    parser.add_argument("--model", "-m", 
+                      choices=["text-embedding-3-small", "text-embedding-ada-002", "text-embedding-3-large"],
+                      default="text-embedding-3-small",
+                      help="Embedding model to use")
+    parser.add_argument("--force", "-f", action="store_true",
+                      help="Force processing even if files exist")
     parser.add_argument("--check", "-c", action="store_true",
-                      help="Check for updates without processing")
+                      help="Only check for new regulations, don't download or process")
     parser.add_argument("--status", "-s", action="store_true",
                       help="Show system status")
-    parser.add_argument("--force", "-f", action="store_true",
-                      help="Force update even if no new regulations found")
     
     args = parser.parse_args()
     
-    pipeline = AutoUpdatePipeline(days_back=args.days)
+    # Initialize pipeline with specified model
+    pipeline = AutoUpdatePipeline(days_back=args.days, model=args.model)
     
     if args.status:
         status = pipeline.get_system_status()
