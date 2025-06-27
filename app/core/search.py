@@ -22,6 +22,12 @@ Steps followed :
     4) Summary (TODO)
 """
 import os
+import sys
+
+# Add the app directory to Python path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import config
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import numpy as np
 import faiss
@@ -44,17 +50,23 @@ class ChatSearchService:
     2. Without filter: Direct search using pre-built FAISS index
     """
     
-    def __init__(self, openai_api_key: str, faiss_index_path: str = "./rag_data/faiss.index", 
-                 metadata_path: str = "./rag_data/faiss_metadata.json"):
+    def __init__(self, openai_api_key: str, faiss_index_path: str = None, 
+                 metadata_path: str = None):
         """
         Initialize
         
         Args:
             openai_api_key: OpenAI API key
-            faiss_index_path: FAISS index file path
-            metadata_path: Metadata file path
+            faiss_index_path: FAISS index file path (defaults to config.faiss_index_path)
+            metadata_path: Metadata file path (defaults to config.faiss_metadata_path)
         """
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
+        
+        # Use config paths if not provided
+        if faiss_index_path is None:
+            faiss_index_path = config.faiss_index_path
+        if metadata_path is None:
+            metadata_path = config.faiss_metadata_path
         
         # Load pre-built FAISS index
         self.faiss_index = faiss.read_index(faiss_index_path)
@@ -340,8 +352,8 @@ def ask_query(query):
         # Initialize service with actual FAISS index and metadata files
         service = ChatSearchService(
             openai_api_key=OPENAI_API_KEY,  # Ensure you have set your OpenAI API key
-            faiss_index_path="./rag_data/faiss.index",
-            metadata_path="./rag_data/faiss_metadata.json"
+            faiss_index_path=config.faiss_index_path,
+            metadata_path=config.faiss_metadata_path
         )
 
         result, chunks = service.ask_question(query, top_k=10)
@@ -362,7 +374,7 @@ def ask_query(query):
         
     except Exception as e:
         print(f"Error: {e}")
-        print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
+        print(f"Please ensure faiss.index and faiss_metadata.json files exist in the configured directories")
         print("Also ensure you have set the correct OpenAI API key")
 
 # Test complete RAG Q&A
