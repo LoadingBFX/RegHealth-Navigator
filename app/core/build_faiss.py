@@ -13,39 +13,24 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
-# Model configuration
-MODEL_CONFIG = {
-    "text-embedding-3-small": {
-        "price_per_1k": 0.00002,  # $0.00002 per 1K tokens
-        "encoding": "cl100k_base",
-        "description": "Most cost-effective, recommended"
-    },
-    "text-embedding-ada-002": {
-        "price_per_1k": 0.0001,   # $0.0001 per 1K tokens
-        "encoding": "text-embedding-ada-002",
-        "description": "Legacy model"
-    },
-    "text-embedding-3-large": {
-        "price_per_1k": 0.00013,  # $0.00013 per 1K tokens
-        "encoding": "cl100k_base",
-        "description": "Highest quality"
-    }
-}
-
 def setup_model(model_name):
-    """Setup model configuration and tokenizer."""
-    if model_name not in MODEL_CONFIG:
-        raise ValueError(f"Unsupported model: {model_name}. Supported models: {list(MODEL_CONFIG.keys())}")
+    """Setup model configuration and tokenizer from config."""
+    if model_name is None:
+        model_name = config.default_embedding_model
     
-    config = MODEL_CONFIG[model_name]
+    try:
+        model_config = config.get_embedding_model_config(model_name)
+    except ValueError as e:
+        raise ValueError(f"Invalid model '{model_name}': {e}")
     
     # Setup tokenizer
-    if config["encoding"] == "cl100k_base":
+    encoding_type = config.get_embedding_model_encoding(model_name)
+    if encoding_type == "cl100k_base":
         encoding = tiktoken.get_encoding("cl100k_base")
     else:
-        encoding = tiktoken.encoding_for_model(config["encoding"])
+        encoding = tiktoken.encoding_for_model(encoding_type)
     
-    return encoding, config
+    return encoding, model_config
 
 # Estimate token count for a string
 def count_tokens(text, encoding):
@@ -67,18 +52,22 @@ def split_into_chunks(text, max_tokens, encoding):
     return chunks
 
 # Embedding with token-aware batching and long chunk splitting
-def get_openai_embeddings(texts, model="text-embedding-3-small", encoding=None):
+def get_openai_embeddings(texts, model=None, encoding=None):
     embeddings = []
     batch = []
     batch_token_count = 0
     total_tokens = 0
     
-    # Get model configuration
-    model_config = MODEL_CONFIG[model]
+    # Get model configuration from config
+    if model is None:
+        model = config.default_embedding_model
+    
+    model_config = config.get_embedding_model_config(model)
     
     # First pass: count total chunks after splitting
     print(f"🔍 Analyzing text chunks and counting tokens for model: {model}")
-    print(f"💰 Model pricing: ${model_config['price_per_1k']:.5f} per 1K tokens")
+    print(f"💰 Model pricing: ${config.get_embedding_model_price(model):.5f} per 1K tokens")
+    print(f"📝 Model description: {config.get_embedding_model_description(model)}")
     all_chunks = []
     for text in tqdm(texts, desc="Preparing chunks", unit="chunk"):
         if count_tokens(text, encoding) > MAX_TOKENS_PER_CHUNK - SAFETY_MARGIN:
@@ -143,7 +132,7 @@ def get_openai_embeddings(texts, model="text-embedding-3-small", encoding=None):
             processed_chunks += len(batch)
             pbar.update(len(batch))
 
-    estimated_cost = total_tokens / 1000 * model_config['price_per_1k']
+    estimated_cost = total_tokens / 1000 * config.get_embedding_model_price(model)
     print(f"\n✅ Embedding generation complete!")
     print(f"📊 Model used: {model}")
     print(f"📊 Total batches processed: {batch_count}")
@@ -153,16 +142,12 @@ def get_openai_embeddings(texts, model="text-embedding-3-small", encoding=None):
 
     return embeddings, total_tokens
 
-
-
-
 if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Build FAISS index from chunks")
     parser.add_argument("--model", "-m", 
-                      choices=list(MODEL_CONFIG.keys()),
-                      default="text-embedding-3-small",
-                      help="Embedding model to use")
+                      type=str,
+                      help="Embedding model to use (defaults to config default)")
     args = parser.parse_args()
     
     # Load environment variables
@@ -195,11 +180,14 @@ if __name__ == "__main__":
     texts = [chunk["text"] for chunk in chunks]
     print(f"✅ Loaded {len(texts)} text chunks")
 
-    print(f"🔄 Generating embeddings with OpenAI using model: {args.model}")
-    print(f"💰 Model pricing: ${model_config['price_per_1k']:.5f} per 1K tokens")
-    print(f"📝 Model description: {model_config['description']}")
+    # Get model name for display
+    model_name = args.model if args.model else config.default_embedding_model
     
-    embeddings, total_tokens = get_openai_embeddings(texts, args.model, encoding)
+    print(f"🔄 Generating embeddings with OpenAI using model: {model_name}")
+    print(f"💰 Model pricing: ${config.get_embedding_model_price(model_name):.5f} per 1K tokens")
+    print(f"📝 Model description: {config.get_embedding_model_description(model_name)}")
+    
+    embeddings, total_tokens = get_openai_embeddings(texts, model_name, encoding)
     embedding_matrix = np.array(embeddings).astype("float32")
 
     # Create FAISS index
@@ -251,24 +239,31 @@ if __name__ == "__main__":
             pbar.set_postfix({'embeddings': embedding_index})
 
     # Save metadata
-    with open(os.path.join(output_folder, "faiss_metadata.json"), "w") as f:
+    metadata_path = os.path.join(output_folder, "faiss_metadata.json")
+    with open(metadata_path, "w") as f:
         json.dump(faiss_metadata, f, indent=2)
-    print("✅ Metadata saved as " + os.path.join(output_folder, "faiss_metadata.json"))
+    print("✅ Metadata saved as " + metadata_path)
 
-    # Print token usage per document
-    print("\n📄 Token usage by document:")
+    # Calculate and display costs by document
+    print("\n💰 Cost breakdown by document:")
     doc_costs = {}
     for doc, tokens in token_log_by_doc.items():
-        cost = tokens / 1000 * model_config['price_per_1k']
+        cost = tokens / 1000 * config.get_embedding_model_price(model_name)
         doc_costs[doc] = {"tokens": tokens, "cost": round(cost, 4)}
         print(f"- {doc}: {tokens} tokens ≈ ${cost:.4f}")
 
     # Save cost summary
-    with open(os.path.join(output_folder, "embedding_cost_summary.json"), "w") as f:
+    cost_summary_path = os.path.join(output_folder, "embedding_cost_summary.json")
+    with open(cost_summary_path, "w") as f:
         json.dump({
             "total_tokens": total_tokens,
-            "estimated_total_cost": round(total_tokens / 1000 * model_config['price_per_1k'], 4),
+            "estimated_total_cost": round(total_tokens / 1000 * config.get_embedding_model_price(model_name), 4),
+            "model_used": model_name,
             "per_document": doc_costs
         }, f, indent=2)
-    print("💾 Cost summary saved as " + os.path.join(output_folder, "embedding_cost_summary.json"))
-    print("\n🎉 RAG embedding pipeline completed successfully!")
+    print("✅ Cost summary saved as " + cost_summary_path)
+
+    print(f"\n🎉 FAISS index build completed!")
+    print(f"📊 Total embeddings: {len(embeddings)}")
+    print(f"📊 Index dimension: {dimension}")
+    print(f"💰 Total estimated cost: ${total_tokens / 1000 * config.get_embedding_model_price(model_name):.4f}")

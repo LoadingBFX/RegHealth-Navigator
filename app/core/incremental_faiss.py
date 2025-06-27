@@ -34,15 +34,13 @@ class IncrementalFAISS:
     - Updating metadata files
     """
     
-    def __init__(self, model: str = "text-embedding-3-small"):
+    def __init__(self, model: str = None):
         """
         Initialize IncrementalFAISS.
         
         Args:
-            model: Embedding model to use. Options:
-                   - "text-embedding-3-small": $0.00002 per 1K tokens (recommended)
-                   - "text-embedding-ada-002": $0.0001 per 1K tokens (legacy)
-                   - "text-embedding-3-large": $0.00013 per 1K tokens (highest quality)
+            model: Embedding model to use. If None, uses default from config.
+                   Available models are defined in config files.
         """
         # Load environment variables
         load_dotenv()
@@ -53,24 +51,21 @@ class IncrementalFAISS:
         # Initialize OpenAI client
         self.client = openai.OpenAI(api_key=self.openai_api_key)
         
-        # Set model and pricing
-        self.model = model
-        self.model_pricing = {
-            "text-embedding-3-small": 0.00002,  # $0.00002 per 1K tokens
-            "text-embedding-ada-002": 0.0001,   # $0.0001 per 1K tokens
-            "text-embedding-3-large": 0.00013   # $0.00013 per 1K tokens
-        }
+        # Set model from config
+        self.model = model if model else config.default_embedding_model
         
-        if model not in self.model_pricing:
-            raise ValueError(f"Unsupported model: {model}. Supported models: {list(self.model_pricing.keys())}")
+        # Get model configuration from config
+        try:
+            self.model_config = config.get_embedding_model_config(self.model)
+        except ValueError as e:
+            raise ValueError(f"Invalid model '{self.model}': {e}")
         
-        # Setup tokenizer (use appropriate tokenizer for the model)
-        if model == "text-embedding-3-small" or model == "text-embedding-3-large":
-            # For text-embedding-3 models, use cl100k_base encoding
+        # Setup tokenizer based on model configuration
+        encoding_type = config.get_embedding_model_encoding(self.model)
+        if encoding_type == "cl100k_base":
             self.encoding = tiktoken.get_encoding("cl100k_base")
         else:
-            # For text-embedding-ada-002, use the model-specific encoding
-            self.encoding = tiktoken.encoding_for_model("text-embedding-ada-002")
+            self.encoding = tiktoken.encoding_for_model(encoding_type)
         
         # Configuration
         self.max_tokens_per_batch = 8191
@@ -83,8 +78,9 @@ class IncrementalFAISS:
         self.faiss_index_path = config.faiss_index_path
         self.metadata_path = os.path.join(self.output_folder, "faiss_metadata.json")
         
-        logger.info(f"🚀 Initialized IncrementalFAISS with model: {model}")
-        logger.info(f"💰 Model pricing: ${self.model_pricing[model]:.5f} per 1K tokens")
+        logger.info(f"🚀 Initialized IncrementalFAISS with model: {self.model}")
+        logger.info(f"💰 Model pricing: ${config.get_embedding_model_price(self.model):.5f} per 1K tokens")
+        logger.info(f"📝 Model description: {config.get_embedding_model_description(self.model)}")
         logger.info(f"📁 Output folder: {self.output_folder}")
 
     def count_tokens(self, text: str) -> int:
@@ -289,7 +285,7 @@ class IncrementalFAISS:
         
         # Calculate costs
         total_tokens = sum(self.count_tokens(chunk["text"]) for chunk in new_chunks)
-        estimated_cost = total_tokens / 1000 * self.model_pricing[self.model]
+        estimated_cost = total_tokens / 1000 * config.get_embedding_model_price(self.model)
         
         stats = {
             "new_chunks_processed": len(new_chunks),
@@ -297,7 +293,7 @@ class IncrementalFAISS:
             "total_tokens": total_tokens,
             "estimated_cost": round(estimated_cost, 4),
             "model_used": self.model,
-            "model_pricing": self.model_pricing[self.model]
+            "model_pricing": config.get_embedding_model_price(self.model)
         }
         
         logger.info(f"✅ Incremental update completed:")
@@ -405,7 +401,7 @@ class IncrementalFAISS:
         
         # Calculate costs
         total_tokens = sum(self.count_tokens(chunk["text"]) for chunk in chunks)
-        estimated_cost = total_tokens / 1000 * self.model_pricing[self.model]
+        estimated_cost = total_tokens / 1000 * config.get_embedding_model_price(self.model)
         
         stats = {
             "chunks_processed": len(chunks),

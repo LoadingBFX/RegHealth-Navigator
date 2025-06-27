@@ -32,20 +32,18 @@ class IncrementalPipeline:
     4. Update metadata files
     """
     
-    def __init__(self, model: str = "text-embedding-3-small"):
+    def __init__(self, model: str = None):
         """
         Initialize the incremental pipeline.
         
         Args:
-            model: Embedding model to use. Options:
-                   - "text-embedding-3-small": $0.00002 per 1K tokens (recommended)
-                   - "text-embedding-ada-002": $0.0001 per 1K tokens (legacy)
-                   - "text-embedding-3-large": $0.00013 per 1K tokens (highest quality)
+            model: Embedding model to use. If None, uses default from config.
+                   Available models are defined in config files.
         """
         self.chunker = IncrementalChunker()
         self.faiss_updater = IncrementalFAISS(model=model)
-        self.model = model
-        logger.info(f"🚀 Initialized Incremental Pipeline with model: {model}")
+        self.model = model if model else config.default_embedding_model
+        logger.info(f"🚀 Initialized Incremental Pipeline with model: {self.model}")
 
     def process_single_file(self, file_path: str) -> Dict:
         """
@@ -244,9 +242,8 @@ if __name__ == "__main__":
     parser.add_argument("--cleanup", action="store_true", 
                       help="Clean up deleted files and rebuild index")
     parser.add_argument("--model", "-m", 
-                      choices=["text-embedding-3-small", "text-embedding-ada-002", "text-embedding-3-large"],
-                      default="text-embedding-3-small",
-                      help="Embedding model to use")
+                      type=str,
+                      help="Embedding model to use (defaults to config default)")
     parser.add_argument("--file", "-f", type=str,
                       help="Process a single file")
     parser.add_argument("--status", action="store_true",
@@ -262,7 +259,7 @@ if __name__ == "__main__":
     if args.status:
         status = pipeline.get_system_status()
         print("\n=== System Status ===")
-        print(f"Model: {args.model}")
+        print(f"Model: {pipeline.model}")
         print(f"Processed files: {status['processed_files_count']}")
         print(f"Total chunks: {status['total_chunks']}")
         print(f"FAISS index size: {status['faiss_index_size']}")
@@ -278,7 +275,7 @@ if __name__ == "__main__":
     elif args.validate:
         validation = pipeline.validate_system()
         print("\n=== System Validation ===")
-        print(f"Model: {args.model}")
+        print(f"Model: {pipeline.model}")
         print(f"Issues: {len(validation['issues'])}")
         print(f"Warnings: {len(validation['warnings'])}")
         
@@ -307,7 +304,7 @@ if __name__ == "__main__":
     elif args.cleanup:
         result = pipeline.cleanup_and_process()
         print(f"\n=== Cleanup and Processing ===")
-        print(f"Model: {args.model}")
+        print(f"Model: {pipeline.model}")
         print(f"Deleted files: {len(result['deleted_files'])}")
         print(f"New files: {len(result['new_files'])}")
         print(f"Processing results: {len(result['processing_results'])}")
@@ -321,7 +318,7 @@ if __name__ == "__main__":
     else:
         results = pipeline.process_new_files()
         print(f"\n=== Batch Processing ===")
-        print(f"Model: {args.model}")
+        print(f"Model: {pipeline.model}")
         print(f"Files processed: {len(results)}")
         
         if results:

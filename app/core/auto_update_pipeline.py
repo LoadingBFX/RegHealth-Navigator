@@ -47,24 +47,22 @@ class AutoUpdatePipeline:
     4. Update FAISS index with new embeddings
     """
     
-    def __init__(self, days_back: int = 365, model: str = "text-embedding-3-small"):
+    def __init__(self, days_back: int = 365, model: str = None):
         """
         Initialize AutoUpdatePipeline.
         
         Args:
             days_back: Number of days to look back for new regulations
-            model: Embedding model to use. Options:
-                   - "text-embedding-3-small": $0.00002 per 1K tokens (recommended)
-                   - "text-embedding-ada-002": $0.0001 per 1K tokens (legacy)
-                   - "text-embedding-3-large": $0.00013 per 1K tokens (highest quality)
+            model: Embedding model to use. If None, uses default from config.
+                   Available models are defined in config files.
         """
         self.days_back = days_back
-        self.model = model
+        self.model = model if model else config.default_embedding_model
         self.data_dir = Path(config.docs_data_path)
         self.incremental_pipeline = IncrementalPipeline(model=model)
         
         logger.info(f"🚀 Initialized AutoUpdatePipeline (looking back {days_back} days)")
-        logger.info(f"💰 Using model: {model}")
+        logger.info(f"💰 Using model: {self.model}")
 
     def fetch_new_regulations(self) -> List[Dict]:
         """
@@ -333,9 +331,8 @@ if __name__ == "__main__":
     parser.add_argument("--days", "-d", type=int, default=365, 
                       help="Number of days to look back for new regulations")
     parser.add_argument("--model", "-m", 
-                      choices=["text-embedding-3-small", "text-embedding-ada-002", "text-embedding-3-large"],
-                      default="text-embedding-3-small",
-                      help="Embedding model to use")
+                      type=str,
+                      help="Embedding model to use (defaults to config default)")
     parser.add_argument("--force", "-f", action="store_true",
                       help="Force processing even if files exist")
     parser.add_argument("--check", "-c", action="store_true",
@@ -349,21 +346,35 @@ if __name__ == "__main__":
     pipeline = AutoUpdatePipeline(days_back=args.days, model=args.model)
     
     if args.status:
-        status = pipeline.get_system_status()
-        print("System Status:")
-        for key, value in status.items():
-            print(f"  {key}: {value}")
+        status = pipeline.incremental_pipeline.get_system_status()
+        print("\n=== System Status ===")
+        print(f"Model: {pipeline.model}")
+        print(f"Processed files: {status['processed_files_count']}")
+        print(f"Total chunks: {status['total_chunks']}")
+        print(f"FAISS index size: {status['faiss_index_size']}")
+        print(f"New files: {len(status['new_files'])}")
+        print(f"Deleted files: {len(status['deleted_files'])}")
+        
+        if status['new_files']:
+            print(f"\nNew files: {status['new_files']}")
+        if status['deleted_files']:
+            print(f"\nDeleted files: {status['deleted_files']}")
     
     elif args.check:
-        if pipeline.check_for_updates():
-            print("🆕 Updates available! Run without --check to process them.")
+        has_updates = pipeline.check_for_updates()
+        if has_updates:
+            print("🆕 Updates available!")
         else:
-            print("✅ System is up to date.")
+            print("✅ System is up to date")
     
     else:
-        # Run full update
-        if args.force or pipeline.check_for_updates():
-            stats = pipeline.run_full_update()
-            print(f"✅ Update completed: {stats}")
-        else:
-            print("✅ No updates needed. Use --force to update anyway.") 
+        result = pipeline.run_full_update()
+        print(f"\n=== Auto Update Results ===")
+        print(f"Model: {pipeline.model}")
+        print(f"Regulations found: {len(result['regulations'])}")
+        print(f"Files downloaded: {len(result['downloaded_files'])}")
+        print(f"Processing results: {len(result['processing_results'])}")
+        
+        if result['processing_results']:
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            print(f"Total cost: ${total_cost:.4f}") 
