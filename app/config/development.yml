@@ -42,3 +42,32 @@ embedding:
       encoding: cl100k_base
       description: "Highest quality, highest cost"
       dimension: 3072
+
+# Document caching configuration
+caching:
+  # Database path for cache storage
+  db_path: rag_data/document_cache.db
+  
+  # Default time-to-live for cached results (in hours)
+  default_ttl_hours: 24
+  
+  # Cache settings for different document processors
+  processors:
+    summary:
+      ttl_hours: 24
+      enabled: true
+    faq:
+      ttl_hours: 48
+      enabled: true
+    comparison:
+      ttl_hours: 72
+      enabled: true
+  
+  # Cache cleanup settings
+  cleanup:
+    # Enable automatic cleanup of expired entries
+    auto_cleanup: true
+    # Cleanup interval in hours
+    cleanup_interval_hours: 6
+    # Maximum cache size in MB (0 for unlimited)
+    max_cache_size_mb: 100
