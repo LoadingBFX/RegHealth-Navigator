@@ -1,10 +1,4 @@
 {
-  "SNF/2024_SNF_final_2024-16907.xml": {
-    "hash": "2d9d3776a253621d8b5142b040215e2edb2d501c04a8c7cb576cf709e9860094",
-    "processed_at": "1749247320.2168067",
-    "chunks_count": 103,
-    "full_path": "/Users/bfx/Documents/CMU/CMU Courses/Capstone/RegHealth-Navigator/data/SNF/2024_SNF_final_2024-16907.xml"
-  },
   "SNF/2025_SNF_proposed_2025-06348.xml": {
     "hash": "9fa9969a5addecb40315bb1a8c3a32136ed6261c8113d49004eb74ea5972aee9",
     "processed_at": "1749247298.6140049",
@@ -49,5 +43,10 @@
     "hash": "ac9cd0b44e7f9c21bb4cf790799de024b7176b61381eabdc0496a21636c74ece",
     "processed_at": "1750993953.7459521",
     "chunks_count": 699
+  },
+  "SNF/2024_SNF_final_2024-16907.xml": {
+    "hash": "2d9d3776a253621d8b5142b040215e2edb2d501c04a8c7cb576cf709e9860094",
+    "processed_at": "1750996607.3645663",
+    "chunks_count": 103
   }
 }
