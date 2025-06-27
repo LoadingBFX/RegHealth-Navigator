@@ -113,7 +113,7 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
 
         try:
             response = client.chat.completions.create(
-                model="gpt-4-turbo",
+                model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
                 response_format={"type": "json_object"}
@@ -136,7 +136,7 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
     try:
         print("\n🔄 Generating final, client-ready intelligence report...")
         final_response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": final_prompt}],
             temperature=0.1,
         )
