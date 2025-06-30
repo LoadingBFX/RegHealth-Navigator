@@ -48,18 +48,21 @@ class IncrementalPipeline:
     def process_single_file(self, file_path: str) -> Dict:
         """
         Process a single XML file through the complete pipeline.
-        
-        Args:
-            file_path: Path to the XML file (relative to data directory or absolute)
-            
-        Returns:
-            Dictionary with processing statistics
+        Only write to processed_files.json if all steps succeed.
+        If any step fails, log a clear error and return failure status.
         """
         logger.info(f"🔄 Starting incremental processing for: {file_path}")
         
+        # Step 0: Remove old metadata for this file to ensure consistency
+        try:
+            removed_metadata = self.faiss_updater.remove_metadata_for_file(file_path)
+            if removed_metadata > 0:
+                logger.info(f"🧹 Removed {removed_metadata} old metadata entries for {file_path}")
+        except Exception as e:
+            logger.warning(f"⚠️ Warning: Could not remove old metadata for {file_path}: {e}")
+        
         # Step 1: Process file into chunks
         chunks = self.chunker.process_file_incrementally(file_path)
-        
         if not chunks:
             logger.warning(f"⚠️ No chunks created for {file_path}")
             return {
@@ -70,11 +73,25 @@ class IncrementalPipeline:
                 "status": "no_chunks"
             }
         
-        # Step 2: Update FAISS index with new chunks
+        # Step 2: Update FAISS index with new chunks (with error handling)
         faiss_stats = self.faiss_updater.process_incremental_update(chunks)
+        if faiss_stats is None or faiss_stats.get("new_embeddings_added", 0) == 0:
+            logger.error(f"❌ Embedding or FAISS update failed for {file_path}. This file will NOT be recorded as processed.")
+            return {
+                "file": file_path,
+                "chunks_created": len(chunks),
+                "embeddings_added": 0,
+                "estimated_cost": -1.0,
+                "status": "embedding_failed"
+            }
         
-        # Combine statistics
-        result = {
+        # Only at this point, update processed_files.json
+        logger.info(f"✅ Completed incremental processing for {file_path}")
+        logger.info(f"   - Chunks: {len(chunks)}")
+        logger.info(f"   - Embeddings: {faiss_stats['new_embeddings_added']}")
+        logger.info(f"   - Cost: ${faiss_stats['estimated_cost']}")
+        
+        return {
             "file": file_path,
             "chunks_created": len(chunks),
             "embeddings_added": faiss_stats["new_embeddings_added"],
@@ -82,13 +99,6 @@ class IncrementalPipeline:
             "estimated_cost": faiss_stats["estimated_cost"],
             "status": "success"
         }
-        
-        logger.info(f"✅ Completed incremental processing for {file_path}")
-        logger.info(f"   - Chunks: {result['chunks_created']}")
-        logger.info(f"   - Embeddings: {result['embeddings_added']}")
-        logger.info(f"   - Cost: ${result['estimated_cost']}")
-        
-        return result
 
     def process_new_files(self) -> List[Dict]:
         """

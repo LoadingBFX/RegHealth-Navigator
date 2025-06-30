@@ -245,7 +245,9 @@ class AutoUpdatePipeline:
         duration = end_time - start_time
         
         stats = {
+            "regulations": regulations,
             "regulations_found": len(regulations),
+            "downloaded_files": downloaded_files,
             "files_downloaded": len(downloaded_files),
             "files_processed": len(processing_results),
             "files_successful": successful_files,
@@ -371,10 +373,14 @@ if __name__ == "__main__":
         result = pipeline.run_full_update()
         print(f"\n=== Auto Update Results ===")
         print(f"Model: {pipeline.model}")
-        print(f"Regulations found: {len(result['regulations'])}")
-        print(f"Files downloaded: {len(result['downloaded_files'])}")
+        print(f"Regulations found: {result['regulations_found']}")
+        print(f"Files downloaded: {result['files_downloaded']}")
         print(f"Processing results: {len(result['processing_results'])}")
         
         if result['processing_results']:
-            total_cost = sum(r['estimated_cost'] for r in result['processing_results'])
+            total_cost = sum(r['estimated_cost'] for r in result['processing_results'] if r.get('estimated_cost', 0) >= 0)
+            skipped_files = [r for r in result['processing_results'] if r.get('estimated_cost', 0) == -1]
+            successful_files = [r for r in result['processing_results'] if r.get('status') == 'success']
+            print(f"Files processed successfully: {len(successful_files)}")
+            print(f"Files skipped (already exist): {len(skipped_files)}")
             print(f"Total cost: ${total_cost:.4f}") 

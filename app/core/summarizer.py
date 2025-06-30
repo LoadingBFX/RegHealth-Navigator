@@ -1,8 +1,13 @@
 import os
 import json
+import sys
 from pathlib import Path
 from typing import List, Dict, Any
 from openai import OpenAI
+
+# Add the app directory to Python path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import config
 
 # -------- OpenAI Client Initialization --------
 api_key = os.getenv("OPENAI_API_KEY")
@@ -148,7 +153,7 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
 
 # -------- Main Runner --------
 if __name__ == "__main__":
-    CHUNKS_FILE_PATH = Path("../../rag_data/faiss_metadata.json")
+    CHUNKS_FILE_PATH = Path(config.faiss_metadata_path)
     print(f"Loading chunks from {CHUNKS_FILE_PATH}...")
 
     try:
