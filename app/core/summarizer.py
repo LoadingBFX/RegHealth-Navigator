@@ -11,21 +11,31 @@ client = OpenAI(api_key=api_key) if api_key else exit("❌ OPENAI_API_KEY is not
 SUMMARY_DIR = Path("./summary_outputs")
 SUMMARY_DIR.mkdir(exist_ok=True)
 
+# -------- Utilities --------
+def count_tokens(text: str) -> int:
+    return len(text.encode("utf-8")) // 4  # rough approximation
+
+def chunk_batches(data: List[Dict], batch_size: int) -> List[List[Dict]]:
+    return [data[i:i+batch_size] for i in range(0, len(data), batch_size)]
+
 # -------- Prompt Utilities --------
-def get_chunk_prompt(program: str) -> str:
+def get_batch_prompt(program: str, batch: List[Dict], batch_num: int) -> str:
+    formatted_chunks = "\n\n".join(
+        f"[Section {i+1}]\n{c.get('page_content') or c.get('text', '')}" for i, c in enumerate(batch)
+    )
     return f"""
-You are a senior compliance analyst reviewing a CMS {program.upper()} Final Rule.
+You are a senior compliance analyst reviewing CMS {program.upper()} Final Rule content.
 
-Analyze the following section and extract:
-1. topic (main subject)
-2. key_changes (bulleted list with conditions, expirations, etc.)
-3. quantitative_data (numbers, percentages, codes, dates)
-4. stakeholders_affected (who is impacted)
+Below are multiple sections grouped together. For each distinct topic you identify in the text, extract:
+- topic (brief title)
+- key_changes (bulleted list with conditions, expiration dates, etc.)
+- quantitative_data (numbers, percentages, codes, dates)
+- stakeholders_affected (e.g. physicians, billing staff)
 
-Respond as a single valid JSON object.
+Respond as a list of valid JSON objects.
 
-[Start of text]
-{{chunk}}
+[Start of batched text: Batch {batch_num}]
+{formatted_chunks}
 [End of text]
 """
 
@@ -69,39 +79,55 @@ def generate_report(chunks_data: List[Dict], file_name: str) -> str:
         program = "SNF"
 
     summary_path = SUMMARY_DIR / f"{file_name}.md"
+    json_path = SUMMARY_DIR / f"{file_name}.json"
+
     if summary_path.exists():
         print("📄 Cached summary found. Loading...\n")
         return summary_path.read_text()
 
-    chunk_prompt_template = get_chunk_prompt(program)
-    individual_summaries: List[Dict[str, Any]] = []
+    if json_path.exists():
+        print("📄 Found precomputed JSON summary. Skipping chunk-level summarization...")
+        with open(json_path, 'r') as jf:
+            individual_summaries = json.load(jf)
+    else:
+        individual_summaries: List[Dict[str, Any]] = []
+        batches = chunk_batches(chunks_data, batch_size=5)
 
-    for i, chunk_info in enumerate(chunks_data):
-        chunk_text = chunk_info.get('page_content') or chunk_info.get('text', '')
-        if not chunk_text.strip(): continue
+        for b_idx, batch in enumerate(batches):
+            prompt = get_batch_prompt(program, batch, b_idx + 1)
+            print(f"🔄 Summarizing batch {b_idx + 1}/{len(batches)} ({len(batch)} chunks)...")
 
-        prompt = chunk_prompt_template.replace("{chunk}", chunk_text)
-        print(f"🔄 Analyzing chunk {i+1}/{len(chunks_data)} for {file_name}...")
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                    response_format={"type": "json_object"}
+                )
+                parsed = json.loads(response.choices[0].message.content)
+                if isinstance(parsed, list):
+                    individual_summaries.extend(parsed)
+                else:
+                    individual_summaries.append(parsed)
+                print(f"✅ Batch {b_idx + 1} summarized.")
+            except Exception as e:
+                print(f"❌ Error summarizing batch {b_idx + 1}: {e}")
+                continue
 
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0,
-                response_format={"type": "json_object"}
-            )
-            parsed_summary = json.loads(response.choices[0].message.content)
-            individual_summaries.append(parsed_summary)
-            print(f"✅ Chunk {i+1} analyzed.")
-        except Exception as e:
-            print(f"❌ Error analyzing chunk {i+1}: {e}")
-            continue
+        if not individual_summaries:
+            return "No report could be generated; all batch analysis failed."
 
-    if not individual_summaries:
-        return "No report could be generated; all chunk analysis failed."
+        with open(json_path, 'w') as jf:
+            json.dump(individual_summaries, jf, indent=2)
+        print(f"💾 Saved intermediate summary JSON to {json_path}")
 
     year_str = file_name.split('_')[0] if '_' in file_name else "latest"
     joined_summaries = json.dumps(individual_summaries, indent=2)
+
+    if count_tokens(joined_summaries) > 100000:
+        print(f"⚠️ Truncating joined summaries to 100000 tokens...")
+        joined_summaries = joined_summaries[:350000]
+
     final_prompt = get_final_report_prompt(program, year_str, joined_summaries)
 
     try:
