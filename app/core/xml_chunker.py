@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 INPUT_DIR = Path(config.docs_data_path)
 CHUNK_WORDS = 500
 OVERLAP_SENTENCES = 1
-OUTPUT_CHUNKS = "./rag_data/chunks.json"
+OUTPUT_CHUNKS = os.path.join(config.build_faiss_output_folder, "chunks.json")
 
 class XMLChunker:
     """
@@ -40,7 +40,7 @@ class XMLChunker:
     """
     
     def __init__(self, input_dir: str = None, chunk_words: int = 500, 
-                 overlap_sentences: int = 1, output_chunks: str = "./rag_data/chunks.json"):
+                 overlap_sentences: int = 1, output_chunks: str = None):
         """
         Initialize XMLChunker.
         
@@ -48,15 +48,20 @@ class XMLChunker:
             input_dir: Directory containing XML files (defaults to config.docs_data_path)
             chunk_words: Maximum words per chunk
             overlap_sentences: Number of sentences to overlap between chunks
-            output_chunks: Path to save chunked data
+            output_chunks: Path to save chunked data (defaults to config.build_faiss_output_folder/chunks.json)
         """
         if input_dir is None:
             self.input_dir = Path(config.docs_data_path)
         else:
             self.input_dir = Path(input_dir)
+        
+        if output_chunks is None:
+            self.output_chunks = os.path.join(config.build_faiss_output_folder, "chunks.json")
+        else:
+            self.output_chunks = output_chunks
+            
         self.chunk_words = chunk_words
         self.overlap_sentences = overlap_sentences
-        self.output_chunks = output_chunks
         logger.info(f"Initialized XMLChunker with input_dir: {self.input_dir.absolute()}")
 
     def clean_text(self, text: str) -> str:
