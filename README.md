@@ -81,6 +81,59 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
    python -m app.main
    ```
 
+## 📊 Data Management & Updates
+
+### Initial Data Setup & Getting Latest Regulation Data
+The system includes an automated pipeline that handles both initial setup and ongoing updates:
+
+#### Automated Update 
+```bash
+cd app/core
+python auto_update_pipeline.py
+```
+
+This command will:
+- Check for new regulations from the Federal Register (looks back 365 days by default)
+- Download any new XML files automatically
+- Process only new or modified files (incremental processing)
+- Update the FAISS index with new embeddings
+- Provide detailed cost and time statistics
+
+**For first-time setup:** The same command will download and process all available regulations from the past year, effectively initializing your system.
+
+**For ongoing updates:** It will only process new or modified files, making it cost-efficient.
+
+#### Manual Processing Options
+```bash
+cd app/core
+
+# Process a single file
+python incremental_pipeline.py --file "MPFS/new_file.xml"
+
+# Check system status
+python incremental_pipeline.py --status
+
+# Validate system state
+python incremental_pipeline.py --validate
+
+# Clean up deleted files
+python incremental_pipeline.py --cleanup
+```
+
+#### Scheduled Updates
+For production environments, you can set up automated scheduled updates:
+
+```bash
+cd app/core
+python scheduled_updater.py
+```
+
+**Note:** The incremental processing system is designed to be cost-efficient by:
+- Only processing new or modified files
+- Skipping unchanged files using hash-based detection
+- Rebuilding indexes without API calls when possible
+- Providing detailed cost tracking for all operations
+
 ---
 
 ## 🚀 Frontend Setup
