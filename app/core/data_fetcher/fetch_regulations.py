@@ -11,6 +11,11 @@ from typing import List, Dict, Optional, Tuple
 
 import json
 from lxml import etree
+import os
+
+# Add the app directory to Python path for imports when used as module
+if __name__ != "__main__":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Constants
 BASE_URL = "https://www.federalregister.gov/api/v1"

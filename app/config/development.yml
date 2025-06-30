@@ -17,3 +17,28 @@ build_faiss:
 
 docs_data:
   path: data/
+
+# Embedding model configuration
+embedding:
+  # Default model to use for embeddings
+  default_model: text-embedding-3-small
+  
+  # Available models with their pricing and configuration
+  models:
+    text-embedding-3-small:
+      price_per_1k_tokens: 0.00002  # $0.00002 per 1K tokens
+      encoding: cl100k_base
+      description: "Most cost-effective, recommended for production"
+      dimension: 1536
+      
+    text-embedding-ada-002:
+      price_per_1k_tokens: 0.0001   # $0.0001 per 1K tokens
+      encoding: text-embedding-ada-002
+      description: "Legacy model, maintained for compatibility"
+      dimension: 1536
+      
+    text-embedding-3-large:
+      price_per_1k_tokens: 0.00013  # $0.00013 per 1K tokens
+      encoding: cl100k_base
+      description: "Highest quality, highest cost"
+      dimension: 3072

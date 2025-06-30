@@ -235,6 +235,7 @@ yarn-error.log*
 # Project specific
 faiss.index
 rag_data/chunks.json
+app/core/rag_data/chunks.json
 *.log
 old_front/
 *.zip
