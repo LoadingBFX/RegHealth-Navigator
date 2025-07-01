@@ -22,147 +22,95 @@ Steps followed :
     4) Summary (TODO)
 """
 import os
-import sys
-
-# Add the app directory to Python path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import config
-
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import numpy as np
 import faiss
 import openai
 import json
-from typing import List, Tuple, Dict, Any
+from typing import List, Dict, Any
 import logging
-from key import OPENAI_API_KEY 
+from key import OPENAI_API_KEY
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 logger = logging.getLogger(__name__)
 
 
 class ChatSearchService:
-    """
-    Complete RAG service:
-    1. Retrieval: Search relevant chunks from pre-built index
-    2. Generation: Use LLM to generate answers based on chunks
-    
-    Two search modes:
-    1. With filter: Filter results from pre-built index
-    2. Without filter: Direct search using pre-built FAISS index
-    """
-    
-    def __init__(self, openai_api_key: str, faiss_index_path: str = None, 
-                 metadata_path: str = None):
-        """
-        Initialize
-        
-        Args:
-            openai_api_key: OpenAI API key
-            faiss_index_path: FAISS index file path (defaults to config.faiss_index_path)
-            metadata_path: Metadata file path (defaults to config.faiss_metadata_path)
-        """
+    def __init__(self, openai_api_key: str, faiss_index_path: str = "./rag_data/faiss.index",
+                 metadata_path: str = "./rag_data/faiss_metadata.json"):
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
-        
-        # Use config paths if not provided
-        if faiss_index_path is None:
-            faiss_index_path = config.faiss_index_path
-        if metadata_path is None:
-            metadata_path = config.faiss_metadata_path
-        
-        # Load pre-built FAISS index
         self.faiss_index = faiss.read_index(faiss_index_path)
-        
-        # Load metadata (contains all chunks information)
+
         with open(metadata_path, 'r', encoding='utf-8') as f:
             self.all_chunks = json.load(f)
-        
+
         logger.info(f"Loaded FAISS index with {self.faiss_index.ntotal} vectors")
         logger.info(f"Loaded metadata with {len(self.all_chunks)} chunks")
-        
-        # Validate consistency between index and metadata
+
         if self.faiss_index.ntotal != len(self.all_chunks):
-            logger.warning(f"Warning: FAISS index contains {self.faiss_index.ntotal} vectors, but metadata contains {len(self.all_chunks)} chunks. Inconsistency detected!")
-        
+            logger.warning("Inconsistency detected between index and metadata!")
+
+        # Build sparse index for hybrid search
+        self.tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+        self.doc_texts = [chunk['text'] for chunk in self.all_chunks]
+        self.sparse_matrix = self.tfidf_vectorizer.fit_transform(self.doc_texts)
+
     def embed_text(self, text: str) -> np.ndarray:
-        """
-        Convert text to vector
-        
-        Args:
-            text: Text to convert (query)
-            
-        Returns:
-            Vector (1536 dimensions)
-        """
         response = self.openai_client.embeddings.create(
-            model="text-embedding-ada-002",
+            #model="text-embedding-ada-002",
+            model = "text-embedding-3-small",
             input=text
         )
-        return np.array(response.data[0].embedding, dtype='float32')
+        embedding = np.array(response.data[0].embedding, dtype='float32')
+        return embedding / np.linalg.norm(embedding)
 
     def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20) -> List[Dict]:
-        """
-        Unified search: Apply filters first if provided, then do embedding similarity search.
-
-        Args:
-            query: User's question
-            filters: Optional metadata filters (e.g., {"year": 2024})
-            top_k: Number of results to return
-
-        Returns:
-            List of top_k relevant chunks
-        """
+        # Step 1: Apply filters if present
         if filters:
-            # Step 1: Apply filters
             filtered_chunks = []
             for i, chunk in enumerate(self.all_chunks):
                 if all(chunk.get("metadata", {}).get(k) == v for k, v in filters.items()):
-                    chunk['__original_index__'] = i  # for FAISS lookup
+                    chunk['__original_index__'] = i
                     filtered_chunks.append(chunk)
-
-            logger.info(f"Filtered to {len(filtered_chunks)} chunks before similarity search")
 
             if not filtered_chunks:
                 return []
 
-            # Step 2: Get embeddings for filtered chunks
-            embeddings = []
-            for chunk in filtered_chunks:
-                faiss_idx = chunk["__original_index__"]
-                embeddings.append(self.faiss_index.reconstruct(faiss_idx))
-
+            embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
             doc_matrix = np.vstack(embeddings).astype("float32")
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
         else:
-            # No filters, use full FAISS index
             doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
             filtered_chunks = self.all_chunks.copy()
 
-        # Step 3: Embed the query
+        # Step 2: Embed and normalize the query
         query_embedding = self.embed_text(query).reshape(1, -1)
 
-        # Step 4: Compute distances manually
-        distances = np.linalg.norm(doc_matrix - query_embedding, axis=1)
-        sorted_indices = np.argsort(distances)[:top_k]
+        # Step 3: Compute cosine similarity
+        similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
 
-        # Step 5: Return top_k results
+        # Step 4: Hybrid: Get BM25 (TF-IDF) similarity scores
+        sparse_query_vec = self.tfidf_vectorizer.transform([query])
+        sparse_similarities = cosine_similarity(sparse_query_vec, self.sparse_matrix).flatten()
+
+        # Step 5: Combine scores (weighted sum)
+        alpha = 0.3  # weight for embedding, 0.5 for sparse
+        combined_scores = alpha * similarities + (1 - alpha) * sparse_similarities[:len(filtered_chunks)]
+
+        top_indices = np.argsort(-combined_scores)[:top_k]
+
+        # Step 6: Prepare results
         results = []
-        for rank in sorted_indices:
-            chunk = filtered_chunks[rank].copy()
-            chunk["distance"] = float(distances[rank])
+        for i in top_indices:
+            chunk = filtered_chunks[i].copy()
+            chunk["distance"] = float(1 - combined_scores[i])
             results.append(chunk)
 
         return results
 
     def generate_answer(self, query: str, chunks: List[Dict], max_context_length: int = 4000) -> Dict[str, Any]:
-        """
-        Use LLM to generate answers based on retrieved chunks
-        
-        Args:
-            query: User's question
-            chunks: Retrieved relevant chunks
-            max_context_length: Maximum context length (character count)
-            
-        Returns:
-            Dictionary containing answer, confidence, and sources used
-        """
         if not chunks:
             return {
                 "answer": "Sorry, I couldn't find relevant information to answer your question.",
@@ -170,19 +118,13 @@ class ChatSearchService:
                 "sources_used": [],
                 "total_sources": 0
             }
-        
-        # Build context, ensuring it doesn't exceed length limit
+
         context_parts = []
         current_length = 0
         sources_used = []
-        
+
         for i, chunk in enumerate(chunks):
             chunk_text = f"[Source {i+1}] {chunk['text']}"
-            
-            #if current_length + len(chunk_text) > max_context_length:
-            #    print('ERROR')
-            #    import pdb;pdb.set_trace()
-                
             context_parts.append(chunk_text)
             current_length += len(chunk_text)
             sources_used.append({
@@ -191,36 +133,16 @@ class ChatSearchService:
                 "distance": chunk.get('distance', 0),
                 "metadata": chunk.get('metadata', {})
             })
-        
+
         context = "\n\n".join(context_parts)
 
         prompt = f"""Based on the following medical regulation document content, please answer the user's question.
 
-        Please follow these rules:
-        1. Only answer based on the provided content, do not add external knowledge
-        2. If the provided content is insufficient to answer the question, please state this clearly
-        3. Cite relevant sources in your answer using the format [Source1], [Source2], etc.
-        4. Keep answers accurate, professional, and easy to understand
-        5. If there are multiple relevant pieces of information, organize them into a clear structure
-
-        Context content:
-        {context}
-
-        User question: {query}
-
-        Answer:"""
-
-        '''
-        # Build prompt
-        prompt = f"""Based on the following medical regulation document content, please answer the user's question.
-
-        Please follow these rules:
-        1. Only answer based on the provided content, do not add external knowledge
-        2. If the provided content is insufficient to answer the question, please state 'Sorry, I couldn't find relevant information to answer your question.' "
-        3. Cite relevant sources in your answer using the format [Source1], [Source2], etc.
-        4. Keep answers accurate, professional, and easy to understand
-        5. If there are multiple relevant pieces of information, organize them into a clear structure
-
+Please follow these rules:
+1. Only answer based on the provided content, do not add external knowledge
+3. Cite relevant sources in your answer using the format [Source1], [Source2], etc.
+4. Keep answers accurate, professional, and easy to understand
+5. If there are multiple relevant pieces of information, organize them into a clear structure
 
 Context content:
 {context}
@@ -228,35 +150,24 @@ Context content:
 User question: {query}
 
 Answer:"""
-        '''
+
         try:
-            # Call OpenAI GPT-4
             response = self.openai_client.chat.completions.create(
-                model="gpt-4o-mini",  # Use gpt-4o-mini for lower cost
+                model="gpt-4o-mini",
                 messages=[
-                    {
-                        "role": "system", 
-                        "content": "You are a professional medical regulation assistant, specializing in helping users understand Medicare-related regulatory documents."
-                    },
-                    {
-                        "role": "user", 
-                        "content": prompt
-                    }
+                    {"role": "system", "content": "You are a professional medical regulation assistant."},
+                    {"role": "user", "content": prompt}
                 ],
-                temperature=0.1,  # Lower randomness for more consistency
-                max_tokens=1000,
+                temperature=0,
+                max_tokens=1500,
                 top_p=0.9
             )
-            
+
             answer = response.choices[0].message.content
-            
-            # Simple confidence estimation (based on similarity of retrieved chunks)
-            if sources_used:
-                avg_distance = sum(source['distance'] for source in sources_used) / len(sources_used)
-                confidence = max(0, 1 - (avg_distance / 2))  # Simple confidence calculation
-            else:
-                confidence = 0.0
-            
+
+            avg_distance = sum(src['distance'] for src in sources_used) / len(sources_used)
+            confidence = max(0, 1 - avg_distance / 2)
+
             return {
                 "answer": answer,
                 "confidence": round(confidence, 2),
@@ -264,86 +175,39 @@ Answer:"""
                 "total_sources": len(chunks),
                 "context_length": current_length
             }
-            
+
         except Exception as e:
-            logger.error(f"Error generating answer with LLM: {e}")
+            logger.error(f"Error generating answer: {e}")
             return {
-                "answer": f"Sorry, encountered a technical issue while generating the answer: {str(e)}",
+                "answer": f"Error generating answer: {str(e)}",
                 "confidence": 0.0,
                 "sources_used": sources_used,
                 "total_sources": len(chunks)
             }
-    
+
     def ask_question(self, query: str, filters: Dict[str, Any] = None, top_k: int = 5) -> Dict[str, Any]:
-        """
-        Complete RAG Q&A process: Retrieval + Generation
-        
-        Args:
-            query: User's question
-            filters: Optional filter conditions
-            top_k: Number of chunks to retrieve
-            
-        Returns:
-            Complete Q&A result including answer, sources, and metadata
-        """
         logger.info(f"Processing question: {query}")
 
         response = self.openai_client.moderations.create(
-            model="text-moderation-latest",  # or "text-moderation-007"
-            input=query  # string or list[str]
+            model="text-moderation-latest",
+            input=query
         )
 
-        result = response.results[0]
-        if result.flagged:
-            print("Input was flagged.")
-            result = {
+        if response.results[0].flagged:
+            return {
                 "answer": "Sorry, cannot process this query!",
                 "query": query,
                 "filters_applied": filters,
-                'sources_used':[]
+                "sources_used": []
             }
-            return result
 
         chunks = self.search(query, filters=filters, top_k=top_k)
-        logger.info(f"Retrieved {len(chunks)} relevant chunks")
-
-        '''
-        # Step 2 : # classify query category
-        classification_prompt = f"""
-        You are a helpful assistant. Classify the following query into one of three categories:
-        1. Summarize
-        2. Compare
-        3. Other
-
-        Only respond with: Summarize, Compare, or Other.
-
-        Query: \"{query}\"
-        """
-
-        chat_response =  self.openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",  # or "gpt-4"
-            messages=[
-                {"role": "system", "content": "You are a classification assistant."},
-                {"role": "user", "content": classification_prompt}
-            ],
-            temperature=0
-        )
-
-        classification = chat_response.choices[0].message.content.strip()
-        print(classification)
-        '''
-
-        # Step 3: Generate answer using LLM
         result = self.generate_answer(query, chunks)
-
-        # Add query information
         result.update({
             "query": query,
             "filters_applied": filters,
             "retrieval_method": "filtered" if filters else "unfiltered"
         })
-        
-        logger.info(f"Answer generation completed...")
         return result, chunks
 
 def ask_query(query):
@@ -352,11 +216,11 @@ def ask_query(query):
         # Initialize service with actual FAISS index and metadata files
         service = ChatSearchService(
             openai_api_key=OPENAI_API_KEY,  # Ensure you have set your OpenAI API key
-            faiss_index_path=config.faiss_index_path,
-            metadata_path=config.faiss_metadata_path
+            faiss_index_path="./rag_data/faiss.index",
+            metadata_path="./rag_data/faiss_metadata.json"
         )
 
-        result, chunks = service.ask_question(query, top_k=10)
+        result, chunks = service.ask_question(query, top_k=20)
         print(f"Question: {result['query']}")
         print(f"Answer: {result['answer']}")
         #print(f"Confidence: {result['confidence']}")
@@ -371,20 +235,8 @@ def ask_query(query):
         final_output = result['answer']
 
         return final_output
-        
+
     except Exception as e:
         print(f"Error: {e}")
-        print(f"Please ensure faiss.index and faiss_metadata.json files exist in the configured directories")
+        print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
-
-# Test complete RAG Q&A
-#query = "I hate you. I'm going to hurt you and everyone like you."
-#query = "Summarize abc"
-#query = "When did the SNF Prospective Payment System transition end?"
-#query = "When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?"
-#query = "What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?"
-#query = "Summarize CY 2024 Medicare Physician Fee Schedule final rule?"
-#query = "Summarize  Correction of Errors in the Preambleof the CY 2025 PFS Final Rule"
-query = "When did the SNF Prospective Payment System transition end?"
-
-response = ask_query(query)
