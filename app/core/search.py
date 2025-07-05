@@ -29,7 +29,9 @@ import openai
 import json
 from typing import List, Dict, Any
 import logging
-from key import OPENAI_API_KEY
+# from key import OPENAI_API_KEY
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -65,49 +67,60 @@ class ChatSearchService:
         embedding = np.array(response.data[0].embedding, dtype='float32')
         return embedding / np.linalg.norm(embedding)
 
-    def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20) -> List[Dict]:
-        # Step 1: Apply filters if present
-        if filters:
-            filtered_chunks = []
-            for i, chunk in enumerate(self.all_chunks):
-                if all(chunk.get("metadata", {}).get(k) == v for k, v in filters.items()):
-                    chunk['__original_index__'] = i
-                    filtered_chunks.append(chunk)
+    # def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20) -> List[Dict]:
+    #     # Step 1: Apply filters if present
+    #     if filters:
+    #         filtered_chunks = []
+    #         for i, chunk in enumerate(self.all_chunks):
+    #             if all(chunk.get("metadata", {}).get(k) == v for k, v in filters.items()):
+    #                 chunk['__original_index__'] = i
+    #                 filtered_chunks.append(chunk)
+    #
+    #         if not filtered_chunks:
+    #             return []
+    #
+    #         embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
+    #         doc_matrix = np.vstack(embeddings).astype("float32")
+    #         doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+    #     else:
+    #         doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
+    #         doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+    #         filtered_chunks = self.all_chunks.copy()
+    #
+    #     # Step 2: Embed and normalize the query
+    #     query_embedding = self.embed_text(query).reshape(1, -1)
+    #
+    #     # Step 3: Compute cosine similarity
+    #     similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
+    #
+    #     # Step 4: Hybrid: Get BM25 (TF-IDF) similarity scores
+    #     sparse_query_vec = self.tfidf_vectorizer.transform([query])
+    #     sparse_similarities = cosine_similarity(sparse_query_vec, self.sparse_matrix).flatten()
+    #
+    #     # Step 5: Combine scores (weighted sum)
+    #     alpha = 0.3  # weight for embedding, 0.5 for sparse
+    #     combined_scores = alpha * similarities + (1 - alpha) * sparse_similarities[:len(filtered_chunks)]
+    #
+    #     top_indices = np.argsort(-combined_scores)[:top_k]
+    #
+    #     # Step 6: Prepare results
+    #     results = []
+    #     for i in top_indices:
+    #         chunk = filtered_chunks[i].copy()
+    #         chunk["distance"] = float(1 - combined_scores[i])
+    #         results.append(chunk)
+    #
+    #     return results
 
-            if not filtered_chunks:
-                return []
-
-            embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
-            doc_matrix = np.vstack(embeddings).astype("float32")
-            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
-        else:
-            doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
-            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
-            filtered_chunks = self.all_chunks.copy()
-
-        # Step 2: Embed and normalize the query
+    def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20):
         query_embedding = self.embed_text(query).reshape(1, -1)
-
-        # Step 3: Compute cosine similarity
-        similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
-
-        # Step 4: Hybrid: Get BM25 (TF-IDF) similarity scores
-        sparse_query_vec = self.tfidf_vectorizer.transform([query])
-        sparse_similarities = cosine_similarity(sparse_query_vec, self.sparse_matrix).flatten()
-
-        # Step 5: Combine scores (weighted sum)
-        alpha = 0.3  # weight for embedding, 0.5 for sparse
-        combined_scores = alpha * similarities + (1 - alpha) * sparse_similarities[:len(filtered_chunks)]
-
-        top_indices = np.argsort(-combined_scores)[:top_k]
-
-        # Step 6: Prepare results
+        distances, indices = self.faiss_index.search(query_embedding, top_k)
         results = []
-        for i in top_indices:
-            chunk = filtered_chunks[i].copy()
-            chunk["distance"] = float(1 - combined_scores[i])
-            results.append(chunk)
-
+        for idx, dist in zip(indices[0], distances[0]):
+            if 0 <= idx < len(self.all_chunks):
+                chunk = self.all_chunks[idx].copy()
+                chunk["distance"] = float(dist)
+                results.append(chunk)
         return results
 
     def generate_answer(self, query: str, chunks: List[Dict], max_context_length: int = 4000) -> Dict[str, Any]:
@@ -234,9 +247,21 @@ def ask_query(query):
         # prepare final output
         final_output = result['answer']
 
-        return final_output
+        return final_output, chunks
 
     except Exception as e:
         print(f"Error: {e}")
         print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
+
+query1 = "What update did CMS make to the Promoting Interoperability performance period in 2024?"
+answer1, chunks1 = ask_query(query1)
+print("\n=== Test Case 1 ===")
+print("Question:", query1)
+print("Answer:\n", answer1)
+
+query2 = "What behavioral health-related improvement activities were added for 2024?"
+answer2, chunks2 = ask_query(query2)
+print("\n=== Test Case 2 ===")
+print("Question:", query2)
+print("Answer:\n", answer2)
