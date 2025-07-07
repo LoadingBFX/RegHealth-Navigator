@@ -29,7 +29,9 @@ from data_fetcher.fetch_regulations import (
     get_single_document, 
     detect_program_type, 
     download_xml, 
-    is_valid_xml
+    is_valid_xml,
+    extract_year_from_title,
+    generate_filename
 )
 
 # Configure logging
@@ -148,10 +150,12 @@ class AutoUpdatePipeline:
                 program_dir = self.data_dir / program_type
                 program_dir.mkdir(parents=True, exist_ok=True)
                 
-                # Check if file already exists
-                year = publication_date.split("-")[0]
-                doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
-                filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+                # Check if file already exists (using unified filename generation)
+                filename = generate_filename(doc, program_type)
+                if not filename:
+                    logger.error(f"Could not generate filename for document {doc_number}")
+                    continue
+                
                 filepath = program_dir / filename
                 
                 if filepath.exists() and is_valid_xml(filepath):
@@ -161,13 +165,13 @@ class AutoUpdatePipeline:
                 
                 # Download file
                 logger.info(f"⬇️ Downloading: {filename}")
-                success = download_xml(doc, program_dir, logger=logger)
+                success = download_xml(doc, self.data_dir, logger=logger)
                 
                 if success:
                     downloaded_files.append(filepath)
-                    logger.info(f"✅ Successfully downloaded: {filepath}")
                 else:
                     logger.error(f"❌ Failed to download: {filename}")
+                    continue
                 
                 # Add delay between downloads
                 time.sleep(random.uniform(2, 5))
@@ -296,10 +300,11 @@ class AutoUpdatePipeline:
             if not has_program:
                 continue
             
-            # Check if file exists
-            year = publication_date.split("-")[0]
-            doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
-            filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+            # Check if file exists (using unified filename generation)
+            filename = generate_filename(doc, program_type)
+            if not filename:
+                continue
+            
             filepath = self.data_dir / program_type / filename
             
             if not filepath.exists():
