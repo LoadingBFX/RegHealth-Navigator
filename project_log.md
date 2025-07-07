@@ -2,6 +2,130 @@
 
 ---
 
+## 2025-07-07 — v0.6
+
+### Summary of Changes
+- **Enhanced year extraction in fetch_regulations.py**
+  - Modified year extraction logic to use regex patterns from document titles instead of publication dates
+  - Added `extract_year_from_title()` function with program-specific regex patterns
+  - Updated file naming convention to reflect program years (CY/FY) rather than publication years
+  - Improved program type detection to include "home health" documents
+  - Added logic to skip correction documents based on title content (not just document number)
+
+### Technical Decisions
+- **Year Extraction Strategy**: Use regex patterns from titles instead of publication dates for more accurate file naming
+- **Program-Specific Patterns**: 
+  - MPFS: Extract "CY XXXX" (Calendar Year) with multiple pattern variations
+  - HOSPICE: Extract "FY XXXX" (Fiscal Year) with multiple pattern variations  
+  - SNF: Extract "Federal Fiscal Year XXXX"
+- **Robust Pattern Matching**: Implemented multiple regex patterns per program type to handle different title formats
+- **Error Handling**: Added graceful handling when year extraction fails
+
+### Key Code Changes
+```python
+def extract_year_from_title(doc: Dict, program_type: str) -> Optional[str]:
+    """Extract year from document title using regex patterns for different program types."""
+    title = doc.get("title", "")
+    
+    if program_type == "MPFS":
+        # Extract CY XXXX (Calendar Year) - multiple patterns
+        patterns = [
+            r'cy\s*(\d{4})',  # CY 2025
+            r'calendar\s+year\s*\(cy\)\s*(\d{4})',  # Calendar Year (CY) 2025
+            r'calendar\s+year\s+(\d{4})'  # Calendar Year 2025
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, title, re.IGNORECASE)
+            if match:
+                return match.group(1)
+    
+    elif program_type == "HOSPICE":
+        # Extract FY XXXX (Fiscal Year) - multiple patterns
+        patterns = [
+            r'fy\s*(\d{4})',  # FY 2025
+            r'fiscal\s+year\s*\(fy\)\s*(\d{4})',  # Fiscal Year (FY) 2025
+            r'fiscal\s+year\s+(\d{4})'  # Fiscal Year 2025
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, title, re.IGNORECASE)
+            if match:
+                return match.group(1)
+    
+    elif program_type == "SNF":
+        # Extract Federal Fiscal Year XXXX
+        pattern = r'federal\s+fiscal\s+year\s+(\d{4})'
+        match = re.search(pattern, title, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    
+    return None
+```
+
+```python
+def detect_program_type(doc: Dict) -> Tuple[bool, str]:
+    """Detect program type from document title."""
+    title = doc.get("title", "").lower()
+    
+    # Skip correction documents based on title
+    if "correction" in title:
+        return False, ""
+    
+    # MPFS (Medicare Physician Fee Schedule)
+    if any(keyword in title for keyword in ["medicare physician fee schedule","physician fee schedule", "mpfs", "pfs", "physician fee", "home health"]):
+        return True, "MPFS"
+    
+    # HOSPICE (Hospice Payment)
+    if any(keyword in title for keyword in ["hospice wage", "hospice payment", "hospice quality"]):
+        return True, "HOSPICE"
+    
+    # SNF (Skilled Nursing Facility)
+    if any(keyword in title for keyword in ["skilled nursing facility", "snf", "nursing facility", "consolidated billing"]):
+        return True, "SNF"
+    
+    return False, ""
+```
+
+```python
+# Updated file naming logic
+# Extract year from title using regex patterns
+year = extract_year_from_title(doc, program_type)
+if not year:
+    logger.error(f"Could not extract year from title for document {doc_number}")
+    return False
+
+# Get month and date from publication date for XML URL
+month = publication_date.split("-")[1]
+date = publication_date.split("-")[2]
+doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
+filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+```
+
+### User–Assistant Discussion Highlights
+- **User requested year extraction from titles**: Specifically asked to extract program years (CY/FY) from document titles instead of using publication dates
+- **Assistant implemented comprehensive solution**: Created regex-based extraction function with multiple patterns per program type
+- **Collaborative testing**: Created and ran test suite to verify all patterns work correctly with various title formats
+- **Systematic approach**: Updated both download logic and file existence checking to use new year extraction
+- **Fixed duplicate download issue**: Resolved bug where files were being downloaded twice due to incorrect directory path construction and redundant existence checking
+- **User requested additional filtering**: Asked to skip correction documents based on title content (not just document number)
+- **Assistant implemented title-based filtering**: Added logic to detect_program_type to skip documents with "correction" in title
+
+### Impact and Results
+- **More Accurate File Naming**: Files now reflect the actual program year (CY/FY) rather than publication year
+- **Better Organization**: Documents are grouped by the year they refer to, not when they were published
+- **Enhanced Pattern Recognition**: Robust regex patterns handle multiple title formats for each program type
+- **Improved Data Consistency**: All file operations now use the same year extraction logic
+- **Comprehensive Testing**: All test cases pass, ensuring reliability across different document formats
+- **Enhanced Document Filtering**: Improved correction document detection by checking both document number and title content
+- **Eliminated Duplicate Downloads**: Fixed bug that caused files to be downloaded twice, improving efficiency and preventing wasted bandwidth
+
+### Example Output Changes
+- **Before**: `2024_MPFS_final_2024-06431.xml` (publication year)
+- **After**: `2025_MPFS_final_2024-06431.xml` (program year from title)
+
+---
+
+## 2025-06-30 — v0.5
+
 ## 2025-06-30 — v0.5
 
 ### Summary of Changes

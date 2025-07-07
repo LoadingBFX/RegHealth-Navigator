@@ -5,6 +5,7 @@ import time
 import random
 import requests
 import sys
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
@@ -167,6 +168,73 @@ def is_valid_xml(filepath: Path) -> bool:
     except (etree.XMLSyntaxError, IOError):
         return False
 
+def extract_year_from_title(doc: Dict, program_type: str) -> Optional[str]:
+    """Extract year from document title using regex patterns for different program types.
+    
+    Args:
+        doc (Dict): Document data containing title and other metadata
+        program_type (str): Program type (MPFS, HOSPICE, SNF)
+        
+    Returns:
+        Optional[str]: Extracted year if found, None otherwise
+        
+    Regex Patterns:
+        1. MPFS: Extract "CY XXXX" (Calendar Year)
+           - Pattern: r'cy\s*(\d{4})' (case insensitive)
+           - Example: "Calendar Year (CY) 2025" -> "2025"
+        
+        2. HOSPICE: Extract "FY XXXX" (Fiscal Year)
+           - Pattern: r'fy\s*(\d{4})' (case insensitive)
+           - Example: "Fiscal Year (FY) 2025" -> "2025"
+        
+        3. SNF: Extract "Federal Fiscal Year XXXX"
+           - Pattern: r'federal\s+fiscal\s+year\s+(\d{4})' (case insensitive)
+           - Example: "Federal Fiscal Year 2025" -> "2025"
+    
+    Example:
+        >>> doc = {
+        ...     "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+        ...     "type": "Rule",
+        ...     "document_number": "2024-06431"
+        ... }
+        >>> extract_year_from_title(doc, "MPFS")
+        "2025"
+    """
+    title = doc.get("title", "")
+    
+    if program_type == "MPFS":
+        # Extract CY XXXX (Calendar Year) - multiple patterns
+        patterns = [
+            r'cy\s*(\d{4})',  # CY 2025
+            r'calendar\s+year\s*\(cy\)\s*(\d{4})',  # Calendar Year (CY) 2025
+            r'calendar\s+year\s+(\d{4})'  # Calendar Year 2025
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, title, re.IGNORECASE)
+            if match:
+                return match.group(1)
+    
+    elif program_type == "HOSPICE":
+        # Extract FY XXXX (Fiscal Year) - multiple patterns
+        patterns = [
+            r'fy\s*(\d{4})',  # FY 2025
+            r'fiscal\s+year\s*\(fy\)\s*(\d{4})',  # Fiscal Year (FY) 2025
+            r'fiscal\s+year\s+(\d{4})'  # Fiscal Year 2025
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, title, re.IGNORECASE)
+            if match:
+                return match.group(1)
+    
+    elif program_type == "SNF":
+        # Extract Federal Fiscal Year XXXX
+        pattern = r'federal\s+fiscal\s+year\s+(\d{4})'
+        match = re.search(pattern, title, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    
+    return None
+
 def detect_program_type(doc: Dict) -> Tuple[bool, str]:
     """Detect program type from document title.
     
@@ -188,6 +256,9 @@ def detect_program_type(doc: Dict) -> Tuple[bool, str]:
         3. SNF (Skilled Nursing Facility)
            - Keywords: skilled nursing facility, snf, nursing facility, consolidated billing
            - Example: Prospective Payment System and Consolidated Billing for Skilled Nursing Facilities
+        
+    Special Handling:
+        - If the title contains 'correction', treat as unrecognized (skip)
     
     Example:
         >>> doc = {
@@ -201,8 +272,12 @@ def detect_program_type(doc: Dict) -> Tuple[bool, str]:
     title = doc.get("title", "").lower()
     print("Detecting program type from title:", title)
     
+    # Skip correction documents based on title
+    if "correction" in title:
+        return False, ""
+    
     # MPFS (Medicare Physician Fee Schedule)
-    if any(keyword in title for keyword in ["medicare physician fee schedule","physician fee schedule", "mpfs", "pfs", "physician fee"]):
+    if any(keyword in title for keyword in ["medicare physician fee schedule","physician fee schedule", "mpfs"]):
         return True, "MPFS"
     
     # HOSPICE (Hospice Payment)
@@ -228,6 +303,12 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
         
     File Naming Convention:
         YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.xml
+        Where YYYY is the issue year extracted from title using regex patterns:
+        - MPFS: Extract "CY XXXX" (Calendar Year)
+        - HOSPICE: Extract "FY XXXX" (Fiscal Year)  
+        - SNF: Extract "Federal Fiscal Year XXXX"
+        
+    Note: The XML URL uses the publication year from publication_date, while the filename uses the issue year from title.
         
     Example:
         >>> doc = {
@@ -237,7 +318,7 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
         ...     "publication_date": "2024-03-28"
         ... }
         >>> download_xml(doc, Path("data"))
-        True  # Creates data/MPFS/2024_MPFS_final_2024-06431.xml
+        True  # Creates data/MPFS/2025_MPFS_final_2024-06431.xml
     """
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -258,15 +339,21 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
             return False
         
         # Create program type directory
-        program_dir = save_dir #/ program_type
+        program_dir = save_dir / program_type
         program_dir.mkdir(parents=True, exist_ok=True)
         
-        # Construct filename
+        # Extract issue year from title using regex patterns (for filename)
+        issue_year = extract_year_from_title(doc, program_type)
+        if not issue_year:
+            logger.error(f"Could not extract year from title for document {doc_number}")
+            return False
+        
+        # Get publication year, month, and date for XML URL construction
         year = publication_date.split("-")[0]
         month = publication_date.split("-")[1]
         date = publication_date.split("-")[2]
         doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
-        filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+        filename = f"{issue_year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
         filepath = program_dir / filename
         
         # Check if file already exists and is valid
@@ -295,6 +382,49 @@ def download_xml(doc: Dict, save_dir: Path, logger: Optional[logging.Logger] = N
     except Exception as e:
         logger.error(f"Error downloading document {doc.get('document_number', '')}: {str(e)}")
         return False
+
+def generate_filename(doc: Dict, program_type: str) -> Optional[str]:
+    """Generate standardized filename for a document.
+    
+    Args:
+        doc (Dict): Document data containing title, type, and document_number
+        program_type (str): Program type (MPFS, HOSPICE, SNF)
+        
+    Returns:
+        Optional[str]: Generated filename if successful, None if failed
+        
+    File Naming Convention:
+        YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.xml
+        Where YYYY is the issue year extracted from title using regex patterns:
+        - MPFS: Extract "CY XXXX" (Calendar Year)
+        - HOSPICE: Extract "FY XXXX" (Fiscal Year)  
+        - SNF: Extract "Federal Fiscal Year XXXX"
+        
+    Example:
+        >>> doc = {
+        ...     "document_number": "2024-06431",
+        ...     "title": "Medicare Program; Calendar Year (CY) 2025 Home Health Prospective Payment System Rate Update",
+        ...     "type": "Rule"
+        ... }
+        >>> generate_filename(doc, "MPFS")
+        "2025_MPFS_final_2024-06431.xml"
+    """
+    doc_number = doc.get("document_number", "")
+    doc_type = doc.get("type", "")
+    
+    if not doc_number or not doc_type:
+        return None
+    
+    # Extract issue year from title
+    issue_year = extract_year_from_title(doc, program_type)
+    if not issue_year:
+        return None
+    
+    # Generate filename
+    doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
+    filename = f"{issue_year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
+    
+    return filename
 
 def parse_args():
     """Parse command line arguments.
@@ -361,13 +491,13 @@ def main():
         Creates a directory structure:
         data/
         ├── MPFS/
-        │   ├── 2024_MPFS_final_2024-06431.xml
+        │   ├── 2025_MPFS_final_2024-06431.xml
         │   └── 2024_MPFS_proposed_2024-06432.xml
         ├── HOSPICE/
-        │   ├── 2024_HOSPICE_final_2024-06433.xml
+        │   ├── 2025_HOSPICE_final_2024-06433.xml
         │   └── 2024_HOSPICE_proposed_2024-06434.xml
         └── SNF/
-            ├── 2024_SNF_final_2024-06435.xml
+            ├── 2025_SNF_final_2024-06435.xml
             └── 2024_SNF_proposed_2024-06436.xml
     """
     # Parse command line arguments
@@ -383,7 +513,6 @@ def main():
     # Initialize counters
     total_docs = 0
     downloaded = 0
-    already_existed = 0
     unrecognized = 0
     unsupported = 0
     failed = 0
@@ -400,10 +529,7 @@ def main():
                 total_docs = 1
                 has_program, program_type = detect_program_type(doc)
                 if has_program:
-                    program_dir = save_dir / program_type
-                    program_dir.mkdir(parents=True, exist_ok=True)
-                    print("Program Directory:", program_dir)
-                    success = download_xml(doc, program_dir, logger=logger)
+                    success = download_xml(doc, save_dir, logger=logger)
                     if success:
                         downloaded += 1
                     else:
@@ -452,27 +578,9 @@ def main():
                     unrecognized += 1
                     continue
                 
-                # Create program type directory
-                program_dir = save_dir / program_type
-                program_dir.mkdir(parents=True, exist_ok=True)
-                
-                # Check if file already exists and is valid
-                year = publication_date.split("-")[0]
-                #month = publication_date.split("-")[1]
-                #date = publication_date.split("-")[2]
-                doc_type_suffix = "final" if doc_type == "Rule" else "proposed"
-                filename = f"{year}_{program_type}_{doc_type_suffix}_{doc_number}.xml"
-                filepath = program_dir / filename
-                
-                if filepath.exists() and is_valid_xml(filepath):
-                    logger.info(f"Already exists and valid: {filepath}")
-                    logger.info(f"{doc_number}: Already exists and valid: {filepath}")
-                    already_existed += 1
-                    continue
-                
-                # Download document
-                logger.info(f"{doc_number}: Need to download: {doc_number}")
-                success = download_xml(doc, program_dir, logger=logger)
+                # Download document (download_xml handles existence checking)
+                logger.info(f"{doc_number}: Processing document: {doc_number}")
+                success = download_xml(doc, save_dir, logger=logger)
                 if success:
                     downloaded += 1
                 else:
@@ -488,8 +596,7 @@ def main():
     # Print summary
     logger.info("\nDownload Summary:")
     logger.info(f"Total documents: {total_docs}")
-    logger.info(f"Successfully downloaded: {downloaded}")
-    logger.info(f"Already existed: {already_existed}")
+    logger.info(f"Successfully processed: {downloaded}")
     logger.info(f"Unrecognized program type: {unrecognized}")
     logger.info(f"Unsupported document type: {unsupported}")
     logger.info(f"Failed: {failed}")

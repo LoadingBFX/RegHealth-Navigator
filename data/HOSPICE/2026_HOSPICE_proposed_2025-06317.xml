@@ -1,0 +1,1572 @@
+<PRORULE>
+                <PREAMB>
+                    <PRTPAGE P="18568"/>
+                    <AGENCY TYPE="S">DEPARTMENT OF HEALTH AND HUMAN SERVICES</AGENCY>
+                    <SUBAGY>Centers for Medicare &amp; Medicaid Services</SUBAGY>
+                    <CFR>42 CFR Part 418</CFR>
+                    <DEPDOC>[CMS-1835-P]</DEPDOC>
+                    <RIN>RIN 0938-AV49</RIN>
+                    <SUBJECT>Medicare Program; FY 2026 Hospice Wage Index and Payment Rate Update and Hospice Quality Reporting Program Requirements</SUBJECT>
+                    <AGY>
+                        <HD SOURCE="HED">AGENCY:</HD>
+                        <P>Centers for Medicare &amp; Medicaid Services (CMS), Department of Health and Human Services (HHS).</P>
+                    </AGY>
+                    <ACT>
+                        <HD SOURCE="HED">ACTION:</HD>
+                        <P>Proposed rule.</P>
+                    </ACT>
+                    <SUM>
+                        <HD SOURCE="HED">SUMMARY:</HD>
+                        <P>This proposed rule would update the hospice wage index, payment rates, and aggregate cap amount for Fiscal Year (FY) 2026. This rule also proposes changes to the admission to hospice regulations and the hospice face-to-face attestation requirements under the certification of terminal illness regulations. This proposed rule also includes a technical correction to the regulatory text and provides updates to the Hospice Quality Reporting Program requirements. Finally, this proposed rule solicits comments regarding requests for information surrounding future measure concepts for Hospice Quality Reporting Program.</P>
+                    </SUM>
+                    <EFFDATE>
+                        <HD SOURCE="HED">DATES:</HD>
+                        <P>To be assured consideration, comments must be received at one of the addresses provided below, June 30, 2025.</P>
+                    </EFFDATE>
+                    <ADD>
+                        <HD SOURCE="HED">ADDRESSES:</HD>
+                        <P>In commenting, refer to file code CMS-1835-P.</P>
+                        <P>
+                            Comments, including mass comment submissions, must be submitted in one of the following three ways (choose 
+                            <E T="03">only one</E>
+                             of the ways listed):
+                        </P>
+                        <P>
+                            1. 
+                            <E T="03">Electronically.</E>
+                             You may submit electronic comments on this regulation to 
+                            <E T="03">https://www.regulations.gov.</E>
+                             Follow the “Submit a comment” instructions.
+                        </P>
+                        <P>
+                            2. 
+                            <E T="03">By regular mail.</E>
+                             You may mail written comments to the following address ONLY: Centers for Medicare &amp; Medicaid Services, Department of Health and Human Services, Attention: CMS-1835-P, P.O. Box 8010, Baltimore, MD 21244-1850.
+                        </P>
+                        <P>Please allow sufficient time for mailed comments to be received before the close of the comment period.</P>
+                        <P>
+                            3. 
+                            <E T="03">By express or overnight mail.</E>
+                             You may send written comments to the following address ONLY: Centers for Medicare &amp; Medicaid Services, Department of Health and Human Services, Attention: CMS-1835-P, Mail Stop C4-26-05, 7500 Security Boulevard, Baltimore, MD 21244-1850.
+                        </P>
+                        <P>
+                            For information on viewing public comments, see the beginning of the 
+                            <E T="02">SUPPLEMENTARY INFORMATION</E>
+                             section.
+                        </P>
+                    </ADD>
+                    <FURINF>
+                        <HD SOURCE="HED">FOR FURTHER INFORMATION CONTACT:</HD>
+                        <P/>
+                        <P>
+                            For general questions about hospice payment policy, send your inquiry via email to: 
+                            <E T="03">hospicepolicy@cms.hhs.gov.</E>
+                        </P>
+                        <P>For questions regarding the CAHPS® Hospice Survey, contact Lauren Fuentes at (410) 786-2290.</P>
+                        <P>For questions regarding the hospice quality reporting program, contact Jermama Keys at (410) 786-7778.</P>
+                    </FURINF>
+                </PREAMB>
+                <SUPLINF>
+                    <HD SOURCE="HED">SUPPLEMENTARY INFORMATION:</HD>
+                    <P/>
+                    <P>
+                        <E T="03">Inspection of Public Comments:</E>
+                         All comments received before the close of the comment period are available for viewing by the public, including any personally identifiable or confidential business information that is included in a comment. We post all comments received before the close of the comment period on the following website as soon as possible after they have been received: 
+                        <E T="03">https://www.regulations.gov.</E>
+                         Follow the search instructions on that website to view public comments. CMS will not post on 
+                        <E T="03">Regulations.gov</E>
+                         public comments that make threats to individuals or institutions or suggest that the individual will take actions to harm the individual. CMS continues to encourage individuals not to submit duplicative comments. We will post acceptable comments from multiple unique commenters even if the content is identical or nearly identical to other comments.
+                    </P>
+                    <P>
+                        <E T="03">Plain Language Summary:</E>
+                         In accordance with 5 U.S.C. 553(b)(4), a plain language summary of this proposed rule may be found at 
+                        <E T="03">https://www.regulations.gov/.</E>
+                    </P>
+                    <P>
+                        <E T="03">Deregulation Request for Information (RFI):</E>
+                         On January 31, 2025, President Trump issued Executive Order (E.O.) 14192 “Unleashing Prosperity Through Deregulation,” which states the Administration policy to significantly reduce the private expenditures required to comply with Federal regulations to secure America's economic prosperity and national security and the highest possible quality of life for each citizen. We would like public input on approaches and opportunities to streamline regulations and reduce administrative burdens on providers, suppliers, beneficiaries, and other interested parties participating in the Medicare program. CMS has made available an RFI at 
+                        <E T="03">https://www.cms.gov/medicare-regulatory-relief-rfi.</E>
+                         Please submit all comments in response to this RFI through the provided weblink.
+                    </P>
+                    <HD SOURCE="HD1">I. Executive Summary</HD>
+                    <HD SOURCE="HD2">A. Purpose</HD>
+                    <P>This proposed rule would update the hospice wage index, payment rates, and cap amount for FY 2026 as required under section 1814(i) of the Social Security Act (the Act). In addition, this proposed rule would clarify in the payment regulations that the physician member of the hospice interdisciplinary group (IDG) may recommend admission to hospice. This proposed rule would also re-align the attestation requirements in the regulatory text at 42 CFR 418.22(b)(4) with the original intent of the CY 2011 Home Health Prospective Payment System (HH PPS) final rule and statutory requirements under section 1814(a)(7) of the Act for the certification of terminal illness. That rule stated that the attestation of the physician or nurse practitioner who conducts the face-to-face encounter must include the physician's or nurse practitioner's, as applicable, signature and the date of the signature.</P>
+                    <P>This proposed rule proposes to correct an error in the regulations text at § 418.312(j). This rule also reinforces updates on the Hospice Quality Reporting Program (HQRP) and the Hospice Outcomes and Patient Evaluation (HOPE) instrument and public reporting, future quality measures (QMs), and the transition of hospice providers from the Quality Improvement and Evaluation System (QIES) to the internet Quality Improvement and Evaluation System (iQIES). Finally, this proposed rule includes requests for information (RFI) regarding future QM concepts for the HQRP.</P>
+                    <HD SOURCE="HD2">B. Summary of the Major Provisions</HD>
+                    <P>Section III.A.1. of this proposed rule includes the proposed updates to the hospice wage index and makes the application of the updated wage data budget neutral for all four levels of hospice care.</P>
+                    <P>Section III.A.2. of this proposed rule includes the proposed FY 2026 hospice payment update percentage of 2.4 percent.</P>
+                    <P>Section III.A.3. of this proposed rule includes the proposed FY 2026 hospice payment rates.</P>
+                    <P>Section III.A.4. of this proposed rule includes the proposed update to the hospice cap amount for FY 2026 by the hospice payment update percentage of 2.4 percent.</P>
+                    <P>
+                        Section III.B. of this proposed rule proposes to clarify that the physician member of the interdisciplinary group is among the types of physicians who can recommend a patient's admission to 
+                        <PRTPAGE P="18569"/>
+                        hospice care and proposes to add the physician member of the interdisciplinary group to the regulatory text at § 418.25.
+                    </P>
+                    <P>Section III.C. of this proposed rule proposes to re-align the attestation requirements in the regulatory text at § 418.22(b)(4) with the original intent of the statutory requirements under section 1814(a)(7) of the Act and CY 2011 HH PPS final rule for the certification of terminal illness regulations to include the physician's or nurse practitioner's signature and the date of the signature on each face-to-face encounter attestation. This section provides clarification that the attestation, its accompanying signature, and the date signed, must be a separate and distinct section of, or an addendum to, the recertification form, and must be clearly titled.</P>
+                    <P>Section III.D. of this proposed rule proposes a technical correction to a typo in the FY 2024 Hospice final rule at § 418.312(j). This section provides updates on the HOPE instrument, HQRP measures, and the transition to iQIES. This section also provides RFIs related to the transition to digital measures, nutrition, and well-being concepts.</P>
+                    <HD SOURCE="HD2">C. Summary of Impacts</HD>
+                    <P>The overall economic impact of this proposed rule is estimated to be $695 million in increased payments to hospices in FY 2026.</P>
+                    <HD SOURCE="HD1">II. Background</HD>
+                    <HD SOURCE="HD2">A. Hospice Care</HD>
+                    <P>Hospice care is a comprehensive, holistic approach to treatment that recognizes the impending death of a terminally ill individual and warrants a change in the focus from curative care to palliative care for relief of pain and for symptom management. Medicare regulations define “palliative care” as patient and family-centered care that optimizes quality of life by anticipating, preventing, and treating suffering. Palliative care throughout the continuum of illness involves addressing physical, intellectual, emotional, social, and spiritual needs and to facilitate patient autonomy, access to information, and choice (42 CFR 418.3). Palliative care is at the core of hospice philosophy and care practices and is a critical component of the Medicare hospice benefit.</P>
+                    <P>The goal of hospice care is to help terminally ill individuals continue life with minimal disruption to normal activities while remaining primarily in the home environment. A hospice uses an interdisciplinary approach to deliver medical, nursing, social, psychological, emotional, and spiritual services through a collaboration of professionals and other caregivers, with the goal of making the beneficiary as physically and emotionally comfortable as possible. Hospice is compassionate beneficiary- and family/caregiver-centered care for those who are terminally ill. As referenced in our regulations at § 418.22(c)(1), to be certified for Medicare hospice services, the patient's attending physician (if any) and the hospice medical director (or designee) or physician member of the interdisciplinary group must certify that the individual is “terminally ill,” as defined in section 1861(dd)(3)(A) of the Act and our regulations at § 418.3; that is, the individual has a medical prognosis that the individual's life expectancy is 6 months or less if the illness runs its normal course. The regulations at § 418.22(b)(2) require that clinical information and other documentation that support the medical prognosis accompany the certification and be filed in the medical record with the written certification. The regulations at § 418.22(b)(3) require that the certification and recertification forms, or an addendum to the certification and recertification forms, include a brief narrative explanation of the clinical findings that supports a life expectancy of 6 months or less.</P>
+                    <P>Under the Medicare hospice benefit, the election of hospice care is a patient choice, and once a terminally ill patient elects to receive hospice care, a hospice interdisciplinary group is essential in the seamless provision of primarily home-based services. The hospice interdisciplinary group works with the beneficiary, family, and caregivers to develop a coordinated, comprehensive care plan; reduce unnecessary diagnostics or ineffective therapies; and maintain ongoing communication with individuals and their families about changes in their condition. The beneficiary's care plan will shift over time to meet the changing needs of the individual, family, and caregiver(s) as the individual approaches the end of life.</P>
+                    <P>If, in the judgment of the hospice interdisciplinary group (as specified at § 418.56(a)(1)), which includes the hospice physician, the patient's symptoms cannot be effectively managed at home, then the patient is eligible for general inpatient care (GIP), a more medically intense level of care. GIP must be provided in a Medicare-certified hospice freestanding facility, skilled nursing facility, or hospital. GIP is provided to ensure that any new or worsening symptoms are intensively addressed so that the beneficiary can return home for hospice care (routine home care) (RHC). Limited, short-term, intermittent, inpatient respite care (IRC) is also available because of the absence or need for relief of the family or other caregivers. Additionally, an individual can receive continuous home care (CHC) during a period of crisis in which an individual requires continuous care to achieve palliation or management of acute medical symptoms so that the individual can remain at home. CHC may be covered for as much as 24 hours a day, and these periods must be predominantly nursing care, in accordance with the regulations at § 418.204. A minimum of 8 hours of nursing care or nursing and aide care must be furnished on a particular day to qualify for the CHC rate (§ 418.302(e)(4)).</P>
+                    <P>
+                        Hospices covered by this proposed rule must comply with applicable civil rights laws, including section 504 of the Rehabilitation Act of 1973 and the Americans with Disabilities Act, which require covered entities to take appropriate steps to ensure that communications with individuals with disabilities, including companions with disabilities, are as effective as communications with others, including the provisions of auxiliary aids and services when necessary to afford qualified individuals with disabilities, including applicants, participants, beneficiaries, companions and members of the public, an equal opportunity to participate in, and enjoy the benefits of, a service, program or activity of a covered entity.
+                        <SU>1</SU>
+                        <FTREF/>
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>1</SU>
+                             Hospices receiving Medicare Part A funds or other Federal financial assistance from the Department are also subject to additional Federal civil rights laws, including the Age Discrimination Act, and are subject to conscience and religious freedom laws where applicable.
+                        </P>
+                    </FTNT>
+                    <P>
+                        Title VI of the Civil Rights Act of 1964 prohibits discrimination on the basis of race, color or national origin in federally assisted programs or activities. The Office for Civil Rights (OCR) interprets this to require that recipients of Federal financial assistance take reasonable steps to provide meaningful access to their programs or activities to individuals with limited English proficiency (LEP).
+                        <SU>2</SU>
+                        <FTREF/>
+                         Similarly, section 1557 of the Affordable Care Act's implementing regulation requires covered entities to take reasonable steps to provide meaningful access to LEP individuals in federally funded health programs and activities (45 CFR 92.201(a)). Meaningful access may 
+                        <PRTPAGE P="18570"/>
+                        require the provision of interpreter services and translated materials (45 CFR 92.201(c)).
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>2</SU>
+                             HHS OCR, 
+                            <E T="03">Guidance to Federal Financial Assistance Recipients Regarding Title VI Prohibition Against National Origin Discrimination Affecting Limited English Proficient Persons,</E>
+                             68 FR 47311 (Aug. 8, 2003).
+                        </P>
+                    </FTNT>
+                    <HD SOURCE="HD2">B. Services Covered by the Medicare Hospice Benefit</HD>
+                    <P>Coverage under the Medicare hospice benefit requires that hospice services must be reasonable and necessary for the palliation and management of the terminal illness and related conditions. Section 1861(dd)(1) of the Act establishes the services that are to be rendered by a Medicare-certified hospice program. These covered services include: nursing care; physical therapy; occupational therapy; speech-language pathology services; medical social services; home health aide services (called hospice aide services); physician's services; homemaker services; medical supplies (including drugs and biologicals); medical appliances; counseling services (including dietary counseling); short-term inpatient care in a hospital, nursing facility, or hospice inpatient facility (including both respite care and procedures necessary for pain control and acute and chronic symptom management); continuous home care during periods of crisis, and only as necessary to maintain the terminally ill individual at home; and any other item or service which is specified in the plan of care and for which payment may otherwise be made under Medicare, in accordance with Title XVIII of the Act.</P>
+                    <P>Section 1814(a)(7)(B) of the Act requires that a written plan for providing hospice care to a beneficiary who is a hospice patient be established before such care is provided by, or under arrangements made by, the hospice program; and that the written plan be periodically reviewed by the beneficiary's attending physician (if any), the hospice medical director, and an interdisciplinary group (section 1861(dd)(2)(B) of the Act). The services offered under the Medicare hospice benefit must be available to beneficiaries as needed, 24 hours a day, 7 days a week (section 1861(dd)(2)(A)(i) of the Act).</P>
+                    <P>Upon the implementation of the hospice benefit, Congress also expected hospices to continue to use volunteer services, although Medicare does not pay for these volunteer services (section 1861(dd)(2)(E) of the Act). As stated in the Health Care Financing Administration's (now Centers for Medicare &amp; Medicaid Services (CMS)) proposed rule: Medicare Program; Hospice Care (48 FR 38149), the hospice must have an interdisciplinary group composed of paid hospice employees as well as hospice volunteers, and that “the hospice benefit with the resulting Medicare reimbursement is not intended to diminish the voluntary spirit of hospices.” This expectation supports the hospice philosophy of community based, holistic, comprehensive, and compassionate end of life care.</P>
+                    <HD SOURCE="HD2">C. Medicare Payment for Hospice Care</HD>
+                    <P>Sections 1812(d), 1813(a)(4), 1814(a)(7), 1814(i), and 1861(dd) of the Act, and the regulations in 42 CFR part 418, establish eligibility requirements, payment standards and procedures; define covered services; and delineate the conditions a hospice must meet to be approved for participation in the Medicare program. Part 418, subpart G, provides for a per diem payment based on one of four prospectively determined rate categories of hospice care (RHC, CHC, IRC, and GIP), based on each day a qualified Medicare beneficiary is under hospice care (once the individual has elected the benefit). This per diem payment is meant to cover all hospice services and items needed to manage the beneficiary's care, as required by section 1861(dd)(1) of the Act.</P>
+                    <P>While payment made to hospices is to cover all items, services, and drugs for the palliation and management of the terminal illness and related conditions, federal funds cannot be used for prohibited activities, even in the context of a per diem payment. For example, hospices are prohibited from playing a role in medical aid in dying (MAID) where such practices have been legalized in certain States. The Assisted Suicide Funding Restriction Act of 1997 (Pub. L. 105-12, April 30, 1997) prohibits the use of federal funds to provide or pay for any health care item or service or health benefit coverage for the purpose of causing, or assisting to cause, the death of any individual including “mercy killing, euthanasia, or assisted suicide.” However, the prohibition does not pertain to the provision of an item or service for the purpose of alleviating pain or discomfort, even if such use may increase the risk of death, so long as the item or service is not furnished for the specific purpose of causing or accelerating death.</P>
+                    <P>
+                        The Medicare hospice benefit has been revised and refined since its implementation after various Acts of Congress and Medicare rules. For a historical list of changes and regulatory actions, we refer readers to the background section of previous Hospice Wage Index and Payment Rate Update rules.
+                        <SU>3</SU>
+                        <FTREF/>
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>3</SU>
+                             Hospice Regulations and Notices. 
+                            <E T="03">https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/Hospice/Hospice-Regulations-and-Notices.</E>
+                        </P>
+                    </FTNT>
+                    <HD SOURCE="HD1">III. Provisions of the Proposed Rule</HD>
+                    <HD SOURCE="HD2">A. Proposed FY 2026 Hospice Wage Index and Rate Update</HD>
+                    <HD SOURCE="HD3">1. Proposed FY 2026 Hospice Wage Index</HD>
+                    <HD SOURCE="HD3">a. Background</HD>
+                    <P>The hospice wage index is used to adjust payment rates for hospices under the Medicare program to reflect local differences in area wage levels, based on the location where services are furnished. The hospice wage index utilizes the wage adjustment factors used by the Secretary for purposes of section 1886(d)(3)(E) of the Act for hospital wage adjustments. Our regulations at § 418.306(c) require each labor market to be established using the most current hospital wage data available, including any changes made by the Office of Management and Budget (OMB) to Metropolitan Statistical Area (MSA) definitions.</P>
+                    <P>
+                        In general, OMB issues major revisions to statistical areas every 10 years based on the results of the decennial census. On July 21, 2023, OMB issued Bulletin No. 23-01, which updated and superseded OMB Bulletin No. 20-01, issued on March 6, 2020. OMB Bulletin No. 23-01 established revised delineations for the MSAs, Micropolitan Statistical Areas, Combined Statistical Areas (CSAs), and Metropolitan Divisions, collectively referred to as Core Based Statistical Areas (CBSAs). According to OMB, the delineations reflect the 2020 Standards for Delineating Core Based Statistical Areas (the “2020 Standards”), which appeared in the 
+                        <E T="04">Federal Register</E>
+                         (86 FR 37770 through 37778) on July 16, 2021, and application of those standards to Census Bureau population and journey-to-work data (for example, 2020 Decennial Census, American Community Survey, and Census Population Estimates Program data). A copy of OMB Bulletin No. 23-01 is available online at 
+                        <E T="03">https://www.bls.gov/bls/omb-bulletin-23-01-revised-delineations-of-metropolitan-statistical-areas.pdf.</E>
+                    </P>
+                    <P>
+                        The July 21, 2023 OMB Bulletin No. 23-01 contained a number of significant changes. For example, it designated new CBSAs, split some existing CBSAs, and changed some urban counties to rural and some rural counties to urban. We believe it is important for the hospice 
+                        <PRTPAGE P="18571"/>
+                        wage index to use the latest OMB delineations available in order to maintain the most accurate and up-to-date payment system, reflecting the reality of population shifts and labor market conditions. We further believe that using the most current OMB delineations increases the integrity of the hospice wage index by creating a more accurate representation of geographic variation in wage levels. Therefore, in the FY 2025 Hospice final rule (89 FR 64208 through 64224), we finalized the implementation of new labor market areas based on the revisions in OMB Bulletin No. 23-01 beginning in FY 2025.
+                    </P>
+                    <HD SOURCE="HD3">b. Finalized Hospice Floor and 5 Percent Cap Policies</HD>
+                    <P>As described in the August 8, 1997 Hospice Wage Index final rule (62 FR 42860), the pre-floor and pre-reclassified hospital wage index is used as the raw wage index for the hospice benefit. These raw wage index values are subject to application of the hospice floor to compute the hospice wage index used to determine payments to hospices. The pre-floor, pre-reclassified hospital wage index values below 0.8000 are adjusted by a 15 percent increase subject to a maximum wage index value of 0.8000. For example, if CBSA A has a pre-floor, pre-reclassified hospital wage index value of 0.3994, we would multiply 0.3994 by 1.15, which equals 0.4593. Since 0.4593 is not greater than 0.8000, the CBSA A's hospice wage index would be 0.4593. In another example, if CBSA B has a pre-floor, pre-reclassified hospital wage index value of 0.7440, we would multiply 0.7440 by 1.15, which equals 0.8556. Because 0.8556 is greater than 0.8000, CBSA B's hospice wage index would be 0.8000.</P>
+                    <P>In the FY 2023 Hospice Wage Index and Rate Update final rule (87 FR 45673), we finalized for FY 2023 and subsequent years the application of a permanent 5 percent cap on any decrease to a geographic area's wage index from its wage index in the prior year, regardless of the circumstances causing the decline, so that a geographic area's wage index would not be less than 95 percent of its wage index calculated in the prior FY. When calculating the 5 percent cap on wage index decreases, we start with the current FY's pre-floor, pre-reclassification hospital wage index value for a CBSA or statewide rural area, and if that wage index value is below 0.8000, we apply the hospice floor as discussed previously in this section of the proposed rule. Next, we compare the current FY's wage index value after the application of the hospice floor to the final wage index value from the previous FY. If the current FY's wage index value is less than 95 percent of the previous year's wage index value, the 5 percent cap on wage index decreases would be applied and the final wage index value would be set equal to 95 percent of the previous FY's wage index value. If the 5 percent cap is applied in one FY, then in the subsequent FY, that year's pre-floor, pre-reclassification hospital wage index would be used as the starting wage index value and adjusted by the hospice floor. The hospice floor adjusted wage index value would be compared to the previous FY's wage index which had the 5 percent cap applied. If the hospice floor adjusted wage index value for that FY is less than 95 percent of the capped wage index from the previous year, then the 5 percent cap would be applied again, and the final wage index value would be 95 percent of the capped wage index from the previous FY. Using the example previously stated, if CBSA A has a pre-floor, pre-reclassified hospital wage index value of 0.3994, we would multiply 0.3994 by 1.15, which equals 0.4593. If CBSA A had a wage index value of 0.6200 in the previous FY, then we would compare 0.4593 to the previous FY's wage index value. Since 0.4593 is less than 95 percent of 0.6200, then CBSA A's hospice wage index would be 0.5890, which is equal to 95 percent of the previous FY's wage index value of 0.6200. In the next FY, the updated wage index value would be compared to the wage index value of 0.5890.</P>
+                    <P>Previously, this 5 percent cap methodology was applied to all the counties that make up a CBSA or rural area. However, beginning in FY 2025, we finalized a policy that the 5 percent cap methodology would also be applied to individual counties. In the FY 2025 Hospice Wage Index and Rate Update final rule (89 FR 64202), as a transition to the adoption of the revised delineations from OMB No. 23-01, we finalized a policy applying the permanent 5 percent cap on wage index decreases at the county level. Specifically, counties that were impacted by the revised designations beginning in FY 2025 would receive a 5 percent cap on any decrease in a geographic area's wage index value from the wage index value from the prior FY. Also, beginning in FY 2025, counties that have a different wage index value than the CBSA or rural area into which they are designated due to the application of the 5 percent cap (including redesignated counties that will receive the 5 percent cap and redesignated counties that move into a CBSA or rural area where all other constituent counties receive the 5 percent cap) would use a wage index transition code. These special codes are five digits in length and begin with “50”. The 50XXX wage index transition codes are used only in specific counties. Counties located in CBSAs and rural areas that do not correspond to a different transition wage index value will still use the CBSA number.</P>
+                    <P>Finally, we finalized a policy to apply the 5 percent cap to a county that corresponds to a different wage index value than the wage index value assigned to the CBSA or rural area in which they are designated due to a delineation change until the county's new wage index is more than 95 percent of the wage index from the previous FY. In order to capture the correct wage index value, the county will continue to use the assigned 50XXX transition code until the county's wage index value calculated for that FY using the new OMB delineations is not less than 95 percent of the county's capped wage index from the previous FY.</P>
+                    <P>The FY 2026 hospice wage index will continue to include the hospice floor as well as the 5 percent cap on wage index decreases. For FY 2026, the 5 percent cap on wage index decreases will continue to be calculated at the county level as well. While some counties that required a transition code for FY 2025 will continue to use the same transition code for FY 2026, other counties that required a transition code in FY 2025 will no longer require a transition code in FY 2026. For these counties, the FY 2026 wage index of the CBSA or rural area that they are designated into has a wage index higher than 95 percent of their previous FY's wage index. Therefore, these counties will use the CBSA or rural county code of the area they were redesignated into based on OMB Bulletin No. 23-01.</P>
+                    <P>
+                        More information regarding these special codes can be found in the FY 2025 Hospice Wage Index and Rate Update final rule (89 FR 64220 through 64224). Additionally, the list of counties that must use a 50XXX transition code for a given FY can be found as a separate tab in the hospice wage index file for that FY available on the CMS website at 
+                        <E T="03">https://www.cms.gov/medicare/payment/fee-for-service-providers/hospice/hospice-wage-index.</E>
+                    </P>
+                    <HD SOURCE="HD3">c. Proposed FY 2026 Hospice Wage Index</HD>
+                    <P>
+                        In the FY 2020 Hospice Wage Index and Rate Update final rule (84 FR 38484), we finalized a policy to use the 
+                        <PRTPAGE P="18572"/>
+                        current FY's hospital wage index data to calculate the hospice wage index values. For FY 2026, we are proposing that the hospice wage index be based on the FY 2026 hospital pre-floor, pre-reclassified wage index for hospital cost reporting periods beginning on or after October 1, 2021 and before October 1, 2022 (FY 2022 cost report data). The FY 2026 hospice wage index would not consider any geographic reclassification of hospitals, including those in accordance with sections 1886(d)(8)(B) or 1886(d)(10) of the Act. The regulations that govern hospice payment do not provide a mechanism for allowing hospices to seek geographic reclassification or to utilize the rural floor provisions that exist for Inpatient Prospective Payment System (IPPS) hospitals. The reclassification provision found in section 1886(d)(10) of the Act is specific to hospitals. Section 4410(a) of the Balanced Budget Act of 1997 (Pub. L. 105-33) provides that the area wage index applicable to any hospital located in an urban area of a State may not be less than the area wage index applicable to hospitals located in rural areas in that State. This rural floor provision is also specific to hospitals. Because the reclassification and the hospital rural floor policies apply to hospitals only, and not to hospices, we continue to believe the use of the pre-floor and pre-reclassified hospital wage index is the most appropriate adjustment to the labor portion of the hospice payment rates. This position is longstanding and consistent with other Medicare payment systems, for example, the skilled nursing facility prospective payment system (SNF PPS), the inpatient rehabilitation facility prospective payment system (IRF PPS), and the home health prospective payment system (HH PPS). However, the hospice wage index does include the hospice floor, which is applicable to all CBSAs, both rural and urban. The hospice floor adjusts pre-floor, pre-reclassified hospital wage index values below 0.8000 by a 15 percent increase subject to a maximum wage index value of 0.8000.
+                    </P>
+                    <P>The appropriate FY 2026 wage index value would be applied to the labor portion of the hospice payment rate based on the geographic area in which the beneficiary resides when receiving RHC or CHC. The appropriate FY 2026 wage index value would be applied to the labor portion of the payment rate based on the geographic location of the facility for beneficiaries receiving GIP or IRC.</P>
+                    <P>There exist some geographic areas where there are no hospitals, and thus, no hospital wage data on which to base the calculation of the hospice wage index. In the FY 2006 Hospice Wage Index and Rate Update final rule (70 FR 45135), we adopted the policy that, for urban labor markets without a hospital from which hospital wage index data could be derived, all the CBSAs within the State would be used to calculate a statewide urban average pre-floor, pre-reclassified hospital wage index value to use as a reasonable proxy for these areas. For FY 2026, the only CBSA without a hospital from which hospital wage data can be derived is 25980, Hinesville, Georgia. As such, the proposed FY 2026 hospice wage index for Hinesville, Georgia is 0.8892.</P>
+                    <P>In the FY 2008 Hospice Wage Index and Rate Update final rule (72 FR 50217 through 50218), we implemented a methodology to update the hospice wage index for rural areas without hospital wage data. In cases where there is a rural area without rural hospital wage data, we use the average pre-floor, pre-reclassified hospital wage index data from all contiguous CBSAs, to represent a reasonable proxy for the rural area. The term “contiguous” means sharing a border (72 FR 50217). In the FY 2025 Hospice Wage Index and Rate Update final rule (89 FR 64207), as part of our adoption of the revised OMB delineations, rural North Dakota became a rural area without a hospital from which hospital wage data can be derived. Therefore, to calculate the proposed FY 2026 wage index for rural area 99935, North Dakota, we use as a proxy the average pre-floor, pre-reclassified hospital wage data (updated by the hospice floor and 5 percent cap) from the contiguous CBSAs: CBSA 13900-Bismark, ND, CBSA 22020-Fargo, ND-MN, CBSA 24220-Grand Forks, ND-MN and CBSA 33500, Minot, ND, which results in a proposed FY 2026 hospice wage index of 0.8486 for rural North Dakota.</P>
+                    <P>Previously, the only rural area without a hospital from which hospital wage data could be derived was in Puerto Rico. However, for rural Puerto Rico, we did not apply this methodology due to the distinct economic circumstances that exist there (for example, due to the close proximity of almost all of Puerto Rico's various urban areas to non-urban areas, this methodology would produce a wage index for rural Puerto Rico that is higher than that of half of its urban areas). Instead, we used the most recent wage index previously available for that area, which was 0.4047, subsequently adjusted by the hospice floor for an adjusted wage index of 0.4654. For FY 2025, we noted that as part of our adoption of the revised OMB delineations, there is now a hospital in rural Puerto Rico from which hospital wage data can be derived. Therefore, we finalized a wage index for rural Puerto Rico based on the hospital wage data for the area instead of the previously available pre-hospice floor wage index of 0.4047, which equaled an adjusted wage index value of 0.4654. The proposed FY 2026 pre-hospice floor unadjusted wage index for rural Puerto Rico would be 0.2452 and is subsequently adjusted by the hospice floor to equal 0.2820. Because 0.2820 is more than a 5 percent decline in the FY 2025 wage index, the adjusted FY 2026 wage index with the 5 percent cap applied would equal 0.95 multiplied by 0.4421 (that is, the FY 2025 wage index with 5 percent cap), which would result in a proposed FY 2026 wage index value of 0.4200.</P>
+                    <P>
+                        The proposed hospice wage index applicable for FY 2026 (October 1, 2025 through September 30, 2026) is available on the CMS website for the FY 2026 Hospice Wage Index proposed rule at 
+                        <E T="03">https://www.cms.gov/medicare/payment/fee-for-service-providers/hospice/hospice-regulations-and-notices.</E>
+                    </P>
+                    <HD SOURCE="HD3">2. Proposed FY 2026 Hospice Payment Update Percentage</HD>
+                    <P>Section 4441(a) of the Balanced Budget Act of 1997 (BBA) (Pub. L. 105-33) amended section 1814(i)(1)(C)(ii)(VI) of the Act to establish updates to hospice rates for FYs 1998 through 2002. Hospice rates were to be updated by a factor equal to the inpatient hospital market basket percentage increase set out under section 1886(b)(3)(B)(iii) of the Act, minus one percentage point. Payment rates for FYs since 2002 have been updated as required by section 1814(i)(1)(C)(ii)(VII) of the Act, which states that the update to the payment rates for subsequent FYs must be the inpatient hospital market basket percentage increase for that FY. In the FY 2022 IPPS/LTCH PPS final rule (86 FR 45194 through 45204), we finalized the rebased and revised IPPS market basket to reflect a 2018 base year. For FY 2026, we are proposing to rebase and revise the IPPS market basket to reflect a 2023 base year. For more information on this proposal, we refer readers to the FY 2026 IPPS/LTCH PPS proposed rule.</P>
+                    <P>
+                        Section 3401(g) of the Affordable Care Act mandated that, starting with FY 2013 (and in subsequent FYs), the hospice payment update percentage be annually reduced by changes in economy-wide productivity as specified in section 1886(b)(3)(B)(xi)(II) of the Act. The statute defines the productivity 
+                        <PRTPAGE P="18573"/>
+                        adjustment to be equal to the 10-year moving average of changes in annual economy-wide private nonfarm business multifactor productivity (MFP) as projected by the Secretary for the 10-year period ending with the applicable FY, year, cost reporting period, or other annual period (the “productivity adjustment”). The United States Department of Labor's Bureau of Labor Statistics (BLS) publishes the official measures of productivity for the United States economy. We note that, previously, the productivity measure referenced in section 1886(b)(3)(B)(xi)(II) of the Act was published by BLS as private nonfarm business multifactor productivity. Beginning with the November 18, 2021 release of productivity data, BLS replaced the term “multifactor productivity” with “total factor productivity” (TFP). BLS noted that this is a change in terminology only and would not affect the data or methodology. As a result of the BLS name change, the productivity measure referenced in section 1886(b)(3)(B)(xi)(II) of the Act is now published by BLS as “private nonfarm business total factor productivity.” However, as mentioned, the data and methods are unchanged. We refer readers to 
+                        <E T="03">http://www.bls.gov</E>
+                         for the BLS historical published TFP data. A complete description of IHS Global Inc.'s (IGIs) TFP projection methodology is available on the CMS website at 
+                        <E T="03">https://www.cms.gov/data-research/statistics-trends-and-reports/medicare-program-rates-statistics/market-basket-research-and-information.</E>
+                         In addition, in the FY 2022 IPPS final rule (86 FR 45214), we noted that beginning with FY 2022, CMS changed the name of this adjustment to refer to it as the “productivity adjustment” rather than the “MFP adjustment”.
+                    </P>
+                    <P>Consistent with our historical practice, we estimate the market basket percentage increase, and the productivity adjustment based on IGI's forecast, using the most recent available data. The proposed hospice payment update percentage for FY 2026 is based on the most recent estimate of the inpatient hospital market basket (based on IGI's fourth quarter 2024 forecast). Due to the requirements at sections 1886(b)(3)(B)(xi)(II) and 1814(i)(1)(C)(v) of the Act, the proposed inpatient hospital market basket percentage increase for FY 2026 of 3.2 percent is required to be reduced by a productivity adjustment as mandated by section 3401(g) of the Affordable Care Act. The proposed productivity adjustment for FY 2026 is 0.8 percentage point (based on IGI's fourth quarter 2024 forecast). Therefore, the proposed hospice payment update percentage for FY 2026 is 2.4 percent. We are also proposing that if more recent data become available after the publication of this proposed rule and before the publication of the final rule (for example, a more recent estimate of the inpatient hospital market basket percentage increase or productivity adjustment), we would use such data, if appropriate, to determine the hospice payment update percentage in the FY 2026 final rule. We continue to believe it is appropriate to routinely update the hospice payment system so that it reflects the best available data regarding differences in patient resource use and costs among hospices as required by the statute.</P>
+                    <P>In the FY 2022 Hospice Wage Index and Rate Update final rule (86 FR 42532), we rebased and revised the labor shares for RHC, CHC, GIP, and IRC using Medicare cost report data for freestanding hospices (CMS Form 1984-14, OMB Control Number 0938-0758) from 2018. The current labor portion of the payment rates are: RHC, 66.0 percent; CHC, 75.2 percent; GIP, 63.5 percent; and IRC, 61.0 percent. The non-labor portion is equal to 100 percent minus the labor portion for each level of care. The non-labor portion of the payment rates are as follows: RHC, 34.0 percent; CHC, 24.8 percent; GIP, 36.5 percent; and IRC, 39.0 percent.</P>
+                    <HD SOURCE="HD3">3. Proposed FY 2026 Hospice Payment Rates</HD>
+                    <P>There are four payment categories that are distinguished by the location and intensity of the hospice services provided. The base payments are adjusted for geographic differences in wages by multiplying the labor share, which varies by category, of each base rate by the applicable hospice wage index. A hospice is paid the RHC rate for each day the beneficiary is enrolled in hospice, unless the hospice provides CHC, IRC, or GIP. CHC is provided during a period of patient crisis to maintain the patient at home; IRC is short-term care to allow the usual caregiver to rest and be relieved from caregiving; and GIP care is intended to treat symptoms that cannot be managed in another setting.</P>
+                    <P>As discussed in the FY 2016 Hospice Wage Index and Rate Update final rule (80 FR 47172), we implemented two different RHC payment rates, one RHC rate for the first 60 days and a second RHC rate for days 61 and beyond. In addition, in that final rule, we implemented a Service Intensity Add-On (SIA) payment for RHC when direct patient care is provided by a registered nurse (RN) or social worker during the last seven days of the beneficiary's life. The SIA payment is equal to the CHC hourly rate multiplied by the hours of nursing or social work provided (up to four hours total) that occurred on the day of service if certain criteria are met. To maintain budget neutrality, as required under section 1814(i)(6)(D)(ii) of the Act, the new RHC rates were adjusted by an SIA budget neutrality factor (SBNF). The SBNF is used to reduce the overall RHC rate in order to ensure that SIA payments are budget neutral. At the beginning of every FY, SIA utilization is compared to the prior year in order calculate a budget neutrality adjustment. For FY 2026, the proposed SIA budget neutrality factor is 1.0005 for RHC days 1-60 and 1.0001 for RHC days 61+.</P>
+                    <P>In the FY 2017 Hospice Wage Index and Rate Update final rule (81 FR 52156), we initiated a policy of applying a wage index standardization factor to hospice payments in order to eliminate the aggregate effect of annual variations in hospital wage data. For FY 2026 hospice rate setting, we are continuing our longstanding policy of using the most recent data available. Specifically, we are proposing to use FY 2024 claims data as of January 13, 2025 for the FY 2026 payment rate updates. We note that the budget neutrality factors and payment rates will be updated with more complete FY 2024 claims data for the final rule. In order to calculate the wage index standardization factor, we simulate total payments using FY 2024 hospice utilization claims data with the FY 2025 wage index (pre-floor, pre-reclassified hospital wage index with the hospice floor and the 5 percent cap on wage index decreases) and FY 2025 payment rates and compare it to our simulation of total payments using FY 2024 utilization claims data, the proposed FY 2026 hospice wage index (pre-floor, pre-reclassified hospital wage index with hospice floor, and the 5 percent cap on wage index decreases) and FY 2025 payment rates. By dividing payments for each level of care (RHC days 1 through 60, RHC days 61+, CHC, IRC, and GIP) using the FY 2025 wage index and FY 2025 payment rates for each level of care by the FY 2026 wage index and FY 2025 payment rates, we obtain a wage index standardization factor for each level of care. The proposed wage index standardization factors for each level of care are shown in Tables 1 and 2.</P>
+                    <P>
+                        The proposed FY 2026 RHC rates are shown in Table 1. The proposed FY 2026 payment rates for CHC, IRC, and GIP are shown in Table 2.
+                        <PRTPAGE P="18574"/>
+                    </P>
+                    <GPOTABLE COLS="7" OPTS="L2,nj,i1" CDEF="xs36,r50,10,10,15,10,10">
+                        <TTITLE>Table 1—Proposed FY 2026 Hospice RHC Payment Rates</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Code</CHED>
+                            <CHED H="1">Description</CHED>
+                            <CHED H="1">
+                                FY 2025
+                                <LI>payment</LI>
+                                <LI>rates</LI>
+                            </CHED>
+                            <CHED H="1">
+                                SIA
+                                <LI>budget</LI>
+                                <LI>neutrality</LI>
+                                <LI>factor</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Wage index
+                                <LI>standardization</LI>
+                                <LI>factor</LI>
+                            </CHED>
+                            <CHED H="1">
+                                FY 2026
+                                <LI>hospice</LI>
+                                <LI>payment</LI>
+                                <LI>update</LI>
+                            </CHED>
+                            <CHED H="1">Proposed FY 2026 payment rates</CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">651</ENT>
+                            <ENT>Routine Home Care (days 1-60)</ENT>
+                            <ENT>$224.62</ENT>
+                            <ENT>1.0005</ENT>
+                            <ENT>1.0009</ENT>
+                            <ENT>1.024</ENT>
+                            <ENT>$230.33</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">651</ENT>
+                            <ENT>Routine Home Care (days 61+)</ENT>
+                            <ENT>176.92</ENT>
+                            <ENT>1.0001</ENT>
+                            <ENT>1.0018</ENT>
+                            <ENT>1.024</ENT>
+                            <ENT>181.51</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <GPOTABLE COLS="6" OPTS="L2,nj,i1" CDEF="xs36,r50,10,15,10,r40">
+                        <TTITLE>Table 2—Proposed FY 2026 Hospice CHC, IRC, and GIP Payment Rates</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Code</CHED>
+                            <CHED H="1">Description</CHED>
+                            <CHED H="1">
+                                FY 2025
+                                <LI>payment</LI>
+                                <LI>rates</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Wage index
+                                <LI>standardization</LI>
+                                <LI>factor</LI>
+                            </CHED>
+                            <CHED H="1">
+                                FY 2026
+                                <LI>hospice payment </LI>
+                                <LI>update</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Proposed FY 2026
+                                <LI>payment rates</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">652</ENT>
+                            <ENT>Continuous Home Care Full Rate = 24 hours of care</ENT>
+                            <ENT>$1,618.59</ENT>
+                            <ENT>1.0047</ENT>
+                            <ENT>1.024</ENT>
+                            <ENT>$1,665.23, $69.38 per hour.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">655</ENT>
+                            <ENT>Inpatient Respite Care</ENT>
+                            <ENT>518.78</ENT>
+                            <ENT>1.0007</ENT>
+                            <ENT>1.024</ENT>
+                            <ENT>$531.60.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">656</ENT>
+                            <ENT>General Inpatient Care</ENT>
+                            <ENT>1,170.04</ENT>
+                            <ENT>0.9994</ENT>
+                            <ENT>1.024</ENT>
+                            <ENT>$1,197.40.</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <P>Sections 1814(i)(5)(A) through (C) of the Act require that hospices submit quality data on measures to be specified by the Secretary. In the FY 2012 Hospice Wage Index and Rate Update final rule (76 FR 47320 through 47324), we implemented a Hospice Quality Reporting Program (HQRP) as required by those sections. Hospices were required to begin collecting quality data in October 2012 and submit those quality data in 2013. Section 1814(i)(5)(A)(i) of the Act requires that beginning with FY 2014 through FY 2023, the Secretary shall reduce the market basket percentage increase by two percentage points for any hospice that does not comply with the quality data submission requirements with respect to that FY. Section 1814(i)(5)(A)(i) of the Act was amended by section 407(b) of Division CC, Title IV of the Consolidated Appropriations Act (CAA), 2021 (Pub. L. 116-260) to change the payment reduction for failing to meet hospice quality reporting requirements from two to four percentage points. Depending on the amount of the annual update for a particular year, a reduction of four percentage points beginning in FY 2024 makes a negative payment update more likely than the previous 2 percent reduction. This could result in the annual market basket update being less than zero percent for a FY and may result in payment rates that are less than payment rates for the preceding FY. We applied this policy beginning with the FY 2024 Annual Payment Update (APU), which we based on CY 2022 quality data. Therefore, the proposed FY 2026 rates for hospices that do not submit the required quality data would be updated by −1.6 percent, which is the proposed FY 2026 hospice payment update percentage of 2.4 percent minus four percentage points. The proposed payment rates for hospices that do not submit the required quality data are shown in Tables 3 and 4.</P>
+                    <GPOTABLE COLS="7" OPTS="L2,nj,i1" CDEF="xs36,r50,10,10,15,15,10">
+                        <TTITLE>
+                            Table 3—Proposed FY 2026 Hospice RHC Payment Rates for Hospices That 
+                            <E T="03">DO NOT</E>
+                             Submit the Required Quality Data
+                        </TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Code</CHED>
+                            <CHED H="1">Description</CHED>
+                            <CHED H="1">
+                                FY 2025
+                                <LI>payment rates</LI>
+                            </CHED>
+                            <CHED H="1">SIA budget neutrality factor</CHED>
+                            <CHED H="1">Wage index standardization factor</CHED>
+                            <CHED H="1">
+                                FY 2026 hospice payment update of 2.4% minus 4
+                                <LI>percentage points = −1.6%</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Proposed
+                                <LI>FY 2026</LI>
+                                <LI>payment</LI>
+                                <LI>rates</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">651</ENT>
+                            <ENT>Routine Home Care (days 1-60)</ENT>
+                            <ENT>$224.62</ENT>
+                            <ENT>1.0005</ENT>
+                            <ENT>1.0009</ENT>
+                            <ENT>0.984</ENT>
+                            <ENT>$221.34</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">651</ENT>
+                            <ENT>Routine Home Care (days 61+)</ENT>
+                            <ENT>176.92</ENT>
+                            <ENT>1.0001</ENT>
+                            <ENT>1.0018</ENT>
+                            <ENT>0.984</ENT>
+                            <ENT>174.42</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <GPOTABLE COLS="6" OPTS="L2,nj,i1" CDEF="xs36,r50,10,15,15,r40">
+                        <TTITLE>
+                            Table 4—Proposed FY 2026 Hospice CHC, IRC, and GIP Payment Rates for Hospices That 
+                            <E T="03">DO NOT</E>
+                             Submit the Required Quality Data
+                        </TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Code</CHED>
+                            <CHED H="1">Description</CHED>
+                            <CHED H="1">FY 2025 payment rates</CHED>
+                            <CHED H="1">Wage index standardization factor</CHED>
+                            <CHED H="1">
+                                FY 2026 hospice payment update of 2.4% minus 4
+                                <LI>percentage points</LI>
+                                <LI>= −1.6%</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Proposed FY 2026 
+                                <LI>payment rates</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">652</ENT>
+                            <ENT>Continuous Home Care Full Rate = 24 hours of care</ENT>
+                            <ENT>$1,618.59</ENT>
+                            <ENT>1.0047</ENT>
+                            <ENT>0.984</ENT>
+                            <ENT>$1,600.18, $66.67 per hour.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">655</ENT>
+                            <ENT>Inpatient Respite Care</ENT>
+                            <ENT>518.78</ENT>
+                            <ENT>1.0007</ENT>
+                            <ENT>0.984</ENT>
+                            <ENT>$510.84.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">656</ENT>
+                            <ENT>General Inpatient Care</ENT>
+                            <ENT>1,170.04</ENT>
+                            <ENT>0.9994</ENT>
+                            <ENT>0.984</ENT>
+                            <ENT>$1,150.63.</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <PRTPAGE P="18575"/>
+                    <HD SOURCE="HD3">4. Proposed Hospice Cap Amount for FY 2026</HD>
+                    <P>As discussed in the FY 2016 Hospice Wage Index and Rate Update final rule (80 FR 47183), we implemented changes mandated by the IMPACT Act of 2014 (Pub. L. 113-185, Oct. 6, 2014). Specifically, we stated that for accounting years that end after September 30, 2016, and before October 1, 2025, the hospice cap is updated by the hospice payment update percentage rather than using the consumer price index for all urban consumers (CPI-U). Division CC, section 404 of the CAA, 2021 extended the accounting years impacted by the adjustment made to the hospice cap calculation until 2030. In the FY 2022 Hospice Wage Index and Rate Update final rule (86 FR 42539), we finalized conforming regulation text changes at § 418.309 to reflect the provisions of the CAA, 2021. Division P, section 312 of the CAA, 2022 (Pub. L. 117-103) amended section 1814(i)(2)(B) of the Act and extended the provision that mandates the hospice cap be updated by the hospice payment update percentage (the inpatient hospital market basket percentage increase reduced by the productivity adjustment) rather than the CPI-U for accounting years that end after September 30, 2016 and before October 1, 2031. Division FF, section 4162 of the CAA, 2023 (Pub. L. 118-328) amended section 1814(i)(2)(B) of the Act and extended the provision that currently mandates the hospice cap be updated by the hospice payment update percentage (the inpatient hospital market basket percentage increase reduced by the productivity adjustment) rather than the CPI-U for accounting years that end after September 30, 2016 and before October 1, 2032. Division G, Section 308 of the Consolidated Appropriations Act, 2024 (CAA, 2024) (Pub. L. 118-42) extends this provision to October 1, 2033. Before the enactment of this provision, the hospice cap update was set to revert to the original methodology of updating the annual cap amount by the CPI-U beginning on October 1, 2032. Therefore, for accounting years that end after September 30, 2016, and before October 1, 2033, the hospice cap amount is updated by the hospice payment update percentage rather than the CPI-U. In the FY 2025 Hospice Wage Index and Rate Update final rule (89 FR 64202), as a result of the changes mandated by the CAA, 2024, we finalized conforming regulation text changes at § 418.309 to reflect the revisions at section 1814(i)(2)(B) of the Act.</P>
+                    <P>The proposed hospice cap amount for the FY 2026 cap year is $35,292.51, which is equal to the FY 2025 cap amount ($34,465.34) updated by the proposed FY 2026 hospice payment update percentage of 2.4 percent. We are also proposing that if more recent data become available after the publication of this proposed rule and before the publication of the final rule (for example, a more recent estimate of the hospice payment update percentage), we would use such data, if appropriate, to determine the hospice cap amount in the FY 2026 final rule.</P>
+                    <HD SOURCE="HD2">B. Proposed Regulation Change to Admission to Hospice Care</HD>
+                    <P>The Medicare hospice benefit provides coverage for a comprehensive set of services described in section 1861(dd)(1) of the Act for individuals who are deemed “terminally ill” based on a medical prognosis that the individual's life expectancy is 6 months or less, as described in section 1861(dd)(3)(A) of the Act. As such, section 1814(a)(7)(A) of the Act requires the individual's attending physician (if the patient designates an attending physician) and hospice medical director (or physician member of the interdisciplinary group (IDG)) to certify in writing at the beginning of the first 90-day period of hospice care that the individual is “terminally ill” based on the physician's or medical director's clinical judgment regarding the normal course of the individual's illness. In a subsequent 90- or 60-day period of hospice care, only the hospice medical director or the physician member of the IDG recertifies at the beginning of the period that the patient is terminally ill based on such clinical judgment.</P>
+                    <P>
+                        Operation Restore Trust (ORT), a government initiative that began in 1995, coordinated with the Centers for Medicare &amp; Medicaid Services (CMS), the Office of the Inspector General (OIG), and the Administration on Aging (AoA) to identify vulnerabilities in the Medicare program and to pursue ways to reduce Medicare's exposure to fraud and abuse. Through audits, ORT identified several areas of weakness in the hospice benefit, primarily in the area of hospice eligibility. In response to concerns raised by ORT regarding beneficiaries who had been receiving hospice care for more than 210 days but who were later determined to have not been eligible 
+                        <SU>4</SU>
+                        <FTREF/>
+                         and to reduce Medicare exposure to abusive practices, the FY 2006 Medicare Program; Hospice Care Amendments final rule (70 FR 70532, 70535, 70547) added a new § 418.25, “Admission to hospice care,” which established specific requirements that must be met before a hospice provider admits a patient to its care.
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>4</SU>
+                             Operation Restore Trust: Review of Medicare Hospice Eligibility at the San Diego Hospice Corporation 
+                            <E T="03">https://oig.hhs.gov/reports/all/1997/operation-restore-trust-review-of-medicare-hospice-eligibility-at-the-san-diego-hospice-corporation/.</E>
+                        </P>
+                    </FTNT>
+                    <P>In particular, § 418.25(a) requires that the hospice admit a patient only on the recommendation of the medical director (or the physician designee, as defined in § 418.3) in consultation with, or with input from, the patient's attending physician (if any). Section 418.25(b) sets out the information that the hospice medical director (or the physician designee, as defined in § 418.3) must consider in reaching a decision to certify that the patient is terminally ill. Section 418.25(b) is not the only regulation that discusses the certification of terminal illness. Section 418.22(c)(1) sets forth the sources of the certification of terminal illness and § 418.102(b) provides the standard for the initial certification of terminal illness in the condition of participation (CoP) for hospice medical directors. However, while each of these regulations pertain to the determination that a patient is terminally ill, they do not align regarding the physicians who can make these determinations.</P>
+                    <P>In particular, § 418.25 only describes any of two physicians on the recommendation of whom the hospice may admit a patient: the medical director or the physician designee (in addition to the patient's attending physician, if any). However, the payment certification of terminal illness and medical director CoP regulations at §§ 418.22(c)(1)(i) and 418.102(b), respectively, list any of three physicians who provide the written certification of terminal illness: the medical director of the hospice, the physician designee, or physician member of the hospice IDG.</P>
+                    <P>In the FY 2025 Hospice Wage Index and Rate Update final rule (89 FR 64231), we received several comments requesting that the physician member of the IDG be added to the hospice admission regulation at § 418.25. Specifically, commenters requested that the language regarding which physicians can make determinations for hospice admission align with current certification requirements and CoPs. We did not make a change to § 418.25 in the FY 2025 hospice final rule as we did not propose this change.</P>
+                    <P>
+                        We agree with the commenters that our regulations should consistently describe the physicians who can certify terminal illness and determine patient admission to hospice care. Accordingly, to align with the current payment and CoP regulations at §§ 418.22(c)(1)(i) and 
+                        <PRTPAGE P="18576"/>
+                        418.102(b), respectively, we propose to add the text “or the physician member of the hospice interdisciplinary group” at § 418.25(a) and (b) to indicate that, in addition to the medical director or physician designee, the physician member of the hospice IDG may also determine admission to hospice care. We believe aligning the language at § 418.25(a) and (b) with the language at §§ 418.102(b) and 418.22(c)(1)(i) would allow for greater consistency between key components of hospice regulations and policies.
+                    </P>
+                    <HD SOURCE="HD2">C. Proposed Clarifying Regulation Change Regarding Face-to-Face Attestation</HD>
+                    <P>The Medicare Program; Home Health Prospective Payment System Rate Update for Calendar Year 2011; Changes in Certification Requirements for Home Health Agencies and Hospices final rule (CY 2011 HH PPS final rule) implemented the requirements in section 1814(a)(7)(D) of the Act, as added by section 3132(b) of the Affordable Care Act (75 FR 70435). Subclause (i) of section 1814(a)(7)(D) requires that on and after January 1, 2011, a hospice physician or nurse practitioner (NP) must have a face-to-face encounter with a hospice patient to determine the patient's continued eligibility for hospice care prior to the 180-day recertification, and prior to each subsequent recertification. Section 1814(a)(7)(D)(i) also requires that the hospice physician or NP attest that such a visit took place, in accordance with procedures established by the Secretary. Additionally, as existing regulatory text at § 418.22 requires, if the face-to-face encounter was not performed by the certifying physician, the attestation of the physician or nurse practitioner who performed the face-to-face encounter shall state that the clinical findings of that visit were provided to the certifying physician for use in determining continued eligibility for hospice care. These requirements were codified at § 418.22 to ensure that a hospice patients' continued eligibility is appropriately assessed through a face-to-face encounter conducted by either a hospice physician or NP.</P>
+                    <P>
+                        As explained in the CY 2011 HH PPS final rule, the regulation at § 418.22(b)(4) set forth that the physician or NP who performs the face-to-face encounter with the patient must attest in writing that he or she had a face-to-face encounter with the patient and, at that time, set forth that the attestation of the 
+                        <E T="03">nurse practitioner</E>
+                         shall state that the clinical findings of that visit were provided to the certifying physician, for use in determining whether the patient continues to have a life expectancy of 6 months or less, should the illness run its normal course. Further, the regulation set forth that the attestation, its accompanying signature, and the date signed, must be a separate and distinct section of, or an addendum to, the recertification form, and must be clearly titled (75 FR 70463).
+                    </P>
+                    <P>
+                        In the FY 2012 Hospice Wage Index final rule (76 FR 47314), as a result of interested parties' concerns regarding access risks resulting from the policy implemented in the CY 2011 HH PPS final rule, we finalized that any hospice physician can perform the face-to-face encounter regardless of whether that physician recertifies the patient's terminal illness and composes the recertification narrative. Additionally, we amended the regulatory text at § 418.22(b)(4) to provide that the attestation of the NP 
+                        <E T="03">or a non-certifying hospice physician</E>
+                         shall state that the clinical findings of that encounter were provided to the certifying physician, for use in determining continued eligibility for hospice.
+                    </P>
+                    <P>In that final rule, however, we inadvertently omitted from the regulatory text at § 418.22(b)(4) the explicit requirements that the attestation include the accompanying signature of the practitioner who performed the face-to-face encounter, and the date signed. While the CY 2011 HH PPS final rule regulatory text required the practitioner conducting the encounter to attest to its occurrence, including the date and their signature, the unintentional omission of this explicit requirement in the FY 2012 Hospice Wage Index final rule led to discrepancies in documentation practices and introduced potential ambiguity into compliance requirements along with inconsistencies in implementation among hospice providers. Specifically, the lack of clarity regarding the full attestation requirements complicated documentation standards and audit processes, led to confusion about the expectations for what elements the attestation should minimally include, and thereby undermining of the intent of the original statute and rule to require verifiable documentation of appropriately assessed continued eligibility.</P>
+                    <P>As such, we propose to amend § 418.22(b)(4) to set forth that the physician, or NP who performs the face-to-face encounter attest that the face-to-face encounter occurred, and the attestation must include the signature of the physician or NP who conducted the face-to-face encounter and the date it was signed. Further, we propose that the attestation, its accompanying signature, and the date signed, must be a separate and distinct section of, or an addendum to, the recertification form, and must be clearly titled. With these measures, we seek to realign the regulatory text at § 418.22(b)(4) with the original intent of the CY 2011 HH PPS final rule and the statutory requirement in section 1814(a)(7)(D)(i)(I) of the Act.</P>
+                    <P>Accordingly, we propose to clarify the current regulation at § 418.22(b)(4) as follows: The physician or nurse practitioner who performs the face-to-face encounter with the patient described in paragraph (a)(4) of this section must attest in writing that he or she had a face-to-face encounter with the patient, including the date of that visit. The attestation must include the physician's or nurse practitioner's signature and the date it was signed. The attestation, its accompanying signature, and the date signed, must be a separate and distinct section of, or an addendum to, the recertification form, and must be clearly titled. If the face-to-face encounter was not performed by the certifying physician, the attestation of the physician or nurse practitioner who performed the face-to-face encounter shall state that the clinical findings of that visit were provided to the certifying physician for use in determining continued eligibility for hospice care.</P>
+                    <P>These additions will help to resolve current ambiguities, improve documentation standards, and promote consistent implementation across providers.</P>
+                    <HD SOURCE="HD2">D. Updates for the Hospice Quality Reporting Program (HQRP)</HD>
+                    <HD SOURCE="HD3">1. Background and Statutory Authority</HD>
+                    <P>
+                        Section 1814(i)(5) of the Act requires the Secretary to establish and maintain a quality reporting program for hospices. The Hospice Quality Reporting Program (HQRP), consisting of Hospice Item Set (HIS), administrative data, and Consumer Assessment of Healthcare Providers and Systems (CAHPS®) Hospice Survey, specifies reporting requirements that hospices complete and submit a standardized set of items for each patient to capture patient-level data, regardless of payer or patient age (§ 418.312(b)). Beginning with FY 2014, section 1814(i)(5) of the Act requires the Secretary to reduce the market basket update by 2 percentage points for those hospices failing to meet quality reporting requirements. Section 407(b) of Division CC, Title IV of the Consolidated Appropriations Act (CAA), 2021 amended section 1814(i)(5)(A)(i) of the Act to change the 
+                        <PRTPAGE P="18577"/>
+                        payment reduction for failing to meet hospice quality reporting requirements from 2 to 4 percentage points beginning in FY 2024 for any hospice that does not comply with the submission requirements above for that FY. In the FY 2024 Hospice final rule, we codified the application of the 4-percentage point payment reduction for failing to meet hospice quality reporting requirements and set completeness thresholds at § 418.312(j).
+                    </P>
+                    <P>Depending on the amount of the annual update for a particular year, a reduction of 4 percentage points beginning in FY 2024 could result in the annual market basket update being less than zero percent for a FY and may result in payment rates that are less than payment rates for the preceding FY. Any reduction based on failure to comply with the reporting requirements, as required by section 1814(i)(5)(B) of the Act, would apply only for the specified year.</P>
+                    <P>In the FY 2014 Hospice Wage Index and Payment Rate Update final rule (78 FR 48234, 48257 through 48262), and in compliance with section 1814(i)(5)(C) of the Act, we finalized a new standardized patient-level data collection vehicle called the Hospice Item Set (HIS). We also finalized the specific collection of data items that support eight consensus-based entity (CBE)-endorsed measures for hospice.</P>
+                    <P>
+                        In the FY 2015 Hospice Wage Index and Payment Rate Update final rule (79 FR 50452), we finalized national implementation of the CAHPS® Hospice Survey, a component of the CMS HQRP which is used to collect data on the experiences of hospice patients and the primary caregivers listed in their hospice records. Readers who want more information about the development of the survey, originally called the Hospice Experience of Care Survey, may refer to the FY 2014 and FY 2015 Hospice Wage Index and Payment Update final rules (78 FR 48234 and 79 FR 50452, respectively) or to 
+                        <E T="03">https://www.hospicecahpssurvey.org/.</E>
+                         National implementation commenced January 1, 2015. We adopted eight CAHPS® survey-based measures for the CY 2018 data collection period and for subsequent years. These eight measures are publicly reported on the Care Compare website.
+                    </P>
+                    <P>In the FY 2016 Hospice Wage Index and Rate Update final rule (80 FR 47142, 47186 through 47188), we finalized the policy for retention of HQRP measures adopted for previous payment determinations and seven factors for removal. In that same final rule, we discussed how we would provide public notice through rulemaking of measures under consideration for removal, suspension, or replacement. We also stated that if we had reason to believe continued collection of a measure raised potential safety concerns, we would take immediate action to remove the measure from the HQRP and not wait for the annual rulemaking cycle. The measures would be promptly removed and we would immediately notify hospices and the public of such a decision through the usual HQRP communication channels, including but not limited to listening sessions, email notifications, Open Door Forums, and Web postings. In such instances, the removal of a measure would be formally announced in the next annual rulemaking cycle.</P>
+                    <P>On August 31, 2020, we added correcting language to the FY 2016 Hospice Wage Index and Payment Rate Update and Hospice Quality Reporting Requirements; Correcting Amendment (85 FR 53679) hereafter referred to as the FY 2021 HQRP Correcting Amendment. In the correcting amendment, we made updates to 42 CFR 418.312 to correct technical errors identified in the FY 2016 Hospice Wage Index and Payment Rate Update final rule. Specifically, the FY 2021 HQRP Correcting Amendment (85 FR 53679) added paragraph (i) to § 418.312 to reflect our exemptions and extensions requirements for reporting, which were referenced in the preamble but inadvertently omitted from the regulations text. Thus, these exemptions or extensions can occur when a hospice encounters certain extraordinary circumstances.</P>
+                    <P>In the FY 2017 Hospice Wage Index and Payment Rate Update final rule, we finalized the “Hospice Visits When Death is Imminent” measure pair (HVWDII, Measure 1 and Measure 2), effective April 1, 2017. We refer the public to the FY 2017 Hospice Wage Index and Payment Rate Update final rule (81 FR 52144, 52163 through 52169) for a detailed discussion.</P>
+                    <P>
+                        As stated in the FY 2019 Hospice Wage Index and Rate Update final rule (83 FR 38622, 38635 through 38648), we launched the “Meaningful Measures Initiative” (which identifies high priority areas for quality measurement and improvement) to improve outcomes for patients, their families, and providers while also reducing burden on clinicians and providers. The Meaningful Measures Initiative is not intended to replace any existing CMS quality reporting programs but will help such programs identify and select individual measures. The Meaningful Measures Initiative priority areas are intended to increase measure alignment across our quality programs and other public and private initiatives. Additionally, it will point to high priority areas where there may be gaps in available quality measures while helping to guide our efforts to develop and implement quality measures to fill those gaps. More information about the Meaningful Measures Initiative can be found at 
+                        <E T="03">https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/QualityInitiativesGenInfo/MMF/General-info-Sub-Page.html.</E>
+                    </P>
+                    <P>In the FY 2022 Hospice Wage Index and Payment Rate Update final rule (86 FR 42552), we finalized two new measures using claims data: (1) Hospice Visits in the Last Days of Life (HVLDL); and (2) Hospice Care Index (HCI). We also removed the HVWDII measure, as it was replaced by HVLDL. We also finalized a policy that claims-based measures would use 8 quarters of data, which would allow CMS to publicly report on more hospices. Additionally, the rule indicated that public data reflecting hospices' reporting of the two new claims-based quality measures (QMs), the HVLDL and the HCI measures, would be available on the Care Compare/Provider Data Catalogue (PDC) web pages as of the August 2022 refresh.</P>
+                    <P>In addition, we removed the seven HIS Process Measures from the program as individual measures, and ceased their public reporting because, in our view, the HIS Comprehensive Assessment Measure is sufficient for measuring care at admission without the seven individual process measures. In the FY 2022 Hospice Wage Index and Rate Update final rule (86 FR 42553), we finalized § 418.312(b)(2), which requires hospices to provide administrative data, including claims-based measures, as part of the HQRP requirements for § 418.306(b). In that same final rule, we provided CAHPS Hospice Survey updates.</P>
+                    <P>In the FY 2023 and FY 2024 Hospice Wage Index final rules, we did not propose any new quality measures. However, we provided updates on already-adopted measures.</P>
+                    <P>In the FY 2025 Hospice Wage Index final rule, the HQRP finalized two measures, including new data collection through the Hospice Outcomes and Patient Evaluation (HOPE) tool and plans for further development.</P>
+                    <P>
+                        Table 5 shows the current quality measures in effect for the FY 2026 HQRP, which were updated and finalized in the FY 2025 Hospice Wage Index and Payment Rate Update final rule.
+                        <PRTPAGE P="18578"/>
+                    </P>
+                    <GPOTABLE COLS="1" OPTS="L2,nj,i1" CDEF="s200">
+                        <TTITLE>Table 5—Quality Measures in Effect for the Hospice Quality Reporting Program</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Hospice Quality Reporting Program</CHED>
+                        </BOXHD>
+                        <ROW RUL="s">
+                            <ENT I="21">
+                                <E T="02">Hospice Items Set (HIS) and Hospice Outcomes and Patient Evaluation (HOPE)</E>
+                            </ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice and Palliative Care Composite Process Measure—Comprehensive Assessment Measure at Admission includes:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">1. Patients Treated with an Opioid who are Given a Bowel Regimen.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">2. Pain Screening.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">3. Pain Assessment.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">4. Dyspnea Treatment.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">5. Dyspnea Screening.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">6. Treatment Preferences.</ENT>
+                        </ROW>
+                        <ROW RUL="s">
+                            <ENT I="03">7. Beliefs/Values Addressed (if desired by the patient).</ENT>
+                        </ROW>
+                        <ROW RUL="s">
+                            <ENT I="21">
+                                <E T="02">Administrative Data, Including Claims-Based Measures</E>
+                            </ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Visits in Last Days of Life (HVLDL).</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">Hospice Care Index (HCI):</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">1. Continuous Home Care (CHC) or General Inpatient (GIP) Provided.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">2. Gaps in Skilled Nursing Visits.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">3. Early Live Discharges.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">4. Late Live Discharges.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">5. Burdensome Transitions (Type 1)—Live Discharges from Hospice Followed by Hospitalization and Subsequent Hospice Readmission.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">6. Burdensome Transitions (Type 2)—Live Discharges from Hospice Followed by Hospitalization with the Patient Dying in the Hospital.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">7. Per-beneficiary Medicare Spending.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">8. Skilled Nursing Care Minutes per Routine Home Care (RHC) Day.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">9. Skilled Nursing Minutes on Weekends.</ENT>
+                        </ROW>
+                        <ROW RUL="s">
+                            <ENT I="03">10. Visits Near Death.</ENT>
+                        </ROW>
+                        <ROW RUL="s">
+                            <ENT I="21">
+                                <E T="02">CAHPS Hospice Survey</E>
+                            </ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">CAHPS Hospice Survey:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">1. Communication with Family.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">2. Getting Timely Help.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">3. Treating Patient with Respect.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">4. Emotional and Spiritual Support.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">5. Help for Pain and Symptoms.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">6. Training Family to Care for Patient.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">7. Care Preferences.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">8. Rating of this Hospice.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">9. Willing to Recommend this Hospice.</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <HD SOURCE="HD3">2. Update on the Comprehensive Assessment at Admission Measure</HD>
+                    <P>We retained key items from the HIS in HOPE v1.0 and continue to collect data to inform the Comprehensive Assessment at Admission (CBE #3235) while gathering additional data to support new quality measures. The Comprehensive Assessment Measure assesses the proportion of patients for whom the hospice performed all seven care processes, as applicable, at admission.</P>
+                    <P>First endorsed by the National Quality Forum (NQF) in July 2017, the measure was endorsed again by NQF in July 2021 and this measure endorsement has been extended through Fall 2026 under the new CBE, Battelle.</P>
+                    <HD SOURCE="HD3">3. Update on Hospice Claims-Based Measures</HD>
+                    <P>In the FY 2022 Hospice Wage Index and Payment Rate Update final rule (86 FR 42552), we finalized two new measures using claims data: (1) Hospice Visits in the Last Days of Life (HVLDL); and (2) Hospice Care Index (HCI).</P>
+                    <P>
+                        Our measure selection activities for the HQRP take into consideration input we receive from the CBE, as part of a pre-rulemaking process that we have established and are required to follow under section 1890A of the Act. The CBE convenes interested parties from multiple groups to provide CMS with recommendations on the Measures Under Consideration (MUC) list. This input informs how CMS selects certain categories of quality and efficiency measures as required by section 1890A(a)(3) of the Act. By February 1st of each year, the CBE must provide that input to CMS. On July 26, 2022, the CBE endorsed the claims-based HVLDL measure. More information can be found on the HQRP Quality Measure Development web page at 
+                        <E T="03">https://www.cms.gov/medicare/hospiceequality-reporting-program/quality-measure-development</E>
+                         and the HQRP Current Measures web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice/current-measures</E>
+                        . In November 2024, HVLDL was sent to the CBE advisory group for endorsement extension. HVLDL was re-endorsed with conditions in February 2025 and is endorsed through 2027. We are considering respecifying HCI, see the Hospice Technical Expert Panel (TEP) and Caregiver Report on this web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice/provider-and-stakeholder-engagement</E>
+                        .
+                    </P>
+                    <HD SOURCE="HD3">4. Update on the HOPE Instrument and Public Reporting and Future Quality Measure (QM) Development</HD>
+                    <P>The HOPE assessment was developed as the new patient assessment tool to replace the HIS as part of the HQRP. HOPE was finalized in the in the FY 2025 Hospice Wage Index final rule (89 FR 64202) and once implemented in FY 2026 (October 1, 2025), will provide value to hospice providers, patients, and families. Additional information regarding HOPE and its associated costs and burden can be found in the FY 2025 PRA submission (CMS-10390; OMB Control Number: 0938-1153).</P>
+                    <P>
+                        HOPE will provide assessment-based quality data to enhance the HQRP 
+                        <PRTPAGE P="18579"/>
+                        through standardized data collection, provide a better understanding of patient care needs, contribute to the patient's plan of care, and provide additional clinical data that could inform future payment refinements.
+                    </P>
+                    <P>
+                        We encourage providers and vendors to visit the HOPE Technical Information web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice-quality-reporting-program/hospice-outcomes-and-patient-evaluation-hope-technical-information</E>
+                         for the latest updates and resources related to HOPE data submission specifications and other technical information. The Web-Based Training, entitled Introducing the HOPE Tool, released October 1, 2024, is available on the HQRP Training and Education Library web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice/hqrp-training-and-education-library</E>
+                        . We encourage providers to complete the course, which contains five sections and includes interactive exercises to help providers understand and apply the content presented. More detailed comprehensive training will follow and be available on the HQRP Training and Education Library web page linked above.
+                    </P>
+                    <P>As finalized in the FY 2025 Hospice Wage Index final rule (89 FR 64202), public reporting of the HOPE quality measures will be implemented no earlier than FY 2028. Data collected by hospices during the four quarters of CY 2026 (for example, Q 1, 2, 3 and 4 CY 2026) will be analyzed starting in CY 2027. We will inform the public of the decisions about whether CMS will report some or all of the quality measures publicly based on the findings of analysis of the CY 2026 data through future rulemaking. Providers will have the opportunity to preview HOPE data before it is publicly reported, with the first HOPE-based QM public reporting anticipated to be no earlier than November 2027 (FY 2028). Table 6 walks through the anticipated schedule for HOPE public reporting, should CMS decide that this information will be publicly reported.</P>
+                    <GPOTABLE COLS="2" OPTS="L2,nj,i1" CDEF="s200,xs90">
+                        <TTITLE>Table 6—Anticipated HOPE Public Education, Data Collection, and Reporting</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Key event</CHED>
+                            <CHED H="1">Time period</CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">Provider Trainings for HOPE Implementation </ENT>
+                            <ENT>Spring/Summer 2025.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">Data Collection Begins </ENT>
+                            <ENT>October 1, 2025.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">CY 2026 Data Analyzed to Assess Quality and Completeness</ENT>
+                            <ENT>Winter/Spring 2027.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">Provider Preview Reports for HOPE Measure(s) Provided to Hospices *</ENT>
+                            <ENT>Summer 2027.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">Public Reporting of HOPE Measure(s) Begins * </ENT>
+                            <ENT>Fall 2027.</ENT>
+                        </ROW>
+                        <TNOTE>* These dates are subject to change based on the quality and reportability of the data as determined based on CMS analyses; updates will be provided in the FY 2027 Hospice Rule.</TNOTE>
+                    </GPOTABLE>
+                    <P>
+                        Lastly, as stated in the FY 2022 Hospice Wage Index final rule (86 FR 42528), we continue to consider developing hybrid quality measures that could be calculated from multiple data sources, such as claims, HOPE data, or other data sources (for example, CAHPS Hospice Survey). We also intend to develop several quality measures based on information collected by HOPE after HOPE is implemented. More information on measure development can be found on the HQRP Quality Measure Development web page at 
+                        <E T="03">https://www.cms.gov/medicare/hospice-quality-reporting-program/quality-measure-development</E>
+                        .
+                    </P>
+                    <HD SOURCE="HD3">5. Update on the Transition to iQIES</HD>
+                    <P>In the FY 2020 Hospice Wage Index and Payment Rate Update final rule (84 FR 38484), we finalized migrating our systems for submitting and processing assessment data and the reporting system. Hospices are currently required to submit HIS data to CMS using the Quality Improvement and Evaluation System (QIES) Assessment and the Submission Processing (ASAP) system and obtain reports in the Certification and Survey Provider Enhanced Reports (CASPER) system. The FY 2020 Hospice Wage Index and Payment Rate Update final rule (84 FR 38484) finalized the proposal to migrate to a new single CMS submission and reporting system.</P>
+                    <P>In the FY 2025 Hospice Wage Index and Payment Rate Update final rule (86 FR 64202), we finalized the HOPE tool to replace the HIS as part of the HQRP. Beginning on October 1, 2025, the new CMS submission and reporting system will begin accepting the data from HOPE, in line with the start of HOPE data collection. Provider reports will also be available in this system beginning October 1, 2025. The QIES system will stop accepting HIS records for hospice admissions and discharges that occurred prior to October 1, 2025, including any corrections, on February 15, 2026.</P>
+                    <HD SOURCE="HD3">6. Form, Manner, and Timing of Quality Measure Data Submission</HD>
+                    <HD SOURCE="HD3">a. Statutory Penalty for Failure To Report</HD>
+                    <P>Section 1814(i)(5)(C) of the Act requires that each hospice submit data to the Secretary on quality measures specified by the Secretary. The data must be submitted in a form and manner, and at a time specified by the Secretary. Section 1814(i)(5)(A)(i) of the Act was amended by the CAA, 2021 and the payment reduction for failing to meet hospice quality reporting requirements was increased from 2 percent to 4 percent beginning with FY 2024. During FYs 2014 through 2023, the Secretary reduced the market basket update by 2 percentage points for non-compliance. Beginning in FY 2024 and for each subsequent year, the Secretary will reduce the market basket update by 4 percentage points for any hospice that does not comply with the quality measure data submission requirements for that FY. In the FY 2023 Hospice Wage Index final rule (87 FR 45669), we revised our regulations at § 418.306(b)(2) in accordance with this statutory change.</P>
+                    <HD SOURCE="HD3">b. Compliance</HD>
+                    <P>HQRP Compliance requires understanding the different timeframes for both HIS (or HOPE, once implemented) and CAHPS: The relevant Reporting Year, the payment FY, and the Reference Year.</P>
+                    <P>• The “Reporting Year”' (HIS or HOPE) or “Data Collection Year”' (CAHPS) is based on the calendar year (CY). It is the same CY for both HIS (or HOPE, once it is implemented) and CAHPS. If the CAHPS Data Collection year is CY 2025, then the HIS (or HOPE) reporting year is also CY 2025.</P>
+                    <P>• In the “Payment FY”, the APU is subsequently applied to FY payments based on compliance in the corresponding Reporting Year/Data Collection Year.</P>
+                    <P>
+                        • For the CAHPS Hospice Survey, the Reference Year is the CY before the Data Collection Year. The Reference Year applies to hospices submitting a size exemption from the CAHPS survey (there is no similar exemption for HIS 
+                        <PRTPAGE P="18580"/>
+                        or HOPE).
+                        <SU>5</SU>
+                        <FTREF/>
+                         For example, for the CY 2025 data collection year, the Reference Year is CY 2024. This means providers seeking a size exemption for CAHPS in CY 2025 will base it on their hospice size in CY 2024.
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>5</SU>
+                             CAHPS Hospice Survey, Participation Exemption for Size. 
+                            <E T="03">https://www.hospicecahpssurvey.org/en/participation-exemption-for-size/</E>
+                            .
+                        </P>
+                    </FTNT>
+                    <P>Submission requirements are codified at 42 CFR 418.312. Table 7 summarizes the three timeframes. It illustrates how the CY interacts with the FY payments, covering the CY 2023 through CY 2026 data collection periods and the corresponding APU application from FY 2025 through FY 2028. Please note that during the first reporting year that implements HOPE, APUs may be based on fewer than four quarters of data. We will provide additional subregulatory guidance regarding APUs for the HOPE implementation year.</P>
+                    <GPOTABLE COLS="3" OPTS="L2,nj,i1" CDEF="s100,r100,r100">
+                        <TTITLE>Table 7—HQRP Reporting Requirements and Corresponding Annual Payments Updates</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">
+                                Reporting year for HIS/HOPE and data 
+                                <LI>collection year for CAHPS data </LI>
+                                <LI>(calendar year)</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Annual payment update impacts 
+                                <LI>payments for the FY</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Reference year for CAHPS size exemption 
+                                <LI>(CAHPS only)</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">CY 2024</ENT>
+                            <ENT>FY 2026 APU</ENT>
+                            <ENT>CY 2023.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">CY 2025</ENT>
+                            <ENT>FY 2027 APU</ENT>
+                            <ENT>CY 2024.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">CY 2026</ENT>
+                            <ENT>FY 2028 APU</ENT>
+                            <ENT>CY 2025.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">CY 2027</ENT>
+                            <ENT>FY 2029 APU</ENT>
+                            <ENT>CY 2026.</ENT>
+                        </ROW>
+                    </GPOTABLE>
+                    <P>As illustrated in Table 7, CY 2024 data submissions compliance impacts the FY 2026 APU. CY 2025 data submissions compliance impacts the FY 2027 APU. CY 2026 data submissions compliance impacts FY 2028 APU. This CY data submission impacting FY APU pattern follows for subsequent years.</P>
+                    <HD SOURCE="HD3">c. Submission of Data Requirements</HD>
+                    <P>As finalized in the FY 2016 Hospice Wage Index final rule (80 FR 47142, 47192), hospices' compliance with HIS requirements beginning with the FY 2020 APU determination (that is, based on HIS Admission and Discharge records submitted in CY 2018) are based on a timeliness threshold of 90 percent. This means CMS requires that hospices submit 90 percent of all required HIS records within 30 days of the event (that is, patient's admission or discharge). The 90-percent threshold is hereafter referred to as the timeliness compliance threshold. Ninety percent of all required HIS records must be submitted and accepted within the 30-day submission deadline to avoid the statutorily mandated payment penalty.</P>
+                    <P>We will apply the same submission requirements for HOPE admission, discharge, and up to two hospice update visit (HUV) records. After HIS is phased out, hospices will continue to be required to submit 90 percent of all required HOPE records to support the quality measures within 30 days of the event or completion date (patient's admission, discharge, and based on the patient's length of stay up to two HUV timepoints).</P>
+                    <P>Hospice compliance with claims data requirements is based on administrative data collection. Since Medicare claims data are already collected from claims, hospices are considered 100 percent compliant with the submission of these data for the HQRP. There is no additional submission requirement for administrative data.</P>
+                    <P>
+                        To comply with CMS' quality reporting requirements for CAHPS, hospices are required to collect data monthly using the CAHPS Hospice Survey. Hospices comply by utilizing a CMS-approved third-party vendor. Approved Hospice CAHPS vendors must successfully submit data on the hospice's behalf to the CAHPS Hospice Survey Data Center. A list of the approved vendors can be found on the CAHPS Hospice Survey website at 
+                        <E T="03">https://www.hospicecahpssurvey.org</E>
+                        .
+                    </P>
+                    <P>Table 8 HQRP Compliance Checklist illustrates the APU and timeliness threshold requirements.</P>
+                    <GPOTABLE COLS="3" OPTS="L2,nj,i1" CDEF="xs63,r100,r50">
+                        <TTITLE>Table 8—HQRP Compliance Checklist</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">
+                                Annual payment 
+                                <LI>update</LI>
+                            </CHED>
+                            <CHED H="1">HIS/HOPE</CHED>
+                            <CHED H="1">CAHPS</CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">FY 2026</ENT>
+                            <ENT>Submit at least 90 percent of all HIS records within 30 days of the event date (for example, patient's admission or discharge) for patient admissions/discharges occurring 1/1/24-12/31/24</ENT>
+                            <ENT>Ongoing monthly participation in the Hospice CAHPS survey 1/1/2024-12/31/2024.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">FY 2027</ENT>
+                            <ENT>Submit at least 90 percent of all HIS/HOPE records within 30 days of the event date (for example, patient's admission or discharge) for patient admissions/discharges occurring 1/1/25-12/31/25</ENT>
+                            <ENT>Ongoing monthly participation in the Hospice CAHPS survey 1/1/2025-12/31/2025.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">FY 2028</ENT>
+                            <ENT>Submit at least 90 percent of all HOPE records within 30 days of the event or completion date (for example, patient's admission date, HUV completion date or discharge date) for patient admissions/discharges occurring 1/1/26-12/31/26</ENT>
+                            <ENT>Ongoing monthly participation in the Hospice CAHPS survey 1/1/2026-12/31/2026.</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">FY 2029</ENT>
+                            <ENT>Submit at least 90 percent of all HOPE records within 30 days of the event date (for example, patient's admission or discharge) for patient admissions/discharges occurring 1/1/27-12/31-2027</ENT>
+                            <ENT>Ongoing monthly participation in the Hospice CAHPS survey 1/1/2028-12/31/2027.</ENT>
+                        </ROW>
+                        <TNOTE>
+                            <E T="02">Note:</E>
+                             The data source for the claims-based measures will be Medicare claims data that are already collected and submitted to CMS. There is no additional submission requirement for administrative data (Medicare claims), and hospices with claims data are 100-percent compliant with this requirement.
+                        </TNOTE>
+                    </GPOTABLE>
+                    <P>
+                        Most hospices that fail to meet HQRP requirements do so because they miss the 90 percent threshold. We offer many training and education opportunities through our websites, which are available 24/7, 365 days per year, to enable hospice staff to learn at the pace and time of their choice. We want hospices to be successful with meeting 
+                        <PRTPAGE P="18581"/>
+                        the HQRP requirements. We encourage hospices to visit the frequently-updated HQRP website at 
+                        <E T="03">https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/Hospice-Quality-Reporting</E>
+                        . Available trainings can be found on the HQRP Training and Education Library web page at 
+                        <E T="03">https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/Hospice-Quality-Reporting/Hospice-Quality-Reporting-Training-Training-and-Education-Library</E>
+                         and additional resources are located on the Requirements and Best Practices web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice/hqrp-requirements-and-best-practices</E>
+                        . We also encourage readers to stay informed about HQRP by visiting the HQRP Provider and Stakeholder Engagement web page at 
+                        <E T="03">https://www.cms.gov/medicare/quality/hospice/provider-and-stakeholder-engagement</E>
+                         to sign-up for the Hospice Quality Listserv.
+                    </P>
+                    <HD SOURCE="HD3">7. Request for Information (RFI) To Advance Digital Quality Measurement (dQM) in the HQRP</HD>
+                    <P>As part of our quality measurement enterprise modernization, we are issuing this RFI to gather broad public input on the digital quality measurement.</P>
+                    <HD SOURCE="HD3">a. Background</HD>
+                    <P>
+                        We are committed to improving healthcare quality through measurement, transparency, and public reporting of quality data, and to enhancing healthcare data exchange by promoting the adoption of interoperable health information technology (IT) through Health Level Seven® (HL7®) Fast Healthcare Interoperability Resources® (FHIR®) standards. Proposing requirements around the use of technology utilizing such standards within the HQRP in the future could potentially enable greater care coordination and information sharing, which is essential for delivering high-quality, efficient care and better outcomes at a lower cost (86 FR 25615). In the FY 2022 IRF/LTCH PPS proposed rule and the FY 2023 Hospice proposed rule,
+                        <SU>6</SU>
+                        <FTREF/>
+                         we outlined several HHS initiatives aimed at promoting the adoption of interoperable health IT and facilitating nationwide health information exchange. Further, to inform our digital strategy, in the FY 2022 Hospice proposed rule we shared and sought feedback on our intent to explore the use of FHIR-based standards to exchange clinical information through application programming interfaces (APIs), enabling quality data submission to CMS through our internet Quality Improvement and Evaluation System (iQIES), and to work with healthcare standards organizations to ensure their standards support our assessment tools (86 FR 19700).
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>6</SU>
+                             “Advancing Health Information Exchange” in: FY 2022 IPPS/LTCH PPS proposed rule (87 FR 28108) and FY 2023 Hospice proposed rule (87 FR 19442).
+                        </P>
+                    </FTNT>
+                    <P>We now are continuing to consider opportunities to advance FHIR-based reporting of patient assessment data in settings that were not eligible to participate in the Medicare Electronic Health Record (EHR) Incentive Program (now known as the Medicare Promoting Interoperability Program), while acknowledging that such providers may be at different levels of health IT adoption and readiness. Specifically, we are interested in assessing the feasibility of using the FHIR standard for the submission of HOPE data. Our objective is to explore how hospices typically integrate technologies with varying complexity into existing systems and how this affects hospice workflows. We seek to identify the challenges or opportunities that may arise during this integration, and determine the support needed to complete and submit HOPE in ways that protect and enhance care delivery.</P>
+                    <P>Any updates to specific program requirements related to quality measurement and reporting provisions would be addressed through separate and future notice-and-comment rulemaking, as necessary.</P>
+                    <HD SOURCE="HD3">b. Solicitation for Comment</HD>
+                    <P>We seek feedback on the following questions regarding the current state of health IT use, including EHRs, in your facilities:</P>
+                    <P>
+                        • To what extent does your hospice use health IT to maintain patient records? If your facility has transitioned to using electronic records, in part or in whole, what types of health IT does your hospice use to maintain patient records, and are these technology systems certified under the Office of the National Coordinator (ONC) Health IT Certification Program? 
+                        <SU>7</SU>
+                        <FTREF/>
+                         If your facility uses health IT systems that are not certified under the ONC Health IT Certification Program, please specify and include the reason(s) for not using a certified health IT system (for example, resources, lack of certified health IT products that meet your needs, etc.). Does your facility maintain any patient records outside of these electronic systems? If so, are the data organized in a structured format, using codes and recognized standards, that can be exchanged with other systems?
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>7</SU>
+                             Certified Health IT Product List (CHPL). 
+                            <E T="03">https://chpl.healthit.gov/#/search</E>
+                            .
+                        </P>
+                    </FTNT>
+                    <P>• Does your hospice submit data to CMS through your current health IT system? If a third-party intermediary (for example, an EHR vendor) is used to report data, what type of intermediary service is used? How does your facility currently exchange health information with other healthcare providers or systems, specifically between hospices and other provider types? What about health information exchange with other entities, such as public health agencies—what does that look like? What are the challenges to electronic exchange of health information?</P>
+                    <P>• Are there any challenges with your current electronic devices (for example, tablets, smartphones, computers) that hinder your ability to easily exchange information across systems? Does limited or lack of internet connectivity impact your ability to exchange data with other healthcare providers, including community-based care services, or your ability to submit patient assessment data to CMS? Please specify.</P>
+                    <P>• What steps does your hospice take to ensure compliance in using health IT security and patient privacy requirements such as the Health Insurance Portability and Accountability Act and related regulations?</P>
+                    <P>
+                        • Does your hospice refer to Safety Assurance Factors for HER Resilience (SAFER) Guides (see newly revised versions published in January 2025 at 
+                        <E T="03">https://www.healthit.gov/topic/safety/safer-guides</E>
+                        ) to self-assess EHR safety practices?
+                    </P>
+                    <P>• What challenges or barriers does your hospice encounter when submitting quality measure data to CMS as part of the Hospice QRP? What opportunities or factors could improve your facility's successful data submission to CMS?</P>
+                    <P>• How do you anticipate the adoption of technology using FHIR-based APIs to facilitate the reporting of patient assessment data could impact provider workflows? What impact, if any, do you anticipate it will have on quality of care?</P>
+                    <P>
+                        • Does your hospice have any experience using one or more versions of the United States Core Data for Interoperability (USCDI) standard? 
+                        <SU>8</SU>
+                        <FTREF/>
+                         Is your facility using technology that utilizes APIs based on the FHIR 
+                        <PRTPAGE P="18582"/>
+                        standard for electronic data exchange using APIs? If so, with whom are you exchanging data using the FHIR standard and for what purpose(s)? For example, have you used FHIR APIs to exchange data with public health agencies? Does your facility use any Substitutable Medical Applications and Reusable Technologies (SMART) on FHIR 
+                        <SU>9</SU>
+                        <FTREF/>
+                         applications? If so, are the SMART on FHIR applications integrated with your EHR? Additionally, what benefits or challenges have you experienced with the implementation of technology using FHIR-based APIs?
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>8</SU>
+                             The USCDI is a standardized set of health data classes and constituent data elements for nationwide, interoperable health information exchange. Learn more at 
+                            <E T="03">https://www.healthit.gov/isp/united-states-core-data-interoperability-uscdi</E>
+                            .
+                        </P>
+                    </FTNT>
+                    <FTNT>
+                        <P>
+                            <SU>9</SU>
+                             
+                            <E T="03">https://smarthealthit.org/</E>
+                            .
+                        </P>
+                    </FTNT>
+                    <P>• What might encourage your facility or agency and/or vendors to participate in a pilot test that would explore assessment submission process options, for example, testing a FHIR-based assessment submission to CMS?</P>
+                    <P>
+                        • How could the Trusted Exchange Framework and Common Agreement
+                        <E T="51">TM</E>
+                         (TEFCA
+                        <E T="51">TM</E>
+                        ) 
+                        <SU>10</SU>
+                        <FTREF/>
+                         support CMS quality programs' adoption of FHIR-based assessment submissions consistent with the FHIR Roadmap (available at 
+                        <E T="03">https://rce.sequoiaproject.org/three-year-fhir-roadmap-for-tefca/</E>
+                        )? How might patient assessment data hold secondary uses for treatment or other TEFCA exchange purposes?
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>10</SU>
+                             TEFCA
+                            <E T="51">TM</E>
+                            , outlines a common set of principles, terms, and conditions to support the development of a Common Agreement that helps enable the nationwide exchange of electronic health information (EHI) across disparate health information networks (HINs).
+                        </P>
+                    </FTNT>
+                    <P>• What other information should we consider that could facilitate successful adoption and integration of FHIR-based technologies and standardized data for patient assessment instruments like HOPE? We invite any feedback, suggestions, best practices, or success stories related to the implementation of these technologies.</P>
+                    <P>We plan to continue working with other agencies and interested parties to coordinate and to inform our dQM transition, nutrition and well-being efforts. While we will not be responding to specific comments submitted in response to this RFI in the FY 2026 Hospice final rule, we will actively consider all input as we develop future regulatory proposals or future sub-regulatory policy guidance. Any updates to specific program requirements related to quality measurement and reporting provisions would be addressed through separate and future notice-and-comment rulemaking, as necessary.</P>
+                    <HD SOURCE="HD3">8. RFIs on Future Quality Measure Concepts for the Hospice QRP</HD>
+                    <P>We are seeking input on the importance, relevance, appropriateness, and applicability of several concepts under consideration for future years in the Hospice QRP. We published a request for information (RFI) in previous proposed rules on meaningful measures suitable for the hospice setting.</P>
+                    <P>We are seeking input on three concepts for the Hospice QRP:</P>
+                    <HD SOURCE="HD3">1. Interoperability</HD>
+                    <P>
+                        We are seeking comments on a measure of interoperability, focusing on systems readiness and capabilities in the Hospice setting. Title XXX of the Public Health Service Act defines “interoperability” in part, and with respect to health information technology, as health information technology that enables the secure exchange of electronic health information with, and use of electronic health information from, other health information technology without requiring special efforts by the user.
+                        <SU>11</SU>
+                        <FTREF/>
+                         The definition further states that interoperability of health information technology allows for complete, including by providers, patients, and caregivers, access, exchange, and use of electronically accessible health information for authorized uses under applicable State or Federal law.
+                        <SU>12</SU>
+                        <FTREF/>
+                         Adoption and optimization of electronic health records (EHRs) and health information exchange services that use common standards to share data can enable interoperability across systems. We would like to receive input and comment on approaches to assessing interoperability in the hospice care setting, for instance, measures that address or evaluate the level of readiness for interoperable data exchange, or measures that evaluate the ability of data systems to securely share information across the spectrum of care.
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>11</SU>
+                             42 U.S.C. 300jj(9).
+                        </P>
+                    </FTNT>
+                    <FTNT>
+                        <P>
+                            <SU>12</SU>
+                             42 U.S.C. 300jj(9).
+                        </P>
+                    </FTNT>
+                    <HD SOURCE="HD3">2. Well-Being</HD>
+                    <P>
+                        We are seeking feedback on a measure of well-being. Well-being is a comprehensive approach to disease prevention and health promotion, as it integrates mental, social, and physical health while emphasizing preventative care to proactively address potential health issues.
+                        <SU>13</SU>
+                        <FTREF/>
+                         This comprehensive approach emphasizes person-centered care by promoting the well-being of hospice patients. We are seeking comments on tools and measures that assess overall health, happiness, and satisfaction at the end of life, which could include aspects of emotional well-being, social connections, purpose, fulfillment, and self-care work.
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>13</SU>
+                             Well-Being Concepts. CDC Archives. 
+                            <E T="03">WHPL_Canon_WB_Well-Being_Concepts__HRQOL__CDC_2017.pdf</E>
+                            .
+                        </P>
+                    </FTNT>
+                    <HD SOURCE="HD3">3. Nutrition</HD>
+                    <P>We are seeking feedback on a measure of nutrition. Assessment for nutritional status may include various strategies, guidelines, and practices designed to promote nutrition at every stage of hospice care and ensure patients receive the necessary nutrients for maintaining their individual health needs and overall well-being. This also includes aspects of health that support or mediate nutritional status, such as activity and sleep. These efforts not only support nutrition but could also work to include the cultural, social, and spiritual needs and wishes of the patients. We are seeking feedback on tools and frameworks that promote healthy, safe eating habits, exercise, nutrition, and activity appropriate for optimal end-of-life care.</P>
+                    <HD SOURCE="HD3">9. Proposed Revision to § 418.312(j)(2) To Correct Regulatory Text</HD>
+                    <P>In accordance with the Administrative Procedure Act, 5 U.S.C. 553, it is the Secretary's practice to offer interested parties the opportunity to comment on proposed regulations. However, the regulatory changes in this proposal are necessary to correct an error and do not establish any new substantive rules.</P>
+                    <P>We are proposing to revise the regulatory text at § 418.312(j)(2) to correct a reference to another part of the regulations. Specifically, we are replacing a reference to § 412.306(b)(2) with the correct reference to § 418.306(b)(2).</P>
+                    <HD SOURCE="HD1">IV. Collection of Information Requirements</HD>
+                    <P>
+                        This proposed rule would revise the attestation requirements at § 418.22(b)(4) to better align with the original intent of the statutory requirements under section 1814(a)(7) of the Act and CY 2011 HH PPS final rule for the certification of terminal illness regulations to include the physician's or nurse practitioner's signature and the date of the signature on each face-to-face encounter attestation. These underlying attestation requirements are collections of information that require approval under the Paperwork Reduction Act and were previously approved in the ICR for the Hospice Conditions of Participation (OMB Control Number 0938-1067). However, the revisions proposed in this rule are minor and would not substantively change the scope of the attestation requirement or the burden that it would entail, and thus they do not require any additional approval that 
+                        <PRTPAGE P="18583"/>
+                        would go beyond the coverage provided by 0938-1067.
+                    </P>
+                    <P>We are planning to seek approval from OMB to reinstate Control Number 0938-1067 separately from this rulemaking via the standard PRA process.</P>
+                    <HD SOURCE="HD1">V. Response to Comments</HD>
+                    <P>
+                        Because of the large number of public comments, we normally receive on 
+                        <E T="04">Federal Register</E>
+                         documents, we are not able to acknowledge or respond to them individually. We will consider all comments we receive by the date and time specified in the 
+                        <E T="02">DATES</E>
+                         section of this preamble, and, when we proceed with a subsequent document, we will respond to the comments in the preamble to that document.
+                    </P>
+                    <HD SOURCE="HD1">VI. Regulatory Impact Analysis</HD>
+                    <HD SOURCE="HD2">A. Statement of Need</HD>
+                    <HD SOURCE="HD3">1. Hospice Payment</HD>
+                    <P>
+                        This proposed rule meets the requirements of our regulations at § 418.306(c) and (d), which require annual issuance, in the 
+                        <E T="04">Federal Register</E>
+                        , of the Hospice Wage Index based on the most current available CMS hospital wage data, including any changes to the definitions of CBSAs or previously used Metropolitan Statistical Areas (MSAs), as well as any changes to the methodology for determining the per diem payment rates. This proposed rule would update the payment rates for each of the categories of hospice care, described in § 418.302(b), for FY 2026 as required under section 1814(i)(1)(C)(ii)(VII) of the Act. The payment rate updates are subject to changes in economy-wide productivity as specified in section 1886(b)(3)(B)(xi)(II) of the Act.
+                    </P>
+                    <HD SOURCE="HD2">B. Overall Impact</HD>
+                    <P>We have examined the impacts of this rule as required by Executive Order 12866, “Regulatory Planning and Review”; Executive Order 13132, “Federalism“; Executive Order 13563, “Improving Regulation and Regulatory Review”; Executive Order 14192, “Unleashing Prosperity Through Deregulation”; the Regulatory Flexibility Act (RFA) (Pub. L. 96-354); section 1102(b) of the Social Security Act; and section 202 of the Unfunded Mandates Reform Act of 1995 (Pub. L. 104-4).</P>
+                    <P>Executive Orders 12866 and 13563 direct agencies to assess all costs and benefits of available regulatory alternatives and, if regulation is necessary, to select those regulatory approaches that maximize net benefits (including potential economic, environmental, public health and safety, and other advantages; and distributive impacts). Section 3(f) of Executive Order 12866 defines a “significant regulatory action” as any regulatory action that is likely to result in a rule that may: (1) have an annual effect on the economy of $100 million or more or adversely affect in a material way the economy, a sector of the economy, productivity, competition, jobs, the environment, public health or safety, or State, local, or tribal governments or communities; (2) create a serious inconsistency or otherwise interfere with an action taken or planned by another agency; (3) materially alter the budgetary impact of entitlements, grants, user fees, or loan programs or the rights and obligations of recipients thereof; or (4) raise novel legal or policy issues arising out of legal mandates, or the President's priorities.</P>
+                    <P>A regulatory impact analysis (RIA) must be prepared for a regulatory action that is significant under section 3(f)(1) of E.O. 12866. Based on our estimates, OMB's Office of Information and Regulatory Affairs has determined this rulemaking is significant per section 3(f)(1) of E.O. 12866. Accordingly, we have prepared a regulatory impact analysis that presents the costs and benefits of the rulemaking to the best of our ability.</P>
+                    <HD SOURCE="HD3">1. Hospice Payment</HD>
+                    <P>We estimate that the aggregate impact of the payment provisions in this proposed rule would result in an estimated increase of $695 million in payments to hospices, resulting from the proposed hospice payment update percentage of 2.4 percent for FY 2026. The impact analysis of this proposed rule represents the projected effects of the changes in hospice payments from FY 2025 to FY 2026. Using the most recent complete data available at the time of rulemaking, in this case FY 2024 hospice claims data as of January 13, 2025, we simulate total payments using the FY 2025 wage index (pre-floor, pre-reclassified hospital wage index with the hospice floor, and the 5 percent cap on wage index decreases) and FY 2025 payment rates and compare it to our simulation of total payments using FY 2024 utilization claims data, the final FY 2026 Hospice Wage Index (pre-floor, pre-reclassified hospital wage index with hospice floor, and the 5 percent cap on wage index decreases) and FY 2025 payment rates. By dividing payments for each level of care (RHC days 1 through 60, RHC days 61+, CHC, IRC, and GIP) using the FY 2025 wage index and payment rates for each level of care by the proposed FY 2026 wage index and FY 2025 payment rates, we obtain a wage index standardization factor for each level of care. We apply the wage index standardization factors so that the aggregate simulated payments do not increase or decrease due to changes in the wage index.</P>
+                    <P>Certain events may limit the scope or accuracy of our impact analysis, because such an analysis is susceptible to forecasting errors due to other changes in the forecasted impact time- period. The nature of the Medicare program is such that the changes may interact, and the complexity of the interaction of these changes could make it difficult to predict accurately the full scope of the impact upon hospices.</P>
+                    <HD SOURCE="HD3">2. Hospice Quality Reporting Program</HD>
+                    <P>There are no new proposals related to the Hospice Quality Reporting Program for FY 2026; accordingly, there are no impacts.</P>
+                    <HD SOURCE="HD2">C. Detailed Economic Analysis</HD>
+                    <HD SOURCE="HD3">1. Proposed Hospice Payment Update for FY 2026</HD>
+                    <P>
+                        The FY 2026 hospice payment impacts appear in Table 9. We tabulate the resulting payments according to the classifications (for example, provider type, geographic region, facility size), and compare the difference between current and future payments to determine the overall impact. The first column shows the breakdown of all hospices by provider type and control (non-profit, for-profit, government, other), facility location, and facility size. The second column shows the number of hospices in each of the categories in the first column. The third column shows the effect of using the FY 2026 updated wage index data with a 5 percent cap on wage index decreases. The aggregate impact of the change in column three is zero percent, due to the hospice wage index standardization factors. However, there are distributional effects of using the FY 2026 hospice wage index. The fourth column shows the effect of the hospice payment update percentage as mandated by section 1814(i)(1)(C) of the Act and is consistent for all providers. The hospice payment update percentage of 2.4 percent is based on the proposed 3.2 percent inpatient hospital market basket percentage increase reduced by a proposed 0.8 percentage point productivity adjustment. The fifth column shows the total effect of the updated wage data and the hospice payment update percentage on FY 2026 hospice payments. As illustrated in Table 9, the combined effects vary by specific types of providers and by location. We note that simulated 
+                        <PRTPAGE P="18584"/>
+                        payments are based on utilization in FY 2024 as seen on Medicare hospice claims (accessed from the CCW on January 13, 2025) and only include payments related to the level of care and do not include payments related to the service intensity add-on.
+                    </P>
+                    <P>As illustrated in Table 9, the combined effects vary by specific types of providers and by location.</P>
+                    <GPOTABLE COLS="5" OPTS="L2,nj,i1" CDEF="s100,10,10,10,12">
+                        <TTITLE>Table 9—Impact to Hospices for FY 2026</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Hospice subgroup</CHED>
+                            <CHED H="1">Hospices</CHED>
+                            <CHED H="1">
+                                FY 2026 
+                                <LI>updated </LI>
+                                <LI>wage data </LI>
+                                <LI>(%)</LI>
+                            </CHED>
+                            <CHED H="1">
+                                FY 2026 
+                                <LI>proposed </LI>
+                                <LI>hospice </LI>
+                                <LI>payment </LI>
+                                <LI>update </LI>
+                                <LI>(2.4%)</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Overall 
+                                <LI>total impact </LI>
+                                <LI>for FY 2026 </LI>
+                                <LI>(%)</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">All Hospices</ENT>
+                            <ENT>6,695</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Type and Control:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Non-Profit</ENT>
+                            <ENT>790</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/For-Profit</ENT>
+                            <ENT>4,596</ENT>
+                            <ENT>−0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.3</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Government</ENT>
+                            <ENT>34</ENT>
+                            <ENT>0.6</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Non-Profit</ENT>
+                            <ENT>267</ENT>
+                            <ENT>0.6</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/For-Profit</ENT>
+                            <ENT>4</ENT>
+                            <ENT>0.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.8</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Government</ENT>
+                            <ENT>97</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="03">Facility/HHA Based/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: Freestanding Facility Type</ENT>
+                            <ENT>5,420</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: Facility/HHA Based Facility Type</ENT>
+                            <ENT>368</ENT>
+                            <ENT>0.5</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.9</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: Non-Profit</ENT>
+                            <ENT>1,068</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: For Profit</ENT>
+                            <ENT>5,095</ENT>
+                            <ENT>−0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.3</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: Government</ENT>
+                            <ENT>132</ENT>
+                            <ENT>0.3</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.7</ENT>
+                        </ROW>
+                        <ROW RUL="n,s">
+                            <ENT I="05">Subtotal: Other</ENT>
+                            <ENT>10</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Type and Control: Rural:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Non-Profit</ENT>
+                            <ENT>206</ENT>
+                            <ENT>0.3</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.7</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/For-Profit</ENT>
+                            <ENT>391</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Government</ENT>
+                            <ENT>24</ENT>
+                            <ENT>0.6</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Non-Profit</ENT>
+                            <ENT>113</ENT>
+                            <ENT>1.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/For-Profit</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Government</ENT>
+                            <ENT>71</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Type and Control: Urban:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Non-Profit</ENT>
+                            <ENT>584</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/For-Profit</ENT>
+                            <ENT>4,205</ENT>
+                            <ENT>−0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.3</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Government</ENT>
+                            <ENT>10</ENT>
+                            <ENT>0.5</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.9</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Freestanding/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Non-Profit</ENT>
+                            <ENT>154</ENT>
+                            <ENT>0.5</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.9</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/For-Profit</ENT>
+                            <ENT>4</ENT>
+                            <ENT>0.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.8</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Government</ENT>
+                            <ENT>26</ENT>
+                            <ENT>0.3</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.7</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Facility/HHA Based/Other</ENT>
+                            <ENT>0</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Location: Urban or Rural:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Rural</ENT>
+                            <ENT>819</ENT>
+                            <ENT>0.3</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.7</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Urban</ENT>
+                            <ENT>5,876</ENT>
+                            <ENT>0.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Location: Region of the Country (Census Division):</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">New England</ENT>
+                            <ENT>159</ENT>
+                            <ENT>1.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.8</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Middle Atlantic</ENT>
+                            <ENT>280</ENT>
+                            <ENT>0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.5</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">South Atlantic</ENT>
+                            <ENT>649</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">East North Central</ENT>
+                            <ENT>654</ENT>
+                            <ENT>0.5</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.9</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">East South Central</ENT>
+                            <ENT>251</ENT>
+                            <ENT>0.2</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.6</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">West North Central</ENT>
+                            <ENT>441</ENT>
+                            <ENT>0.9</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>3.3</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">West South Central</ENT>
+                            <ENT>1,247</ENT>
+                            <ENT>−0.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Mountain</ENT>
+                            <ENT>700</ENT>
+                            <ENT>0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.5</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Pacific</ENT>
+                            <ENT>2,266</ENT>
+                            <ENT>−1.0</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>1.4</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">Outlying</ENT>
+                            <ENT>48</ENT>
+                            <ENT>−0.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="22">Hospice Size:</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">0-3,499 RHC Days (Small)</ENT>
+                            <ENT>1,727</ENT>
+                            <ENT>−0.7</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>1.7</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">3,500-19,999 RHC Days (Medium)</ENT>
+                            <ENT>3,006</ENT>
+                            <ENT>−0.4</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.0</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="03">20,000+ RHC Days (Large)</ENT>
+                            <ENT>1,962</ENT>
+                            <ENT>0.1</ENT>
+                            <ENT>2.4</ENT>
+                            <ENT>2.5</ENT>
+                        </ROW>
+                        <TNOTE>Source: FY 2024 hospice claims data from CCW accessed on January 13, 2025.</TNOTE>
+                        <TNOTE>
+                            <E T="02">Note:</E>
+                             The overall total impact reflects the addition of the individual impacts, which includes the wage index impact as well as the proposed hospice payment update of 2.4 percent.
+                            <PRTPAGE P="18585"/>
+                        </TNOTE>
+                        <TNOTE>Due to missing Provider of Services file and Cost Report information (from which hospice characteristics are obtained), some subcategories in the impact tables have fewer agencies represented than the overall total (of 6,695). Subtypes involving ownership only add up to 6,305 while subtypes involving facility type only add up to 5,788.</TNOTE>
+                        <TNOTE>
+                            <E T="03">Region Key:</E>
+                        </TNOTE>
+                        <TNOTE>New England = Connecticut, Maine, Massachusetts, New Hampshire, Rhode Island, Vermont.</TNOTE>
+                        <TNOTE>Middle Atlantic = Pennsylvania, New Jersey, New York.</TNOTE>
+                        <TNOTE>South Atlantic = Delaware, District of Columbia, Florida, Georgia, Maryland, North Carolina, South Carolina, Virginia, West Virginia.</TNOTE>
+                        <TNOTE>East North Central = Illinois, Indiana, Michigan, Ohio, Wisconsin.</TNOTE>
+                    </GPOTABLE>
+                    <HD SOURCE="HD2">D. Regulatory Review Cost Estimation</HD>
+                    <P>Due to the uncertainty involved with accurately quantifying the number of entities that will review the rule, we assume that the total number of unique commenters on last year's proposed rule will be the number of reviewers of this proposed rule. We acknowledge that this assumption may understate or overstate the costs of reviewing this rule. It is possible that not all commenters reviewed last year's rule in detail, and it is also possible that some reviewers chose not to comment on the proposed rule. For these reasons we believe that the number of past commenters would be a fair estimate of the number of reviewers of this rule. We welcome any comments on the approach in estimating the number of entities which will review this proposed rule.</P>
+                    <P>We also recognize that different types of entities are in many cases affected by mutually exclusive sections of this proposed rule, and therefore for the purposes of our estimate we assume that each reviewer reads approximately 50 percent of the rule. We seek comments on this assumption.</P>
+                    <P>
+                        Using the May 2023 National median hourly wage rate (doubled for benefits and overhead) for medical and health service managers (Code 11-9111); we estimate that the cost of reviewing this rule is $106.42 per hour, including overhead and fringe benefits (
+                        <E T="03">https://www.bls.gov/oes/current/oes_nat.htm</E>
+                        ). Assuming an average reading speed we estimate that it would take approximately 1.76 hours for staff to review half of this proposed rule. For each hospice that reviews the rule, the estimated cost is $187.30 (1.76 hours × $106.42). Therefore, we estimate that the total cost of reviewing this regulation is $18,355.40 ($187.30 × 98 reviewers (based on last year's comments received).
+                    </P>
+                    <HD SOURCE="HD2">E. Alternatives Considered</HD>
+                    <HD SOURCE="HD3">1. Hospice Payment</HD>
+                    <P>Since the hospice payment update percentage is determined based on statutory requirements, we did not consider alternatives to updating the hospice payment rates by the hospice payment update percentage. The proposed 2.4 percent hospice payment update percentage for FY 2026 is based on a proposed 3.2 percent inpatient hospital market basket percentage increase for FY 2026, reduced by a proposed 0.8 percentage point productivity adjustment. Payment rates since FY 2002 have been updated according to section 1814(i)(1)(C)(ii)(VII) of the Act, which states that the update to the payment rates for subsequent years must be the market basket percentage increase for that fiscal year. Section 3401(g) of the Affordable Care Act also mandates that, starting with FY 2013 (and in subsequent years), the hospice payment update percentage will be annually reduced by changes in economy-wide productivity as specified in section 1886(b)(3)(B)(xi)(II) of the Act. For FY 2026, since the hospice payment update percentage is determined based on statutory requirements at section 1814(i)(1)(C) of the Act, we did not consider alternatives for the hospice payment update percentage.</P>
+                    <HD SOURCE="HD2">F. Accounting Statement and Table</HD>
+                    <P>
+                        Consistent with OMB Circular A-4 (available at 
+                        <E T="03">https://trumpwhitehouse.archives.gov/sites/whitehouse.gov/files/omb/circulars/A4/a-4.pdf</E>
+                        ), we have prepared an accounting statement in Table 10 showing the classification of the expenditures associated with the provisions of this proposed rule. Table 10 provides our best estimate of the possible changes in Medicare payments under the hospice benefit as a result of the policies in this proposed rule. This estimate is based on the data for 6,695 hospices in our impact analysis file, which was constructed using FY 2024 claims (accessed from the CCW on January 13, 2025). All expenditures are classified as transfers to hospices.
+                    </P>
+                    <P>Table 10 also provides the impact costs associated with the Hospice Quality Reporting Program starting FY 2026.</P>
+                    <GPOTABLE COLS="2" OPTS="L2,nj,i1" CDEF="s100,r100">
+                        <TTITLE>Table 10—Accounting Statement Classification of Estimated Transfers and Costs</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">Hospice payment update category</CHED>
+                            <CHED H="1">FY 2025 to FY 2026 transfers</CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">Annualized Monetized Transfers</ENT>
+                            <ENT>$695 million.*</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">From Whom to Whom?</ENT>
+                            <ENT>Federal Government to Medicare Hospices.</ENT>
+                        </ROW>
+                        <TNOTE>* The increase of $695 million in transfer payments is a result of the proposed 2.4 percent hospice payment update compared to payments in FY 2025.</TNOTE>
+                    </GPOTABLE>
+                    <HD SOURCE="HD2">G. Regulatory Flexibility Act (RFA)</HD>
+                    <P>
+                        The RFA requires agencies to analyze options for regulatory relief of small entities if a rule has a significant impact on a substantial number of small entities. For purposes of the RFA, small entities include small businesses, nonprofit organizations, and small jurisdictions. We consider all hospices as small entities as that term is used in the RFA. The North American Industry Classification System (NAICS) was adopted in 1997 and is the current standard used by the Federal statistical agencies related to the U.S. business economy. There is no NAICS code specific to hospice services. Therefore, we utilized the NAICS U.S. industry title “Home
+                        <FTREF/>
+                         Health Care Services” and corresponding NAICS code 621610 in determining impacts for small entities. The NAICS code 621610 has a size standard of $19 million.
+                        <SU>14</SU>
+                         Table 11 shows the number of firms, revenue, and estimated impact per home health care service category.
+                    </P>
+                    <FTNT>
+                        <P>
+                            <SU>14</SU>
+                             
+                            <E T="03">https://www.sba.gov/sites/sbagov/files/2023-03/Table%20of%20Size%20Standards_Effective%20March%2017%2C%202023%20%281%29%20%281%29_0.pdf.</E>
+                        </P>
+                    </FTNT>
+                    <PRTPAGE P="18586"/>
+                    <GPOTABLE COLS="6" OPTS="L2,nj,i1" CDEF="xs60,r50,r50,10,10,16">
+                        <TTITLE>Table 11—Number of Firms, Revenue, and Estimated Impact of Home Health Care Services by NAICS Code 621610</TTITLE>
+                        <BOXHD>
+                            <CHED H="1">
+                                NAICS
+                                <LI>code</LI>
+                            </CHED>
+                            <CHED H="1">NAICS description</CHED>
+                            <CHED H="1">Enterprise size</CHED>
+                            <CHED H="1">
+                                Number
+                                <LI>of firms</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Receipts
+                                <LI>($1,000)</LI>
+                            </CHED>
+                            <CHED H="1">
+                                Estimated impact
+                                <LI>($1,000) per</LI>
+                                <LI>enterprise size</LI>
+                            </CHED>
+                        </BOXHD>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>&lt;100</ENT>
+                            <ENT>5,861</ENT>
+                            <ENT>210,697</ENT>
+                            <ENT>$35.95</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>100-499</ENT>
+                            <ENT>5,687</ENT>
+                            <ENT>1,504,668</ENT>
+                            <ENT>264.58</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>500-999</ENT>
+                            <ENT>3,342</ENT>
+                            <ENT>2,430,807</ENT>
+                            <ENT>727.35</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>1,000-2,499</ENT>
+                            <ENT>4,434</ENT>
+                            <ENT>7,040,174</ENT>
+                            <ENT>1,587.77</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>2,500-4,999</ENT>
+                            <ENT>1,951</ENT>
+                            <ENT>6,657,387</ENT>
+                            <ENT>3,412.29</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>5,000-7,499</ENT>
+                            <ENT>672</ENT>
+                            <ENT>3,912,082</ENT>
+                            <ENT>5,821.55</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>7,500-9,999</ENT>
+                            <ENT>356</ENT>
+                            <ENT>2,910,943</ENT>
+                            <ENT>8,176.81</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>10,000-14,999</ENT>
+                            <ENT>346</ENT>
+                            <ENT>3,767,710</ENT>
+                            <ENT>10,889.34</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>15,000-19,999</ENT>
+                            <ENT>191</ENT>
+                            <ENT>2,750,180</ENT>
+                            <ENT>14,398.85</ENT>
+                        </ROW>
+                        <ROW RUL="n,n,n,s">
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT>≥20,000</ENT>
+                            <ENT>961</ENT>
+                            <ENT>51,776,636</ENT>
+                            <ENT>53,877.87</ENT>
+                        </ROW>
+                        <ROW>
+                            <ENT I="01">621610</ENT>
+                            <ENT>Home Health Care Services</ENT>
+                            <ENT O="oi3">Total</ENT>
+                            <ENT>23,801</ENT>
+                            <ENT>82,961,284</ENT>
+                            <ENT>3,485.62</ENT>
+                        </ROW>
+                        <TNOTE>
+                            Source: Data obtained from United States Census Bureau table “us_6digitnaics_rcptsize_2017” (SOURCE: 2017 County Business Patterns and Economic Census) Release Date: 5/28/2021: 
+                            <E T="03">https://www2.census.gov/programs-surveys/susb/tables/2017/.</E>
+                        </TNOTE>
+                        <TNOTE>
+                            <E T="02">Notes:</E>
+                             Estimated impact is calculated as Receipts ($1,000)/Number of firms.
+                        </TNOTE>
+                    </GPOTABLE>
+                    <P>The Department of Health and Human Services' practice in interpreting the RFA is to consider effects economically “significant” only if greater than 5 percent of providers reach a threshold of 3 to 5 percent or more of total revenue or total costs. The majority of hospice visits are Medicare paid visits, and therefore the majority of hospice's revenue consists of Medicare payments. Based on our analysis, we conclude that the policies proposed in this rule would result in an estimated total impact of 3 to 5 percent or more on Medicare revenue for greater than 5 percent of hospices. Therefore, the Secretary has certified that this hospice proposed rule would have significant economic impact resulting in a net increase in positive revenue on a substantial number of small entities. We estimate that the net impact of the policies in this rule is 2.4 percent or approximately $695 million in increased revenue to hospices in FY 2026. The 2.4 percent increase in expenditures when comparing FY 2025 payments to estimated FY 2026 payments is reflected in the last column of the first row in Table 9 and is driven solely by the impact of the hospice payment update percentage reflected in the fourth column of the impact table. In addition, small hospices will experience a lower estimated increase (1.7 percent), compared to large hospices (2.5 percent) due to the final updated wage index. Further detail is presented in Table 9 by hospice type and location. The analysis in this section along with the rest of the regulatory impact analysis in this proposed rule constitutes our initial regulatory flexibility analysis.</P>
+                    <P>In addition, section 1102(b) of the Act requires us to prepare a regulatory impact analysis if a rule may have a significant impact on the operations of a substantial number of small rural hospitals. This analysis must conform to the provisions of section 603 of the RFA. For purposes of section 1102(b) of the Act, we define a small rural hospital as a hospital that is located outside of a MSA and has fewer than 100 beds. This rule will only affect hospices. Therefore, the Secretary has determined that this rule will not have a significant impact on the operations of a substantial number of small rural hospitals (see Table 9).</P>
+                    <HD SOURCE="HD2">H. Unfunded Mandates Reform Act (UMRA)</HD>
+                    <P>Section 202 of the Unfunded Mandates Reform Act of 1995 (UMRA) also requires that agencies assess anticipated costs and benefits before issuing any rule whose mandates require spending in any 1 year of $100 million in 1995 dollars, updated annually for inflation. In 2025, that threshold is approximately $187 million. This rule will not have an unfunded effect on state, local, or tribal governments, in the aggregate, or on the private sector that exceeds this threshold in any 1 year.</P>
+                    <HD SOURCE="HD2">I. Federalism</HD>
+                    <P>Executive Order 13132 establishes certain requirements that an agency must meet when it promulgates a proposed rule (and subsequent final rule) that imposes substantial direct requirement costs on State and local governments, preempts State law, or otherwise has Federalism implications. We have reviewed this rule under these criteria of Executive Order 13132 and have determined that it will not impose substantial direct costs on State or local governments.</P>
+                    <HD SOURCE="HD2">J. E.O. 14192, “Unleashing Prosperity Through Deregulation”</HD>
+                    <P>
+                        Executive Order 14192, entitled “Unleashing Prosperity Through Deregulation” was issued on January 31, 2025, and requires that “any new incremental costs associated with new regulations shall, to the extent permitted by law, be offset by the elimination of existing costs associated with at least 10 prior regulations.” This proposed rule, if finalized as proposed, is not expected to be an E.O. 14192 regulatory action because it would not impose any more than 
+                        <E T="03">de minimis</E>
+                         regulatory costs.
+                    </P>
+                    <HD SOURCE="HD2">K. Conclusion</HD>
+                    <P>We estimate that aggregate payments to hospices in FY 2026 will increase by $695 million as a result of the hospice payment update, compared to payments in FY 2025. We estimate that in FY 2026, hospices in urban areas would experience, on average, a 2.4 percent increase in estimated payments compared to FY 2025; while hospices in rural areas would experience, on average, a 2.7 percent increase in estimated payments compared to FY 2025. Hospices providing services in the New England region would experience the largest estimated increases in payments of 3.8 percent. Hospices serving patients in the Pacific region will experience, on average, the lowest estimated increase of 1.4 percent in FY 2026 payments.</P>
+                    <P>In accordance with the provisions of Executive Order 12866, this regulation was reviewed by the Office of Management and Budget.</P>
+                    <P>Stephanie Carlton, Acting Administrator of the Centers for Medicare &amp; Medicaid Services, approved this document on March 31, 2025.</P>
+                    <LSTSUB>
+                        <PRTPAGE P="18587"/>
+                        <HD SOURCE="HED">List of Subjects in 42 CFR Part 418</HD>
+                        <P>Health facilities, Medicare, Reporting and recordkeeping requirements.</P>
+                    </LSTSUB>
+                    <P>For the reasons set forth in the preamble, the Centers for Medicare &amp; Medicaid Services proposes to amend 42 CFR chapter IV, part 418 as set forth below:</P>
+                    <PART>
+                        <HD SOURCE="HED">PART 418—HOSPICE CARE</HD>
+                    </PART>
+                    <AMDPAR>1. The authority citation for part 418 continues to read as follows:</AMDPAR>
+                    <AUTH>
+                        <HD SOURCE="HED">Authority:</HD>
+                        <P>42 U.S.C. 1302 and 1395hh.</P>
+                    </AUTH>
+                    <AMDPAR>2. Section 418.22 is amended by revising paragraph (b)(4) to read as follows:</AMDPAR>
+                    <SECTION>
+                        <SECTNO>§ 418.22</SECTNO>
+                        <SUBJECT> Certification of terminal illness.</SUBJECT>
+                        <STARS/>
+                        <P>(b) * * *</P>
+                        <P>(4) The physician or nurse practitioner who performs the face-to-face encounter with the patient described in paragraph (a)(4) of this section must attest in writing that he or she had a face-to-face encounter with the patient, including the date of that visit. The attestation must include the physician's or nurse practitioner's signature and the date it was signed. The attestation, its accompanying signature, and the date signed, must be a separate and distinct section of, or an addendum to, the recertification form, and must be clearly titled. If the face-to-face encounter was not performed by the certifying physician, the attestation of the physician or nurse practitioner who performed the face-to-face encounter shall state that the clinical findings of that visit were provided to the certifying physician for use in determining continued eligibility for hospice care.</P>
+                        <STARS/>
+                    </SECTION>
+                    <AMDPAR>3. Section 418.25 is amended by revising paragraph (a) and paragraph (b) introductory text to read as follows:</AMDPAR>
+                    <SECTION>
+                        <SECTNO>§ 418.25</SECTNO>
+                        <SUBJECT> Admission to hospice care.</SUBJECT>
+                        <P>(a) The hospice admits a patient only on the recommendation of the medical director (or the physician designee, as defined in § 418.3) or the physician member of the hospice interdisciplinary group, in consultation with, or with input from, the patient's attending physician (if any).</P>
+                        <P>(b) In reaching a decision to certify that the patient is terminally ill, the hospice medical director (or the physician designee, as defined in § 418.3) or the physician member of the hospice interdisciplinary group, must consider at least the following information:</P>
+                        <STARS/>
+                    </SECTION>
+                    <AMDPAR>4. Section 418.312 is amended by revising paragraph (j)(2) to read as follows:</AMDPAR>
+                    <SECTION>
+                        <SECTNO>§ 418.312</SECTNO>
+                        <SUBJECT> Data submission requirements under the hospice quality reporting program.</SUBJECT>
+                        <STARS/>
+                        <P>(j) * * *</P>
+                        <P>(2) A hospice must meet or exceed the data submission compliance threshold in paragraph (j)(1) of this section to avoid receiving a 4-percentage point reduction to its annual payment update for a given FY as described under § 418.306(b)(2).</P>
+                    </SECTION>
+                    <SIG>
+                        <NAME>Robert F. Kennedy, Jr.,</NAME>
+                        <TITLE>Secretary, Department of Health and Human Services.</TITLE>
+                    </SIG>
+                </SUPLINF>
+                <FRDOC>[FR Doc. 2025-06317 Filed 4-11-25; 4:15 pm]</FRDOC>
+                <BILCOD>BILLING CODE 4120-01-P</BILCOD>
+            </PRORULE>
