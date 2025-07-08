@@ -7,6 +7,13 @@ cors:
   origins:
     - http://localhost:5173
     - http://127.0.0.1:5173
+    - https://*.pages.dev      # Cloudflare Pages
+    - https://*.github.io      # GitHub Pages
+    - https://*.cloudflare.com # Cloudflare Workers
+    - https://reghealth-navigator.pages.dev
+    - https://fanxingbu.github.io
+    - https://*.ngrok.io       # ngrok tunnels
+    - https://*.loca.lt        # localtunnel
     
 rag_data:
   faiss_index: rag_data/faiss.index
