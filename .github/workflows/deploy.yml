@@ -38,5 +38,4 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./front/dist
-        cname: reghealth-navigator.fanxingbu.workers.dev  # Optional: if you have a custom domain 
+        publish_dir: ./front/dist 
