@@ -10,11 +10,11 @@ cors:
     - https://*.pages.dev      # Cloudflare Pages
     - https://*.github.io      # GitHub Pages
     - https://*.cloudflare.com # Cloudflare Workers
-    - https://reghealth-navigator.pages.dev
     - https://loadingbfx.github.io
     - https://loadingbfx.github.io/RegHealth-Navigator
     - https://*.ngrok.io       # ngrok tunnels
     - https://*.loca.lt        # localtunnel
+    
     
 rag_data:
   faiss_index: rag_data/faiss.index
