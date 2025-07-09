@@ -254,14 +254,3 @@ def ask_query(query):
         print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
 
-query1 = "What update did CMS make to the Promoting Interoperability performance period in 2024?"
-answer1, chunks1 = ask_query(query1)
-print("\n=== Test Case 1 ===")
-print("Question:", query1)
-print("Answer:\n", answer1)
-
-query2 = "What behavioral health-related improvement activities were added for 2024?"
-answer2, chunks2 = ask_query(query2)
-print("\n=== Test Case 2 ===")
-print("Question:", query2)
-print("Answer:\n", answer2)
