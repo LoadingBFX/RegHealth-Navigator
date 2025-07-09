@@ -2,40 +2,42 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ dev, main ]
-  pull_request:
-    branches: [ dev, main ]
+    branches:
+      - dev
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: front/package-lock.json
-    
-    - name: Install dependencies
-      run: |
-        cd front
-        npm ci
-    
-    - name: Build
-      run: |
-        cd front
-        npm run build
-      env:
-        VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-    
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./front/dist 
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd front
+          npm ci
+
+      - name: Build
+        run: |
+          cd front
+          npm run build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: front/dist
+          clean: true
+          single-commit: true 
