@@ -11,8 +11,8 @@ cors:
     - https://*.github.io      # GitHub Pages
     - https://*.cloudflare.com # Cloudflare Workers
     - https://reghealth-navigator.pages.dev
-    - https://fanxingbu.github.io
-    - https://fanxingbu.github.io/RegHealth-Navigator
+    - https://loadingbfx.github.io
+    - https://loadingbfx.github.io/RegHealth-Navigator
     - https://*.ngrok.io       # ngrok tunnels
     - https://*.loca.lt        # localtunnel
     
