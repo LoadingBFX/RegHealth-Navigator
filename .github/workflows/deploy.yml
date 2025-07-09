@@ -40,5 +40,4 @@ jobs:
           branch: gh-pages
           folder: front/dist
           clean: true
-          single-commit: true 
-          # test
+          single-commit: true
