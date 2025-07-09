@@ -41,3 +41,4 @@ jobs:
           folder: front/dist
           clean: true
           single-commit: true 
+          # test
