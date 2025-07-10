@@ -81,7 +81,7 @@ class IncrementalPipeline:
             
             # Step 2: Update embeddings for this file
             embedding_result = self.faiss_manager.update_embeddings_for_file(file_path, chunks)
-            if embedding_result['status'] != 'success':
+            if embedding_result['status'] not in ['success', 'no_changes']:
                 # Rollback chunks if embedding failed
                 logger.error(f"❌ Embedding failed, rolling back chunks for {file_path}")
                 try:
