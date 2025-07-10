@@ -578,9 +578,59 @@ class IncrementalFAISS:
             existing_metadata = self.load_metadata()
             filename = Path(file_path).name
             
-            # Get existing embeddings for this file
+            # Step 1: Check if FAISS index exists and is healthy
+            index = self.load_index()
+            if index is None:
+                logger.info(f"🔄 FAISS index not found, will regenerate embeddings for {file_path}")
+                # Index doesn't exist, need to regenerate
+                add_result = self.create_embeddings_for_chunks(chunks)
+                if add_result['status'] != 'success':
+                    raise RuntimeError(f"Failed to add new embeddings: {add_result.get('error', 'Unknown')}")
+                
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'embeddings_added': add_result['embeddings_added'],
+                    'total_cost': add_result['cost'],
+                    'status': 'success'
+                }
+            
+            # Step 2: Check if index and metadata are consistent
+            if index.ntotal != len(existing_metadata):
+                logger.warning(f"⚠️ Index-metadata mismatch: index has {index.ntotal} vectors, metadata has {len(existing_metadata)} entries")
+                logger.info(f"🔄 Will regenerate embeddings for {file_path} due to inconsistency")
+                # Inconsistent, need to regenerate
+                add_result = self.create_embeddings_for_chunks(chunks)
+                if add_result['status'] != 'success':
+                    raise RuntimeError(f"Failed to add new embeddings: {add_result.get('error', 'Unknown')}")
+                
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'embeddings_added': add_result['embeddings_added'],
+                    'total_cost': add_result['cost'],
+                    'status': 'success'
+                }
+            
+            # Step 3: Check if file has existing embeddings in FAISS
             existing_embeddings = [m for m in existing_metadata if m.get('metadata', {}).get('source_file') == filename]
             
+            if not existing_embeddings:
+                logger.info(f"🔄 No existing embeddings found for {file_path}, will create new ones")
+                # No existing embeddings, just add new ones
+                add_result = self.create_embeddings_for_chunks(chunks)
+                if add_result['status'] != 'success':
+                    raise RuntimeError(f"Failed to add new embeddings: {add_result.get('error', 'Unknown')}")
+                
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'embeddings_added': add_result['embeddings_added'],
+                    'total_cost': add_result['cost'],
+                    'status': 'success'
+                }
+            
+            # Step 4: Now check if chunks have actually changed
             # Create hash of new chunks for comparison
             import hashlib
             new_chunks_hash = hashlib.md5(
@@ -588,24 +638,24 @@ class IncrementalFAISS:
             ).hexdigest()
             
             # Check if chunks have actually changed
-            if existing_embeddings:
-                existing_chunks_hash = existing_embeddings[0].get('chunks_hash', '')
-                if existing_chunks_hash == new_chunks_hash:
-                    logger.info(f"✅ No changes detected for {file_path}, skipping embedding update")
-                    return {
-                        'file_path': file_path,
-                        'embeddings_removed': 0,
-                        'embeddings_added': 0,
-                        'total_cost': 0.0,
-                        'status': 'no_changes'
-                    }
+            existing_chunks_hash = existing_embeddings[0].get('chunks_hash', '')
+            if existing_chunks_hash == new_chunks_hash:
+                logger.info(f"✅ No changes detected for {file_path}, skipping embedding update")
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'embeddings_added': 0,
+                    'total_cost': 0.0,
+                    'status': 'no_changes'
+                }
             
-            # Step 1: Remove existing embeddings for this file
+            # Step 5: Chunks have changed, perform update (remove old + add new)
+            # Remove existing embeddings for this file
             remove_result = self.remove_embeddings_for_file(file_path, existing_metadata)
             if remove_result['status'] != 'success':
                 raise RuntimeError(f"Failed to remove old embeddings: {remove_result.get('error', 'Unknown')}")
             
-            # Step 2: Add new embeddings
+            # Add new embeddings
             add_result = self.create_embeddings_for_chunks(chunks)
             if add_result['status'] != 'success':
                 raise RuntimeError(f"Failed to add new embeddings: {add_result.get('error', 'Unknown')}")
