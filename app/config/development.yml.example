@@ -7,6 +7,14 @@ cors:
   origins:
     - http://localhost:5173
     - http://127.0.0.1:5173
+    - https://*.pages.dev      # Cloudflare Pages
+    - https://*.github.io      # GitHub Pages
+    - https://*.cloudflare.com # Cloudflare Workers
+    - https://loadingbfx.github.io
+    - https://loadingbfx.github.io/RegHealth-Navigator
+    - https://*.ngrok.io       # ngrok tunnels
+    - https://*.loca.lt        # localtunnel
+    
     
 rag_data:
   faiss_index: rag_data/faiss.index
@@ -17,3 +25,33 @@ build_faiss:
 
 docs_data:
   path: data/
+
+# Chunking configuration
+chunking:
+  chunk_words: 500
+  overlap_sentences: 1
+
+# Embedding model configuration
+embedding:
+  # Default model to use for embeddings
+  default_model: text-embedding-3-small
+  
+  # Available models with their pricing and configuration
+  models:
+    text-embedding-3-small:
+      price_per_1k_tokens: 0.00002  # $0.00002 per 1K tokens
+      encoding: cl100k_base
+      description: "Most cost-effective, recommended for production"
+      dimension: 1536
+      
+    text-embedding-ada-002:
+      price_per_1k_tokens: 0.0001   # $0.0001 per 1K tokens
+      encoding: text-embedding-ada-002
+      description: "Legacy model, maintained for compatibility"
+      dimension: 1536
+      
+    text-embedding-3-large:
+      price_per_1k_tokens: 0.00013  # $0.00013 per 1K tokens
+      encoding: cl100k_base
+      description: "Highest quality, highest cost"
+      dimension: 3072

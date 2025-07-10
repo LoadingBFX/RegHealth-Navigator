@@ -9,9 +9,10 @@ import json
 import hashlib
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 import logging
 import sys
+import html
 
 # Add the app directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,47 +29,399 @@ CHUNK_WORDS = 500
 OVERLAP_SENTENCES = 1
 OUTPUT_CHUNKS = os.path.join(config.build_faiss_output_folder, "chunks.json")
 
+# Structural elements that form logical blocks
+STRUCTURAL_TAGS = {'SECTION', 'SUBPART', 'APPENDIX', 'CONTENTS', 'SUPLINF', 'PREAMB', 'REGTEXT'}
+# Tags that contain meaningful content but are not primary structure
+CONTENT_TAGS = {'P', 'E', 'NOTE'}
+# Tags to ignore during chunking
+IGNORED_TAGS = {'PRTPAGE', 'GPH', 'GID', 'BILCOD', 'FRDOC', 'STARS'}
+
 class XMLChunker:
-    """
-    Class for chunking XML documents into smaller pieces.
+    """Enhanced XML chunker with structure-aware chunking strategy."""
     
-    Attributes:
-        input_dir (Path): Directory containing XML files
-        chunk_words (int): Maximum words per chunk
-        overlap_sentences (int): Number of sentences to overlap between chunks
-        output_chunks (str): Path to save chunked data
-    """
-    
-    def __init__(self, input_dir: str = None, chunk_words: int = 500, 
-                 overlap_sentences: int = 1, output_chunks: str = None):
-        """
-        Initialize XMLChunker.
-        
-        Args:
-            input_dir: Directory containing XML files (defaults to config.docs_data_path)
-            chunk_words: Maximum words per chunk
-            overlap_sentences: Number of sentences to overlap between chunks
-            output_chunks: Path to save chunked data (defaults to config.build_faiss_output_folder/chunks.json)
-        """
-        if input_dir is None:
-            self.input_dir = Path(config.docs_data_path)
-        else:
-            self.input_dir = Path(input_dir)
-        
-        if output_chunks is None:
-            self.output_chunks = os.path.join(config.build_faiss_output_folder, "chunks.json")
-        else:
-            self.output_chunks = output_chunks
-            
+    def __init__(self, chunk_words: int = CHUNK_WORDS, overlap_sentences: int = OVERLAP_SENTENCES):
         self.chunk_words = chunk_words
         self.overlap_sentences = overlap_sentences
-        logger.info(f"Initialized XMLChunker with input_dir: {self.input_dir.absolute()}")
-
+        self.input_dir = INPUT_DIR
+        self.output_chunks = OUTPUT_CHUNKS
+    
     def clean_text(self, text: str) -> str:
-        """Clean text by removing extra whitespace."""
-        if text is None:
+        """Enhanced text cleaning function with HTML entity decoding and whitespace normalization."""
+        if not text:
             return ""
-        return re.sub(r'\s+', ' ', text.strip())
+        
+        # Decode HTML entities
+        text = html.unescape(text)
+        
+        # Remove extra whitespace and normalize
+        text = re.sub(r'\s+', ' ', text.strip())
+        
+        return text
+    
+    def process_special_elements(self, elem: ET.Element) -> Optional[str]:
+        """Process special XML elements and return appropriate text or None."""
+        if elem.tag == "SU":
+            # Handle superscript references
+            return f"[{elem.text}]" if elem.text else ""
+        elif elem.tag == "FTREF":
+            # Handle footnote reference markers
+            return "[footnote_ref]"
+        elif elem.tag == "PRTPAGE":
+            # Remove page number markers
+            return ""
+        elif elem.tag == "GPH":
+            # Handle graphic/table placeholders
+            gid = elem.find("GID")
+            if gid is not None and gid.text:
+                return f"[graphic/table: {gid.text}]"
+            return "[graphic/table]"
+        elif elem.tag == "BILCOD":
+            # Remove billing codes
+            return ""
+        elif elem.tag == "FTNT":
+            # Handle footnote content - avoid recursion
+            text_parts = []
+            if elem.text:
+                text_parts.append(elem.text.strip())
+            for child in elem:
+                if child.text:
+                    text_parts.append(child.text.strip())
+                if child.tail:
+                    text_parts.append(child.tail.strip())
+            return ' '.join(part for part in text_parts if part)
+        else:
+            return None
+    
+    def extract_text_from_element(self, elem: ET.Element) -> str:
+        """Enhanced text extraction from element and its children with special element handling."""
+        # Handle special elements first
+        special_text = self.process_special_elements(elem)
+        if special_text is not None:
+            return special_text
+        
+        # Use itertext() for safe text extraction
+        text_parts = []
+        
+        # Get all text content from element and descendants
+        all_text = list(elem.itertext())
+        
+        # Clean and join text parts
+        for text in all_text:
+            cleaned = self.clean_text(text)
+            if cleaned:
+                text_parts.append(cleaned)
+        
+        result = " ".join(text_parts)
+        return result
+    
+    def merge_footnotes(self, root: ET.Element) -> Dict[str, str]:
+        """Collect all footnotes and return a mapping of reference numbers to footnote text."""
+        footnotes = {}
+        
+        for ftnt in root.findall(".//FTNT"):
+            # Find the reference number in the footnote
+            for su in ftnt.findall(".//SU"):
+                ref_num = su.text
+                if ref_num:
+                    # Extract the footnote text (excluding the reference number itself)
+                    footnote_text = self.extract_text_from_element(ftnt)
+                    # Clean up the footnote text
+                    footnote_text = re.sub(r'^\[\d+\]\s*', '', footnote_text)
+                    footnotes[ref_num] = footnote_text.strip()
+        
+        return footnotes
+    
+    def replace_footnote_references(self, root: ET.Element, footnotes: Dict[str, str]) -> None:
+        """Replace footnote references in the main text with actual footnote content."""
+        for p in root.findall(".//P"):
+            for su in p.findall(".//SU"):
+                ref_num = su.text
+                if ref_num and ref_num in footnotes:
+                    # Replace the superscript reference with the footnote content
+                    footnote_content = footnotes[ref_num]
+                    if footnote_content:
+                        # Create a new text element with the footnote content
+                        su.text = f" ({footnote_content})"
+    
+    def preprocess_xml(self, root: ET.Element) -> None:
+        """Preprocess XML to merge footnotes and clean up special elements."""
+        # Collect and merge footnotes
+        footnotes = self.merge_footnotes(root)
+        self.replace_footnote_references(root, footnotes)
+        
+        # Skip element removal for now to avoid issues - we'll handle it in text extraction
+        pass
+
+    def extract_logical_blocks(self, root: ET.Element) -> List[Dict]:
+        """Extract logical blocks based on structural elements."""
+        logical_blocks = []
+        
+        # Extract document-level metadata for section headers
+        doc_context = self.extract_document_context(root)
+        
+        # Find all structural elements
+        for elem in root.iter():
+            if elem.tag in STRUCTURAL_TAGS:
+                block = self.process_structural_element(elem, doc_context)
+                if block:
+                    logical_blocks.append(block)
+        
+        return logical_blocks
+    
+    def extract_document_context(self, root: ET.Element) -> Dict:
+        """Extract document-level context for building section headers."""
+        context = {}
+        
+        # Extract REGTEXT information
+        regtext = root.find('.//REGTEXT')
+        if regtext is not None:
+            context['title'] = regtext.get('TITLE', '')
+            context['part'] = regtext.get('PART', '')
+        
+        # Extract PREAMB SUBJECT
+        preamb_subject = root.find('.//PREAMB/SUBJECT')
+        if preamb_subject is not None:
+            context['document_subject'] = self.extract_text_from_element(preamb_subject)
+        
+        return context
+    
+    def process_structural_element(self, elem: ET.Element, doc_context: Dict) -> Optional[Dict]:
+        """Process a structural element and extract its content block."""
+        block_type = elem.tag
+        header_parts = []
+        content_paragraphs = []
+        
+        # Build section header based on element type
+        if block_type == 'SECTION':
+            # For SECTION: find SECTNO and SUBJECT
+            sectno = elem.find('./SECTNO')
+            subject = elem.find('./SUBJECT')
+            
+            if sectno is not None:
+                sectno_text = self.extract_text_from_element(sectno)
+                header_parts.append(sectno_text)
+            
+            if subject is not None:
+                subject_text = self.extract_text_from_element(subject)
+                header_parts.append(subject_text)
+            
+            # Extract all paragraphs in this section
+            for p in elem.findall('.//P'):
+                para_text = self.extract_text_from_element(p)
+                if para_text:
+                    content_paragraphs.append(para_text)
+                    
+        elif block_type == 'SUBPART':
+            # For SUBPART: find HD header
+            hd = elem.find('./HD')
+            if hd is not None:
+                hd_text = self.extract_text_from_element(hd)
+                header_parts.append(hd_text)
+            
+            # Extract content from all child elements
+            for child in elem:
+                if child.tag not in {'HD'}:  # Skip the header we already processed
+                    text = self.extract_text_from_element(child)
+                    if text:
+                        content_paragraphs.append(text)
+                        
+        elif block_type == 'APPENDIX':
+            # For APPENDIX: find HD header
+            hd = elem.find('./HD')
+            if hd is not None:
+                hd_text = self.extract_text_from_element(hd)
+                header_parts.append(hd_text)
+            
+            # Extract all paragraphs and notes
+            for p in elem.findall('.//P'):
+                para_text = self.extract_text_from_element(p)
+                if para_text:
+                    content_paragraphs.append(para_text)
+                    
+        elif block_type == 'CONTENTS':
+            # For CONTENTS: extract the table of contents structure
+            header_parts.append('Contents')
+            
+            # Extract all content elements
+            for child in elem.iter():
+                if child.tag in {'SECTNO', 'SUBJECT', 'HD'}:
+                    text = self.extract_text_from_element(child)
+                    if text:
+                        content_paragraphs.append(text)
+                        
+        elif block_type == 'SUPLINF':
+            # For SUPLINF: Supplementary Information section
+            header_parts.append('Supplementary Information')
+            
+            # Extract all paragraphs and headers within SUPLINF
+            for p in elem.findall('.//P'):
+                para_text = self.extract_text_from_element(p)
+                if para_text:
+                    content_paragraphs.append(para_text)
+                    
+        elif block_type == 'PREAMB':
+            # For PREAMB: Preamble section
+            header_parts.append('Preamble')
+            
+            # Extract all paragraphs in preamble
+            for p in elem.findall('.//P'):
+                para_text = self.extract_text_from_element(p)
+                if para_text:
+                    content_paragraphs.append(para_text)
+                    
+        elif block_type == 'REGTEXT':
+            # For REGTEXT: Regulatory Text - main content
+            header_parts.append('Regulatory Text')
+            
+            # Extract all content from regulatory text
+            for p in elem.findall('.//P'):
+                para_text = self.extract_text_from_element(p)
+                if para_text:
+                    content_paragraphs.append(para_text)
+        
+        # Build complete section header
+        section_header = self.build_section_header(header_parts, doc_context, block_type)
+        
+        # Combine all content
+        full_text = ' '.join(content_paragraphs)
+        
+        if not full_text.strip():
+            return None
+            
+        return {
+            'header': section_header,
+            'text': full_text,
+            'type': block_type,
+            'word_count': len(full_text.split())
+        }
+    
+    def build_section_header(self, header_parts: List[str], doc_context: Dict, block_type: str) -> str:
+        """Build comprehensive section header following the format: TITLE + PART > SUBPART > SECTNO + SUBJECT."""
+        header_components = []
+        
+        # Add document-level context
+        if doc_context.get('title') and doc_context.get('part'):
+            header_components.append(f"{doc_context['title']} CFR Part {doc_context['part']}")
+        
+        # Add block-specific header
+        if header_parts:
+            if block_type == 'SECTION' and len(header_parts) >= 2:
+                # Format: § sectno subject
+                header_components.append(f"§ {header_parts[0]} {header_parts[1]}")
+            else:
+                header_components.extend(header_parts)
+        
+        return ' > '.join(header_components) if header_components else f'{block_type}'
+    
+    def split_into_chunks_with_overlap(self, text: str, max_words: int, overlap_sentences: int) -> List[str]:
+        """Split text into chunks with sentence-level overlap."""
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        chunks = []
+        current_chunk = []
+        current_words = 0
+        
+        for sentence in sentences:
+            sentence_words = len(sentence.split())
+            
+            # If adding this sentence exceeds max_words and we have content, start new chunk
+            if current_words + sentence_words > max_words and current_chunk:
+                chunks.append(' '.join(current_chunk))
+                
+                # Start new chunk with overlap from previous chunk
+                overlap_start = max(0, len(current_chunk) - overlap_sentences)
+                current_chunk = current_chunk[overlap_start:] + [sentence]
+                current_words = sum(len(s.split()) for s in current_chunk)
+            else:
+                current_chunk.append(sentence)
+                current_words += sentence_words
+        
+        # Add the final chunk
+        if current_chunk:
+            chunks.append(' '.join(current_chunk))
+        
+        return chunks
+    
+    def chunk_document(self, root: ET.Element, metadata: Dict) -> List[Dict]:
+        """Enhanced structure-aware document chunking strategy."""
+        # Preprocess the XML to handle footnotes and special elements
+        self.preprocess_xml(root)
+        
+        # Extract logical blocks
+        logical_blocks = self.extract_logical_blocks(root)
+        
+        chunks = []
+        chunk_index = 0
+        
+        for block in logical_blocks:
+            section_header = block['header']
+            text = block['text']
+            word_count = block['word_count']
+            
+            if word_count <= self.chunk_words:
+                # Block fits in single chunk
+                chunks.append({
+                    'text': text,
+                    'section_header': section_header,
+                    'metadata': {
+                        **metadata,
+                        'chunk_id': chunk_index,
+                        'block_type': block['type'],
+                        'word_count': word_count
+                    }
+                })
+                chunk_index += 1
+            else:
+                # Split large block into multiple chunks with overlap
+                sub_chunks = self.split_into_chunks_with_overlap(
+                    text, self.chunk_words, self.overlap_sentences
+                )
+                
+                for i, sub_chunk in enumerate(sub_chunks):
+                    chunks.append({
+                        'text': sub_chunk,
+                        'section_header': section_header,
+                        'metadata': {
+                            **metadata,
+                            'chunk_id': chunk_index,
+                            'sub_chunk_index': i,
+                            'total_sub_chunks': len(sub_chunks),
+                            'block_type': block['type'],
+                            'word_count': len(sub_chunk.split())
+                        }
+                    })
+                    chunk_index += 1
+        
+        return chunks
+
+    def process_file(self, file_path: str) -> List[Dict]:
+        """Process a single XML file with enhanced text extraction."""
+        try:
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            
+            # Extract basic metadata
+            metadata = {
+                "source_file": file_path.split("/")[-1],
+                "file_type": "xml",
+                "processing_version": "2.0"  # Enhanced version
+            }
+            
+            # Extract additional metadata from XML structure
+            agency = root.find(".//AGENCY")
+            if agency is not None:
+                metadata["agency"] = agency.text
+            
+            subject = root.find(".//SUBJECT")
+            if subject is not None:
+                metadata["subject"] = subject.text
+            
+            return self.chunk_document(root, metadata)
+            
+        except Exception as e:
+            logger.error(f"Error processing file {file_path}: {str(e)}")
+            return []
 
     def infer_metadata_from_filename(self, filename: str) -> Dict:
         """Extract metadata from filename."""
@@ -99,67 +452,6 @@ class XMLChunker:
         meta["cfr"] = self.clean_text(root.findtext(".//CFR"))
         meta["effective_date"] = self.clean_text(root.findtext(".//EFFDATE/P"))
         return meta
-
-    def chunk_document(self, root: ET.Element, metadata: Dict) -> List[Dict]:
-        """Chunk document into smaller pieces."""
-        chunks = []
-        section_stack = []
-        current_text = []
-        chunk_index = 0
-        last_chunk_sentences = []
-
-        def current_section():
-            return " > ".join(section_stack)
-
-        for elem in root.iter():
-            if elem.tag == "HD":
-                text = self.clean_text(elem.text)
-                if not text:
-                    continue
-                level = elem.attrib.get("SOURCE", "")
-                if level.startswith("HD1"):
-                    section_stack = [text]
-                elif level.startswith("HD2"):
-                    section_stack = section_stack[:1] + [text]
-                elif level.startswith("HD3"):
-                    section_stack = section_stack[:2] + [text]
-                else:
-                    section_stack = [text]
-            elif elem.tag == "P":
-                para = self.clean_text(elem.text)
-                if para:
-                    current_text.append(para)
-                    word_count = sum(len(p.split()) for p in current_text)
-                    if word_count >= self.chunk_words:
-                        chunk_text = " ".join(current_text)
-                        if last_chunk_sentences:
-                            chunk_text = " ".join(last_chunk_sentences) + " " + chunk_text
-                        chunk_hash = hashlib.sha256(chunk_text.encode()).hexdigest()
-                        chunks.append({
-                            "text": chunk_text,
-                            "section_header": current_section(),
-                            "chunk_index": chunk_index,
-                            "hash": chunk_hash,
-                            "metadata": metadata.copy()
-                        })
-                        last_chunk_sentences = chunk_text.split(". ")[:self.overlap_sentences]
-                        current_text = []
-                        chunk_index += 1
-
-        if current_text:
-            chunk_text = " ".join(current_text)
-            if last_chunk_sentences:
-                chunk_text = " ".join(last_chunk_sentences) + " " + chunk_text
-            chunk_hash = hashlib.sha256(chunk_text.encode()).hexdigest()
-            chunks.append({
-                "text": chunk_text,
-                "section_header": current_section(),
-                "chunk_index": chunk_index,
-                "hash": chunk_hash,
-                "metadata": metadata.copy()
-            })
-
-        return chunks
 
     def process_files(self) -> List[Dict]:
         """Process all XML files in input directory."""

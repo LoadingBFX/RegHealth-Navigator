@@ -120,4 +120,15 @@ class Config:
         config = self.get_embedding_model_config(model_name)
         return config['description']
 
+    # Chunking configuration
+    @property
+    def chunk_words(self):
+        """Get chunk words size from config."""
+        return self.config['chunking']['chunk_words']
+
+    @property
+    def overlap_sentences(self):
+        """Get overlap sentences from config."""
+        return self.config['chunking']['overlap_sentences']
+
 config = Config()

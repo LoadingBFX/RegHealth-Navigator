@@ -26,6 +26,11 @@ build_faiss:
 docs_data:
   path: data/
 
+# Chunking configuration
+chunking:
+  chunk_words: 500
+  overlap_sentences: 1
+
 # Embedding model configuration
 embedding:
   # Default model to use for embeddings

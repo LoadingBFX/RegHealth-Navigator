@@ -147,6 +147,15 @@ python scheduled_updater.py
 
 ---
 
+## 🌐 Deployment Guide
+
+For detailed deployment instructions, see:
+- **[Local Backend + GitHub Pages Setup](docs/local_backend_github_pages_setup.md)** - Complete step-by-step guide using ngrok
+- [Deployment Guide](docs/deployment_guide.md) - General deployment options  
+- [Deployment Checklist](docs/deployment_checklist.md) - Pre/post deployment checklist
+
+---
+
 ## 🤝 Team Collaboration & Best Practices
 - Do **not** commit `.env`, `rag_data/`, or actual config files to git. Only commit `.example` templates.
 - All resource paths and sensitive info are managed via config and env files for security and flexibility.

@@ -1,19 +1,14 @@
 server:
-  host: 0.0.0.0  # Allow external connections
+  host: 0.0.0.0
   port: 8080
   debug: false
 
 cors:
   origins:
-    - https://*.pages.dev      # Cloudflare Pages
-    - https://*.github.io      # GitHub Pages
-    - https://*.cloudflare.com # Cloudflare Workers
-    - https://reghealth-navigator.pages.dev
-    - https://fanxingbu.github.io
-    - https://reghealth-navigator.fanxingbu.workers.dev
-    - https://*.ngrok.io       # ngrok tunnels
-    - https://*.loca.lt        # localtunnel
-    
+    - https://reghealth-navigator.com
+    - https://www.reghealth-navigator.com
+
+
 rag_data:
   faiss_index: rag_data/faiss.index
   metadata: rag_data/faiss_metadata.json
