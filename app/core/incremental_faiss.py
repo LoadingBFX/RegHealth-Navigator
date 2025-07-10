@@ -157,14 +157,19 @@ class IncrementalFAISS:
             logger.warning("⚠️ No valid texts to process after filtering")
             return [], 0.0
         
+        # Define batch size early
+        batch_size = 200  # Increased from 50 to reduce API calls
+        
         logger.info(f"📝 Generating embeddings for {len(processed_texts)} texts ({total_tokens} tokens)")
+        logger.info(f"📦 Using batch size: {batch_size}, estimated API calls: {len(processed_texts) // batch_size + 1}")
         
         embeddings = []
         actual_tokens = 0
         max_retries = 5
         base_delay = 1
+        api_calls = 0
         
-        def embed_batch(batch: List[str]) -> Optional[List[List[float]]]:
+        def embed_batch(batch: List[str], current_batch_size: int) -> Optional[List[List[float]]]:
             """Embed a batch with retry logic."""
             for attempt in range(max_retries):
                 try:
@@ -176,8 +181,8 @@ class IncrementalFAISS:
                             logger.error(f"❌ Single text too large: {batch_tokens} tokens")
                             return None
                         
-                        first_half = embed_batch(batch[:mid])
-                        second_half = embed_batch(batch[mid:])
+                        first_half = embed_batch(batch[:mid], current_batch_size)
+                        second_half = embed_batch(batch[mid:], current_batch_size)
                         
                         if first_half is None or second_half is None:
                             return None
@@ -190,8 +195,9 @@ class IncrementalFAISS:
                         model=self.model
                     )
                     
-                    nonlocal actual_tokens
+                    nonlocal actual_tokens, api_calls
                     actual_tokens += response.usage.total_tokens
+                    api_calls += 1
                     
                     return [r.embedding for r in response.data]
                     
@@ -205,8 +211,8 @@ class IncrementalFAISS:
                     if "maximum context length" in str(e).lower() and len(batch) > 1:
                         # Try smaller batch
                         mid = len(batch) // 2
-                        first_half = embed_batch(batch[:mid])
-                        second_half = embed_batch(batch[mid:])
+                        first_half = embed_batch(batch[:mid], current_batch_size)
+                        second_half = embed_batch(batch[mid:], current_batch_size)
                         if first_half is None or second_half is None:
                             return None
                         return first_half + second_half
@@ -221,21 +227,25 @@ class IncrementalFAISS:
             return None
         
         # Process in batches
-        batch_size = 50  # Conservative batch size
         with tqdm(total=len(processed_texts), desc=f"Embedding ({self.model})", unit="text") as pbar:
             for i in range(0, len(processed_texts), batch_size):
                 batch = processed_texts[i:i + batch_size]
                 
-                batch_embeddings = embed_batch(batch)
+                batch_embeddings = embed_batch(batch, batch_size)
                 if batch_embeddings is None:
                     logger.error(f"❌ Failed to embed batch {i//batch_size + 1}")
                     raise RuntimeError("Embedding generation failed")
                 
                 embeddings.extend(batch_embeddings)
                 pbar.update(len(batch))
+                
+                # Add small delay between batches to avoid rate limiting
+                if i + batch_size < len(processed_texts):
+                    time.sleep(0.1)
         
         actual_cost = actual_tokens / 1000 * self.model_price
         logger.info(f"✅ Generated {len(embeddings)} embeddings, cost: ${actual_cost:.4f}")
+        logger.info(f"📊 API calls made: {api_calls}")
         
         return embeddings, actual_cost
 
@@ -340,6 +350,12 @@ class IncrementalFAISS:
             embedding_matrix = np.array(embeddings).astype('float32')
             index.add(embedding_matrix)
             
+            # Create chunk hash for change detection
+            import hashlib
+            chunks_hash = hashlib.md5(
+                json.dumps([chunk.get('text', '') for chunk in chunks], sort_keys=True).encode()
+            ).hexdigest()
+            
             # Update metadata - match exactly with what was embedded
             new_metadata = []
             text_idx = 0
@@ -357,7 +373,8 @@ class IncrementalFAISS:
                             new_metadata.append({
                                 'text': sub_text,
                                 'section_header': chunk.get('section_header', ''),
-                                'metadata': chunk.get('metadata', {})
+                                'metadata': chunk.get('metadata', {}),
+                                'chunks_hash': chunks_hash  # Add hash for change detection
                             })
                             text_idx += 1
                 else:
@@ -365,7 +382,8 @@ class IncrementalFAISS:
                         new_metadata.append({
                             'text': chunk_text,
                             'section_header': chunk.get('section_header', ''),
-                            'metadata': chunk.get('metadata', {})
+                            'metadata': chunk.get('metadata', {}),
+                            'chunks_hash': chunks_hash  # Add hash for change detection
                         })
                         text_idx += 1
             
@@ -395,13 +413,14 @@ class IncrementalFAISS:
                 'error': str(e)
             }
 
-    def remove_embeddings_for_file(self, file_path: str) -> Dict:
+    def remove_embeddings_for_file(self, file_path: str, existing_metadata: List[Dict] = None) -> Dict:
         """
         Remove embeddings for a specific file.
         This rebuilds the index without the specified file's embeddings.
         
         Args:
             file_path: Path to file (just filename, not full path)
+            existing_metadata: Optional pre-loaded metadata to avoid duplicate loading
             
         Returns:
             Dictionary with operation results
@@ -409,8 +428,12 @@ class IncrementalFAISS:
         logger.info(f"🗑️ Removing embeddings for file: {file_path}")
         
         try:
-            # Load current metadata
-            metadata = self.load_metadata()
+            # Load current metadata (only if not provided)
+            if existing_metadata is None:
+                metadata = self.load_metadata()
+            else:
+                metadata = existing_metadata
+                
             if not metadata:
                 logger.info("✅ No metadata found, nothing to remove")
                 return {
@@ -510,8 +533,34 @@ class IncrementalFAISS:
         logger.info(f"🔄 Updating embeddings for file: {file_path}")
         
         try:
+            # Check if we actually need to update by comparing chunk hashes
+            existing_metadata = self.load_metadata()
+            filename = Path(file_path).name
+            
+            # Get existing embeddings for this file
+            existing_embeddings = [m for m in existing_metadata if m.get('metadata', {}).get('source_file') == filename]
+            
+            # Create hash of new chunks for comparison
+            import hashlib
+            new_chunks_hash = hashlib.md5(
+                json.dumps([chunk.get('text', '') for chunk in chunks], sort_keys=True).encode()
+            ).hexdigest()
+            
+            # Check if chunks have actually changed
+            if existing_embeddings:
+                existing_chunks_hash = existing_embeddings[0].get('chunks_hash', '')
+                if existing_chunks_hash == new_chunks_hash:
+                    logger.info(f"✅ No changes detected for {file_path}, skipping embedding update")
+                    return {
+                        'file_path': file_path,
+                        'embeddings_removed': 0,
+                        'embeddings_added': 0,
+                        'total_cost': 0.0,
+                        'status': 'no_changes'
+                    }
+            
             # Step 1: Remove existing embeddings for this file
-            remove_result = self.remove_embeddings_for_file(file_path)
+            remove_result = self.remove_embeddings_for_file(file_path, existing_metadata)
             if remove_result['status'] != 'success':
                 raise RuntimeError(f"Failed to remove old embeddings: {remove_result.get('error', 'Unknown')}")
             
