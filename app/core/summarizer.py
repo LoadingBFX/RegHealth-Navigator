@@ -6,6 +6,7 @@ from typing import List, Dict, Any
 from openai import OpenAI
 from config import config
 
+
 class SummaryGenerator:
     """
     Summary Generator for CMS regulatory rules using OpenAI.
@@ -20,11 +21,10 @@ class SummaryGenerator:
         generator.generate_report(chunk_data, file_name)
     """
 
-    def __init__(self, output_dir: str = "./summary_outputs"):
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            sys.exit("❌ OPENAI_API_KEY is not set.")
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, output_dir: str = "./summary_outputs", openai_api_key: str = os.getenv("OPENAI_API_KEY")):
+        if not openai_api_key:
+            sys.exit("OPENAI_API_KEY is not set.")
+        self.client = OpenAI(api_key=openai_api_key)
         self.summary_dir = Path(output_dir)
         self.summary_dir.mkdir(exist_ok=True)
 
@@ -32,11 +32,11 @@ class SummaryGenerator:
         return len(text.encode("utf-8")) // 4
 
     def _chunk_batches(self, data: List[Dict], batch_size: int) -> List[List[Dict]]:
-        return [data[i:i+batch_size] for i in range(0, len(data), batch_size)]
+        return [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
 
     def _get_batch_prompt(self, program: str, batch: List[Dict], batch_num: int) -> str:
         formatted = "\n\n".join(
-            f"[Section {i+1}]\n{c.get('page_content') or c.get('text', '')}" for i, c in enumerate(batch)
+            f"[Section {i + 1}]\n{c.get('page_content') or c.get('text', '')}" for i, c in enumerate(batch)
         )
         return f"""
 You are a senior compliance analyst reviewing CMS {program.upper()} Final Rule content.

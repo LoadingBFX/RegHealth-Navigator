@@ -11,6 +11,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
+
+from app.core import summarizer
+from app.core.summarizer import SummaryGenerator
 from .core.search import ChatSearchService
 from .config import config
 from dotenv import load_dotenv
@@ -21,6 +24,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 def create_app() -> Flask:
     """
@@ -38,24 +42,30 @@ def create_app() -> Flask:
 
     # Initialize Flask app
     app = Flask(__name__)
-    
+
     # Configure CORS
     CORS(app, origins=config.cors_origins)
-    
+
     # Initialize services
     chat_service = ChatSearchService(
         openai_api_key=api_key,
         faiss_index_path=config.faiss_index_path,
         metadata_path=config.faiss_metadata_path
     )
-    
+
+    summarizer = SummaryGenerator(
+        output_dir="./summary_outputs",
+        openai_api_key=api_key
+    )
+
     # Register error handlers
     register_error_handlers(app)
-    
+
     # Register routes
     register_routes(app, chat_service)
-    
+
     return app
+
 
 def register_error_handlers(app: Flask) -> None:
     """
@@ -64,6 +74,7 @@ def register_error_handlers(app: Flask) -> None:
     Args:
         app: Flask application instance
     """
+
     @app.errorhandler(404)
     def not_found(error: HTTPException) -> tuple[Dict[str, str], int]:
         return jsonify({"error": "Endpoint not found"}), 404
@@ -77,6 +88,7 @@ def register_error_handlers(app: Flask) -> None:
     def handle_bad_request(error: BadRequest) -> tuple[Dict[str, str], int]:
         return jsonify({"error": str(error)}), 400
 
+
 def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
     """
     Register routes for the Flask application.
@@ -85,6 +97,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         app: Flask application instance
         chat_service: ChatSearchService instance
     """
+
     def validate_json_request(required_fields: Optional[list[str]] = None) -> Dict[str, Any]:
         """
         Validate JSON request and required fields.
@@ -136,8 +149,8 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             logger.error(f"Error in chat endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
 
-    @app.route("/api/simple-chat", methods=["POST"])
-    def simple_chat() -> tuple[Dict[str, str], int]:
+    @app.route("/api/summarize", methods=["POST"])
+    def summarize() -> tuple[Dict[str, str], int]:
         """
         Simple test endpoint.
         
@@ -153,10 +166,12 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         """
         try:
             data = validate_json_request(required_fields=["message"])
-            return jsonify({"response": "hello world!"})
+            summary = summarizer.generate_report(data)
+            return jsonify({"response": summary})
         except Exception as e:
-            logger.error(f"Error in simple-chat endpoint: {str(e)}")
+            logger.error(f"Error in summarize endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
+
 
 def main() -> None:
     """Main entry point for the Flask application."""
@@ -167,6 +182,7 @@ def main() -> None:
         port=config.api_port,
         debug=config.debug
     )
+
 
 if __name__ == "__main__":
     main()
