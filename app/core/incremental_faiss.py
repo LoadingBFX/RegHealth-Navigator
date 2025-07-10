@@ -476,38 +476,40 @@ class IncrementalFAISS:
             
             # Efficiently remove vectors from FAISS index
             if filtered_metadata:
-                # Create new index with remaining vectors
-                dimension = index.d
-                new_index = faiss.IndexFlatL2(dimension)
+                # For safety, fall back to rebuilding from metadata
+                # This avoids potential segfaults with index.reconstruct()
+                logger.info(f"🔄 Rebuilding index from {len(filtered_metadata)} remaining metadata entries")
                 
-                # Get remaining vectors from original index
-                remaining_vectors = []
-                for i, entry in enumerate(metadata):
-                    if i not in removed_indices:
-                        # Get vector from original index
-                        vector = index.reconstruct(i)
-                        remaining_vectors.append(vector)
+                # Extract texts from filtered metadata
+                texts = [entry['text'] for entry in filtered_metadata]
                 
-                if remaining_vectors:
-                    # Add remaining vectors to new index
-                    embedding_matrix = np.array(remaining_vectors).astype('float32')
+                # Regenerate embeddings for remaining metadata
+                embeddings, cost = self.generate_embeddings(texts)
+                
+                if embeddings:
+                    # Create new index
+                    dimension = len(embeddings[0])
+                    new_index = faiss.IndexFlatL2(dimension)
+                    
+                    # Add embeddings
+                    embedding_matrix = np.array(embeddings).astype('float32')
                     new_index.add(embedding_matrix)
                     
                     # Save new index and metadata
                     self.save_index(new_index)
                     self.save_metadata(filtered_metadata)
                     
-                    logger.info(f"✅ Removed {removed_count} embeddings, kept {len(remaining_vectors)} remaining")
+                    logger.info(f"✅ Removed {removed_count} embeddings, rebuilt index with {len(embeddings)} remaining")
                     
                     return {
                         'file_path': file_path,
                         'embeddings_removed': removed_count,
-                        'embeddings_remaining': len(remaining_vectors),
-                        'rebuild_cost': 0.0,  # No API calls needed
+                        'embeddings_remaining': len(embeddings),
+                        'rebuild_cost': cost,
                         'status': 'success'
                     }
                 else:
-                    raise RuntimeError("Failed to extract remaining vectors from index")
+                    raise RuntimeError("Failed to regenerate embeddings for remaining metadata")
             else:
                 # No metadata remaining, remove index
                 if os.path.exists(self.faiss_index_path):
