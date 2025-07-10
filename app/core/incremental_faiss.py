@@ -476,14 +476,24 @@ class IncrementalFAISS:
             
             # Efficiently remove vectors from FAISS index
             if filtered_metadata:
-                # Use FAISS's built-in remove_ids method for efficient removal
                 try:
                     # Convert removed_indices to numpy array
                     import numpy as np
                     remove_ids = np.array(removed_indices, dtype=np.int64)
                     
+                    # Log before removal
+                    logger.info(f"🔄 Removing {len(remove_ids)} vectors from index (current size: {index.ntotal})")
+                    
                     # Remove vectors from index
                     index.remove_ids(remove_ids)
+                    
+                    # Verify removal worked correctly
+                    expected_remaining = len(metadata) - len(removed_indices)
+                    actual_remaining = index.ntotal
+                    
+                    if actual_remaining != expected_remaining:
+                        logger.warning(f"⚠️ remove_ids result mismatch: expected {expected_remaining}, got {actual_remaining}")
+                        raise RuntimeError(f"remove_ids failed: expected {expected_remaining}, got {actual_remaining}")
                     
                     # Save updated index and metadata
                     self.save_index(index)
@@ -540,7 +550,6 @@ class IncrementalFAISS:
                     'rebuild_cost': 0.0,
                     'status': 'success'
                 }
-                
         except Exception as e:
             logger.error(f"❌ Error removing embeddings for {file_path}: {e}")
             return {
