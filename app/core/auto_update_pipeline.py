@@ -1,12 +1,9 @@
 """
 auto_update_pipeline.py
 
-Automated pipeline that combines regulation fetching, incremental processing, and vector database updates.
-This system automatically:
-1. Fetches new regulations from Federal Register
-2. Downloads XML files
-3. Processes new files into chunks
-4. Updates FAISS index with new embeddings
+Complete automated pipeline for regulation updates.
+Integrates regulation fetching, XML downloading, incremental processing, and embedding updates.
+Provides simple, unified entry points with comprehensive error handling and rollback capabilities.
 """
 import os
 import json
@@ -22,17 +19,24 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
-# Import components
+# Import pipeline components
 from incremental_pipeline import IncrementalPipeline
-from data_fetcher.fetch_regulations import (
-    get_latest_documents, 
-    get_single_document, 
-    detect_program_type, 
-    download_xml, 
-    is_valid_xml,
-    extract_year_from_title,
-    generate_filename
-)
+
+# Import data fetcher components
+try:
+    from data_fetcher.fetch_regulations import (
+        get_latest_documents, 
+        get_single_document, 
+        detect_program_type, 
+        download_xml, 
+        is_valid_xml,
+        extract_year_from_title,
+        generate_filename
+    )
+    DATA_FETCHER_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"⚠️ Data fetcher not available: {e}")
+    DATA_FETCHER_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,43 +44,59 @@ logger = logging.getLogger(__name__)
 
 class AutoUpdatePipeline:
     """
-    Automated pipeline for regulation updates.
+    Complete automated regulation update pipeline.
     
-    This class orchestrates the complete automated update process:
-    1. Fetch new regulations from Federal Register
-    2. Download XML files to appropriate directories
-    3. Process new files through incremental pipeline
-    4. Update FAISS index with new embeddings
+    Provides simple entry points for:
+    - Full automated updates (fetch + download + process)
+    - Incremental updates (process existing files)
+    - Manual file processing
+    - System monitoring and validation
+    
+    All operations include proper error handling, cost estimation, and rollback capabilities.
     """
     
-    def __init__(self, days_back: int = 365, model: str = None):
+    def __init__(self, model: str = None, days_back: int = None):
         """
         Initialize AutoUpdatePipeline.
         
         Args:
-            days_back: Number of days to look back for new regulations
-            model: Embedding model to use. If None, uses default from config.
-                   Available models are defined in config files.
+            model: Embedding model to use (from config if None)
+            days_back: Days to look back for new regulations (from config if None)
         """
-        self.days_back = days_back
         self.model = model if model else config.default_embedding_model
-        self.data_dir = Path(config.docs_data_path)
-        self.incremental_pipeline = IncrementalPipeline(model=model)
+        self.days_back = days_back if days_back else getattr(config, 'regulation_fetch_days_back', 365)
         
-        logger.info(f"🚀 Initialized AutoUpdatePipeline (looking back {days_back} days)")
-        logger.info(f"💰 Using model: {self.model}")
+        # Initialize core pipeline
+        self.pipeline = IncrementalPipeline(model=self.model)
+        
+        # Paths
+        self.data_dir = Path(config.docs_data_path)
+        
+        logger.info(f"🚀 Initialized AutoUpdatePipeline")
+        logger.info(f"💰 Model: {self.model}")
+        logger.info(f"🗓️ Days back: {self.days_back}")
+        logger.info(f"📁 Data directory: {self.data_dir}")
+        logger.info(f"🌐 Data fetcher available: {DATA_FETCHER_AVAILABLE}")
 
-    def fetch_new_regulations(self) -> List[Dict]:
+    def check_for_new_regulations(self) -> Dict:
         """
-        Fetch new regulations from Federal Register.
+        Check for new regulations without downloading.
         
         Returns:
-            List of regulation documents that need processing
+            Dictionary with check results
         """
-        logger.info(f"🔍 Fetching regulations from the past {self.days_back} days...")
+        logger.info("🔍 Checking for new regulations...")
+        
+        if not DATA_FETCHER_AVAILABLE:
+            return {
+                'available': False,
+                'error': 'Data fetcher not available',
+                'new_regulations': [],
+                'status': 'error'
+            }
         
         try:
-            # Get latest documents
+            # Get latest documents from Federal Register
             all_docs = get_latest_documents(self.days_back)
             logger.info(f"📄 Found {len(all_docs)} total documents")
             
@@ -85,307 +105,617 @@ class AutoUpdatePipeline:
             for doc in all_docs:
                 doc_number = doc.get("document_number", "")
                 doc_type = doc.get("type", "")
-                title = doc.get("title", "")
                 publication_date = doc.get("publication_date", "")
                 
                 # Skip correction documents
                 if doc_number.startswith("C"):
-                    logger.debug(f"⏭️ Skipping correction document: {doc_number}")
                     continue
                 
                 # Skip future-dated documents
                 if publication_date and datetime.strptime(publication_date, "%Y-%m-%d") > datetime.now():
-                    logger.debug(f"⏭️ Skipping future-dated document: {doc_number}")
                     continue
                 
                 # Skip non-rule documents
                 if doc_type not in ["Rule", "Proposed Rule"]:
-                    logger.debug(f"⏭️ Skipping non-rule document: {doc_number} ({doc_type})")
                     continue
                 
-                # Detect program type
+                # Check program type
                 has_program, program_type = detect_program_type(doc)
                 if not has_program:
-                    logger.debug(f"⏭️ Skipping unrecognized program type: {doc_number} - {title}")
                     continue
                 
-                relevant_docs.append(doc)
-                logger.info(f"✅ Found relevant document: {doc_number} ({program_type}) - {title}")
+                # Check if file already exists
+                filename = generate_filename(doc, program_type)
+                if filename:
+                    filepath = self.data_dir / program_type / filename
+                    if not filepath.exists():
+                        relevant_docs.append({
+                            'document': doc,
+                            'program_type': program_type,
+                            'filename': filename,
+                            'filepath': str(filepath)
+                        })
             
-            logger.info(f"📊 Found {len(relevant_docs)} relevant documents")
-            return relevant_docs
+            logger.info(f"📊 Found {len(relevant_docs)} new regulations")
+            
+            return {
+                'available': len(relevant_docs) > 0,
+                'new_regulations': relevant_docs,
+                'total_found': len(all_docs),
+                'relevant_found': len(relevant_docs),
+                'status': 'success'
+            }
             
         except Exception as e:
-            logger.error(f"❌ Error fetching regulations: {e}")
-            return []
+            logger.error(f"❌ Error checking for regulations: {e}")
+            return {
+                'available': False,
+                'error': str(e),
+                'new_regulations': [],
+                'status': 'error'
+            }
 
-    def download_new_files(self, regulations: List[Dict]) -> List[Path]:
+    def download_new_regulations(self, regulations: List[Dict] = None) -> Dict:
         """
-        Download XML files for new regulations.
+        Download new regulations from Federal Register.
         
         Args:
-            regulations: List of regulation documents
+            regulations: List of regulations to download (checks automatically if None)
             
         Returns:
-            List of downloaded file paths
+            Dictionary with download results
         """
+        if regulations is None:
+            check_result = self.check_for_new_regulations()
+            if check_result['status'] != 'success':
+                return {
+                    'downloaded_files': [],
+                    'failed_downloads': [],
+                    'status': 'error',
+                    'error': check_result.get('error', 'Unknown error checking regulations')
+                }
+            regulations = check_result['new_regulations']
+        
         if not regulations:
             logger.info("📭 No new regulations to download")
-            return []
+            return {
+                'downloaded_files': [],
+                'failed_downloads': [],
+                'status': 'success'
+            }
+        
+        logger.info(f"⬇️ Downloading {len(regulations)} regulations...")
         
         downloaded_files = []
+        failed_downloads = []
         
-        for doc in regulations:
+        for reg_info in regulations:
             try:
-                doc_number = doc.get("document_number", "")
-                publication_date = doc.get("publication_date", "")
-                doc_type = doc.get("type", "")
-                
-                # Get program type
-                has_program, program_type = detect_program_type(doc)
-                if not has_program:
-                    continue
+                doc = reg_info['document']
+                program_type = reg_info['program_type']
+                filename = reg_info['filename']
                 
                 # Create program directory
                 program_dir = self.data_dir / program_type
                 program_dir.mkdir(parents=True, exist_ok=True)
-                
-                # Check if file already exists (using unified filename generation)
-                filename = generate_filename(doc, program_type)
-                if not filename:
-                    logger.error(f"Could not generate filename for document {doc_number}")
-                    continue
-                
-                filepath = program_dir / filename
-                
-                if filepath.exists() and is_valid_xml(filepath):
-                    logger.info(f"📁 File already exists: {filepath}")
-                    downloaded_files.append(filepath)
-                    continue
                 
                 # Download file
                 logger.info(f"⬇️ Downloading: {filename}")
                 success = download_xml(doc, self.data_dir, logger=logger)
                 
                 if success:
-                    downloaded_files.append(filepath)
+                    filepath = program_dir / filename
+                    if filepath.exists() and is_valid_xml(filepath):
+                        downloaded_files.append(str(filepath))
+                        logger.info(f"✅ Downloaded: {filename}")
+                    else:
+                        failed_downloads.append({
+                            'filename': filename,
+                            'error': 'File not found after download or invalid XML'
+                        })
                 else:
-                    logger.error(f"❌ Failed to download: {filename}")
-                    continue
+                    failed_downloads.append({
+                        'filename': filename,
+                        'error': 'Download failed'
+                    })
                 
                 # Add delay between downloads
-                time.sleep(random.uniform(2, 5))
+                time.sleep(random.uniform(1, 3))
                 
             except Exception as e:
-                logger.error(f"❌ Error downloading {doc.get('document_number', '')}: {e}")
-                continue
+                logger.error(f"❌ Error downloading {reg_info.get('filename', 'unknown')}: {e}")
+                failed_downloads.append({
+                    'filename': reg_info.get('filename', 'unknown'),
+                    'error': str(e)
+                })
         
-        logger.info(f"📦 Downloaded {len(downloaded_files)} files")
-        return downloaded_files
-
-    def process_new_files(self, downloaded_files: List[Path]) -> List[Dict]:
-        """
-        Process newly downloaded files through incremental pipeline.
-        
-        Args:
-            downloaded_files: List of downloaded file paths
-            
-        Returns:
-            List of processing results
-        """
-        if not downloaded_files:
-            logger.info("📭 No new files to process")
-            return []
-        
-        logger.info(f"🔄 Processing {len(downloaded_files)} new files...")
-        
-        results = []
-        for file_path in downloaded_files:
-            try:
-                # Convert to relative path for incremental processing
-                relative_path = file_path.relative_to(self.data_dir)
-                logger.info(f"📄 Processing: {relative_path}")
-                
-                # Process through incremental pipeline
-                result = self.incremental_pipeline.process_single_file(str(relative_path))
-                results.append(result)
-                
-                cost_display = "skipped" if result.get('estimated_cost', 0) == -1 else f"${result.get('estimated_cost', 0)}"
-                logger.info(f"✅ Processed {relative_path}: {result['chunks_created']} chunks, {cost_display}")
-                
-            except Exception as e:
-                logger.error(f"❌ Error processing {file_path}: {e}")
-                continue
-        
-        return results
-
-    def run_full_update(self) -> Dict:
-        """
-        Run the complete automated update process.
-        
-        Returns:
-            Dictionary with update statistics
-        """
-        logger.info("🚀 Starting automated regulation update...")
-        
-        start_time = time.time()
-        
-        # Step 1: Fetch new regulations
-        regulations = self.fetch_new_regulations()
-        
-        # Step 2: Download new files
-        downloaded_files = self.download_new_files(regulations)
-        
-        # Step 3: Process new files
-        processing_results = self.process_new_files(downloaded_files)
-        
-        # Calculate statistics
-        total_chunks = sum(r.get("chunks_created", 0) for r in processing_results)
-        total_embeddings = sum(r.get("embeddings_added", 0) for r in processing_results)
-        total_cost = sum(r.get("estimated_cost", 0) for r in processing_results if r.get("estimated_cost", 0) >= 0)
-        successful_files = len([r for r in processing_results if r.get("status") == "success"])
-        
-        end_time = time.time()
-        duration = end_time - start_time
-        
-        stats = {
-            "regulations": regulations,
-            "regulations_found": len(regulations),
-            "downloaded_files": downloaded_files,
-            "files_downloaded": len(downloaded_files),
-            "files_processed": len(processing_results),
-            "files_successful": successful_files,
-            "total_chunks_created": total_chunks,
-            "total_embeddings_added": total_embeddings,
-            "total_cost": round(total_cost, 4),
-            "duration_seconds": round(duration, 2),
-            "processing_results": processing_results
-        }
-        
-        # Log summary
-        logger.info("🎉 Automated update completed!")
-        logger.info(f"   - Regulations found: {stats['regulations_found']}")
-        logger.info(f"   - Files downloaded: {stats['files_downloaded']}")
-        logger.info(f"   - Files processed: {stats['files_processed']}")
-        logger.info(f"   - Successful: {stats['files_successful']}")
-        logger.info(f"   - Total chunks: {stats['total_chunks_created']}")
-        logger.info(f"   - Total embeddings: {stats['total_embeddings_added']}")
-        logger.info(f"   - Total cost: ${stats['total_cost']}")
-        logger.info(f"   - Duration: {stats['duration_seconds']}s")
-        
-        return stats
-
-    def check_for_updates(self) -> bool:
-        """
-        Check if there are any new regulations available.
-        
-        Returns:
-            True if updates are available, False otherwise
-        """
-        logger.info("🔍 Checking for new regulations...")
-        
-        regulations = self.fetch_new_regulations()
-        
-        if not regulations:
-            logger.info("✅ No new regulations found")
-            return False
-        
-        # Check if any of these regulations need downloading
-        for doc in regulations:
-            doc_number = doc.get("document_number", "")
-            publication_date = doc.get("publication_date", "")
-            doc_type = doc.get("type", "")
-            
-            has_program, program_type = detect_program_type(doc)
-            if not has_program:
-                continue
-            
-            # Check if file exists (using unified filename generation)
-            filename = generate_filename(doc, program_type)
-            if not filename:
-                continue
-            
-            filepath = self.data_dir / program_type / filename
-            
-            if not filepath.exists():
-                logger.info(f"🆕 New regulation found: {doc_number} ({program_type})")
-                return True
-        
-        logger.info("✅ All regulations are up to date")
-        return False
-
-    def get_system_status(self) -> Dict:
-        """Get comprehensive system status."""
-        # Get incremental pipeline status
-        incremental_status = self.incremental_pipeline.get_system_status()
-        
-        # Check for updates
-        updates_available = self.check_for_updates()
+        logger.info(f"📦 Download completed: {len(downloaded_files)} successful, {len(failed_downloads)} failed")
         
         return {
-            **incremental_status,
-            "updates_available": updates_available,
-            "days_back": self.days_back,
-            "last_check": datetime.now().isoformat()
+            'downloaded_files': downloaded_files,
+            'failed_downloads': failed_downloads,
+            'status': 'success' if not failed_downloads else 'partial_success'
         }
 
+    def run_full_auto_update(self) -> Dict:
+        """
+        Run complete automated update: check + download + process regulations.
+        This is the main entry point for automated updates.
+        
+        Returns:
+            Dictionary with complete update results
+        """
+        logger.info("🚀 Starting full automated update...")
+        start_time = time.time()
+        
+        try:
+            # Step 1: Check for new regulations
+            check_result = self.check_for_new_regulations()
+            if check_result['status'] != 'success':
+                raise Exception(f"Failed to check regulations: {check_result.get('error', 'Unknown')}")
+            
+            if not check_result['available']:
+                logger.info("✅ No new regulations found")
+                
+                # Still run incremental update on existing files
+                incremental_result = self.pipeline.full_incremental_update()
+                
+                end_time = time.time()
+                return {
+                    'regulations_check': check_result,
+                    'download_result': {'downloaded_files': [], 'failed_downloads': []},
+                    'incremental_result': incremental_result,
+                    'total_cost': incremental_result['total_cost'],
+                    'duration_seconds': round(end_time - start_time, 2),
+                    'status': 'success'
+                }
+            
+            # Step 2: Download new regulations
+            download_result = self.download_new_regulations(check_result['new_regulations'])
+            if download_result['status'] == 'error':
+                raise Exception("Failed to download regulations")
+            
+            # Step 3: Run full incremental update (includes new downloads)
+            incremental_result = self.pipeline.full_incremental_update()
+            
+            # Calculate totals
+            total_cost = incremental_result['total_cost']
+            end_time = time.time()
+            
+            logger.info("🎉 Full automated update completed!")
+            logger.info(f"   - New regulations found: {check_result['relevant_found']}")
+            logger.info(f"   - Files downloaded: {len(download_result['downloaded_files'])}")
+            logger.info(f"   - Files processed: {len(incremental_result['process_result']['processed_files'])}")
+            logger.info(f"   - Total cost: ${total_cost:.4f}")
+            logger.info(f"   - Duration: {round(end_time - start_time, 2)}s")
+            
+            return {
+                'regulations_check': check_result,
+                'download_result': download_result,
+                'incremental_result': incremental_result,
+                'total_cost': total_cost,
+                'duration_seconds': round(end_time - start_time, 2),
+                'status': 'success'
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Full auto update failed: {e}")
+            end_time = time.time()
+            return {
+                'error': str(e),
+                'duration_seconds': round(end_time - start_time, 2),
+                'status': 'error'
+            }
 
-# -------- MAIN AUTO UPDATE RUNNER --------
+    def run_incremental_update(self) -> Dict:
+        """
+        Run incremental update on existing files only (no downloading).
+        This is useful for processing files that were downloaded separately.
+        
+        Returns:
+            Dictionary with incremental update results
+        """
+        logger.info("🔄 Starting incremental update...")
+        
+        try:
+            result = self.pipeline.full_incremental_update()
+            
+            logger.info("✅ Incremental update completed!")
+            logger.info(f"   - Files deleted: {len(result['cleanup_result']['deleted_files'])}")
+            logger.info(f"   - Files processed: {len(result['process_result']['processed_files'])}")
+            logger.info(f"   - Total cost: ${result['total_cost']:.4f}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Incremental update failed: {e}")
+            return {
+                'error': str(e),
+                'status': 'error'
+            }
+
+    def process_specific_files(self, file_paths: List[str]) -> Dict:
+        """
+        Process specific XML files.
+        
+        Args:
+            file_paths: List of file paths (relative to data directory) or filenames
+            
+        Returns:
+            Dictionary with processing results
+        """
+        logger.info(f"📄 Processing {len(file_paths)} specific files...")
+        
+        # Resolve file paths to full relative paths
+        resolved_paths = []
+        for file_path in file_paths:
+            resolved_path = self._resolve_file_path(file_path)
+            if resolved_path:
+                resolved_paths.append(resolved_path)
+                logger.info(f"   Resolved: {file_path} -> {resolved_path}")
+            else:
+                logger.warning(f"   Could not resolve: {file_path}")
+        
+        if not resolved_paths:
+            logger.error("❌ No valid files found to process")
+            return {
+                'processed_files': [],
+                'failed_files': [f"Could not resolve: {path}" for path in file_paths],
+                'total_cost': 0.0,
+                'status': 'error'
+            }
+        
+        results = []
+        total_cost = 0.0
+        errors = []
+        
+        for file_path in resolved_paths:
+            try:
+                result = self.pipeline.process_single_file(file_path)
+                results.append(result)
+                
+                if result['status'] == 'success':
+                    total_cost += result['total_cost']
+                else:
+                    errors.append(f"{file_path}: {result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                logger.error(f"❌ Error processing {file_path}: {e}")
+                errors.append(f"{file_path}: {str(e)}")
+        
+        successful_files = [r['file_path'] for r in results if r['status'] == 'success']
+        
+        logger.info(f"✅ Specific file processing completed:")
+        logger.info(f"   - Files processed: {len(successful_files)}/{len(resolved_paths)}")
+        logger.info(f"   - Total cost: ${total_cost:.4f}")
+        
+        if errors:
+            logger.warning(f"⚠️ {len(errors)} files failed to process")
+        
+        return {
+            'processed_files': successful_files,
+            'failed_files': errors,
+            'total_cost': total_cost,
+            'status': 'success' if not errors else 'partial_success'
+        }
+
+    def _resolve_file_path(self, file_path: str) -> Optional[str]:
+        """
+        Resolve a file path or filename to the full relative path.
+        
+        Args:
+            file_path: File path or filename to resolve
+            
+        Returns:
+            Full relative path if found, None otherwise
+        """
+        # If it's already a relative path with subdirectory, check if it exists
+        if '/' in file_path or '\\' in file_path:
+            full_path = self.data_dir / file_path
+            if full_path.exists():
+                return file_path
+        
+        # If it's just a filename, search for it in subdirectories
+        filename = Path(file_path).name
+        for subdir in self.data_dir.iterdir():
+            if subdir.is_dir():
+                potential_path = subdir / filename
+                if potential_path.exists():
+                    return str(potential_path.relative_to(self.data_dir))
+        
+        return None
+
+    def remove_specific_files(self, file_paths: List[str]) -> Dict:
+        """
+        Remove specific files and their associated data.
+        
+        Args:
+            file_paths: List of file paths (relative to data directory) or filenames
+            
+        Returns:
+            Dictionary with removal results
+        """
+        logger.info(f"🗑️ Removing {len(file_paths)} specific files...")
+        
+        # Resolve file paths to full relative paths
+        resolved_paths = []
+        for file_path in file_paths:
+            resolved_path = self._resolve_file_path(file_path)
+            if resolved_path:
+                resolved_paths.append(resolved_path)
+                logger.info(f"   Resolved: {file_path} -> {resolved_path}")
+            else:
+                logger.warning(f"   Could not resolve: {file_path}")
+        
+        if not resolved_paths:
+            logger.error("❌ No valid files found to remove")
+            return {
+                'removed_files': [],
+                'failed_removals': [f"Could not resolve: {path}" for path in file_paths],
+                'total_chunks_removed': 0,
+                'total_embeddings_removed': 0,
+                'total_rebuild_cost': 0.0,
+                'status': 'error'
+            }
+        
+        results = []
+        total_rebuild_cost = 0.0
+        errors = []
+        
+        for file_path in resolved_paths:
+            try:
+                result = self.pipeline.remove_file(file_path)
+                results.append(result)
+                
+                if result['status'] == 'success':
+                    total_rebuild_cost += result['rebuild_cost']
+                else:
+                    errors.append(f"{file_path}: {result.get('error', 'Unknown error')}")
+                    
+            except Exception as e:
+                logger.error(f"❌ Error removing {file_path}: {e}")
+                errors.append(f"{file_path}: {str(e)}")
+        
+        successful_removals = [r['file_path'] for r in results if r['status'] == 'success']
+        total_chunks_removed = sum(r.get('chunks_removed', 0) for r in results if r['status'] == 'success')
+        total_embeddings_removed = sum(r.get('embeddings_removed', 0) for r in results if r['status'] == 'success')
+        
+        logger.info(f"✅ File removal completed:")
+        logger.info(f"   - Files removed: {len(successful_removals)}/{len(resolved_paths)}")
+        logger.info(f"   - Chunks removed: {total_chunks_removed}")
+        logger.info(f"   - Embeddings removed: {total_embeddings_removed}")
+        logger.info(f"   - Rebuild cost: ${total_rebuild_cost:.4f}")
+        
+        if errors:
+            logger.warning(f"⚠️ {len(errors)} files failed to remove")
+        
+        return {
+            'removed_files': successful_removals,
+            'failed_removals': errors,
+            'total_chunks_removed': total_chunks_removed,
+            'total_embeddings_removed': total_embeddings_removed,
+            'total_rebuild_cost': total_rebuild_cost,
+            'status': 'success' if not errors else 'partial_success'
+        }
+
+    def get_system_status(self) -> Dict:
+        """Get comprehensive system status including regulation availability."""
+        pipeline_status = self.pipeline.get_system_status()
+        
+        # Check for available regulations
+        regulation_check = self.check_for_new_regulations()
+        
+        return {
+            'model': self.model,
+            'days_back': self.days_back,
+            'data_fetcher_available': DATA_FETCHER_AVAILABLE,
+            'pipeline_status': pipeline_status,
+            'regulation_availability': regulation_check,
+            'last_check': datetime.now().isoformat()
+        }
+
+    def validate_system(self) -> Dict:
+        """Validate complete system health."""
+        issues = []
+        warnings = []
+        
+        # Check data directory
+        if not self.data_dir.exists():
+            issues.append(f"Data directory not found: {self.data_dir}")
+        
+        # Check data fetcher
+        if not DATA_FETCHER_AVAILABLE:
+            warnings.append("Data fetcher not available - cannot download new regulations")
+        
+        # Check pipeline
+        pipeline_validation = self.pipeline.validate_system()
+        issues.extend(pipeline_validation['issues'])
+        warnings.extend(pipeline_validation['warnings'])
+        
+        # Check for available regulations
+        if DATA_FETCHER_AVAILABLE:
+            regulation_check = self.check_for_new_regulations()
+            if regulation_check['status'] == 'success' and regulation_check['available']:
+                warnings.append(f"{regulation_check['relevant_found']} new regulations available")
+        
+        return {
+            'valid': len(issues) == 0,
+            'issues': issues,
+            'warnings': warnings,
+            'pipeline_validation': pipeline_validation,
+            'system_ready': len(issues) == 0 and DATA_FETCHER_AVAILABLE
+        }
+
+    def estimate_full_update_cost(self) -> Dict:
+        """Estimate cost of running full auto update."""
+        try:
+            # Check for new regulations
+            check_result = self.check_for_new_regulations()
+            
+            # Estimate incremental update cost
+            incremental_estimate = self.pipeline.estimate_processing_cost()
+            
+            # If new regulations are available, add them to estimate
+            new_reg_estimate = {
+                'estimated_files': 0,
+                'estimated_chunks': 0,
+                'estimated_cost': 0.0
+            }
+            
+            if check_result['status'] == 'success' and check_result['available']:
+                # Rough estimate for new regulations (can't chunk without downloading)
+                new_regulations = len(check_result['new_regulations'])
+                estimated_chunks_per_file = 50  # Conservative estimate
+                estimated_chunks = new_regulations * estimated_chunks_per_file
+                
+                dummy_chunks = [{'text': 'dummy text'} for _ in range(estimated_chunks)]
+                estimated_cost = self.pipeline.faiss_manager.estimate_cost(dummy_chunks)
+                
+                new_reg_estimate = {
+                    'estimated_files': new_regulations,
+                    'estimated_chunks': estimated_chunks,
+                    'estimated_cost': estimated_cost
+                }
+            
+            total_estimated_cost = incremental_estimate['estimated_cost'] + new_reg_estimate['estimated_cost']
+            
+            return {
+                'incremental_estimate': incremental_estimate,
+                'new_regulations_estimate': new_reg_estimate,
+                'total_estimated_cost': total_estimated_cost,
+                'status': 'success'
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error estimating cost: {e}")
+            return {
+                'error': str(e),
+                'status': 'error'
+            }
+
+
+# -------- MAIN AUTO UPDATE PIPELINE RUNNER --------
 if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Automated regulation update pipeline")
-    parser.add_argument("--days", "-d", type=int, default=365, 
-                      help="Number of days to look back for new regulations")
-    parser.add_argument("--model", "-m", 
-                      type=str,
-                      help="Embedding model to use (defaults to config default)")
-    parser.add_argument("--force", "-f", action="store_true",
-                      help="Force processing even if files exist")
-    parser.add_argument("--check", "-c", action="store_true",
-                      help="Only check for new regulations, don't download or process")
+    parser.add_argument("--full-auto", action="store_true", 
+                      help="Run full automated update (check + download + process)")
+    parser.add_argument("--incremental", "-i", action="store_true", 
+                      help="Run incremental update on existing files only")
+    parser.add_argument("--check-regulations", "-c", action="store_true",
+                      help="Check for new regulations without downloading")
+    parser.add_argument("--download", "-d", action="store_true",
+                      help="Download new regulations without processing")
+    parser.add_argument("--process-files", "-p", nargs="+",
+                      help="Process specific files (relative paths)")
+    parser.add_argument("--remove-files", "-r", nargs="+", 
+                      help="Remove specific files and their data")
     parser.add_argument("--status", "-s", action="store_true",
-                      help="Show system status")
+                      help="Show comprehensive system status")
+    parser.add_argument("--validate", "-v", action="store_true",
+                      help="Validate system health")
+    parser.add_argument("--estimate", "-e", action="store_true",
+                      help="Estimate full update cost")
+    parser.add_argument("--model", "-m", type=str,
+                      help="Embedding model to use")
+    parser.add_argument("--days", type=int, 
+                      help="Days to look back for regulations")
     
     args = parser.parse_args()
     
-    # Initialize pipeline with specified model
-    pipeline = AutoUpdatePipeline(days_back=args.days, model=args.model)
+    # Initialize pipeline
+    pipeline = AutoUpdatePipeline(model=args.model, days_back=args.days)
     
     if args.status:
-        status = pipeline.incremental_pipeline.get_system_status()
-        print("\n=== System Status ===")
-        print(f"Model: {pipeline.model}")
-        print(f"Processed files: {status['processed_files_count']}")
-        print(f"Total chunks: {status['total_chunks']}")
-        print(f"FAISS index size: {status['faiss_index_size']}")
-        print(f"New files: {len(status['new_files'])}")
-        print(f"Deleted files: {len(status['deleted_files'])}")
+        status = pipeline.get_system_status()
+        print("\n=== Auto Update Pipeline Status ===")
+        print(f"Model: {status['model']}")
+        print(f"Days back: {status['days_back']}")
+        print(f"Data fetcher available: {status['data_fetcher_available']}")
+        print(f"Last check: {status['last_check']}")
         
-        if status['new_files']:
-            print(f"\nNew files: {status['new_files']}")
-        if status['deleted_files']:
-            print(f"\nDeleted files: {status['deleted_files']}")
+        if status['regulation_availability']['status'] == 'success':
+            print(f"New regulations available: {status['regulation_availability']['available']}")
+            if status['regulation_availability']['available']:
+                print(f"Count: {status['regulation_availability']['relevant_found']}")
     
-    elif args.check:
-        has_updates = pipeline.check_for_updates()
-        if has_updates:
-            print("🆕 Updates available!")
+    elif args.validate:
+        validation = pipeline.validate_system()
+        print("\n=== System Validation ===")
+        print(f"Valid: {validation['valid']}")
+        print(f"System ready: {validation['system_ready']}")
+        
+        if validation['issues']:
+            print("\nIssues:")
+            for issue in validation['issues']:
+                print(f"  ❌ {issue}")
+        
+        if validation['warnings']:
+            print("\nWarnings:")
+            for warning in validation['warnings']:
+                print(f"  ⚠️ {warning}")
+    
+    elif args.estimate:
+        estimate = pipeline.estimate_full_update_cost()
+        if estimate['status'] == 'success':
+            print("\n=== Cost Estimate ===")
+            print(f"Incremental update: ${estimate['incremental_estimate']['estimated_cost']:.4f}")
+            print(f"New regulations: ${estimate['new_regulations_estimate']['estimated_cost']:.4f}")
+            print(f"Total estimated: ${estimate['total_estimated_cost']:.4f}")
         else:
-            print("✅ System is up to date")
+            print(f"Error estimating cost: {estimate['error']}")
+    
+    elif args.check_regulations:
+        result = pipeline.check_for_new_regulations()
+        print(f"\nRegulation check:")
+        print(f"Status: {result['status']}")
+        if result['status'] == 'success':
+            print(f"New regulations available: {result['available']}")
+            print(f"Total found: {result['total_found']}")
+            print(f"Relevant found: {result['relevant_found']}")
+        else:
+            print(f"Error: {result['error']}")
+    
+    elif args.download:
+        result = pipeline.download_new_regulations()
+        print(f"\nDownload result:")
+        print(f"Status: {result['status']}")
+        print(f"Downloaded: {len(result['downloaded_files'])}")
+        print(f"Failed: {len(result['failed_downloads'])}")
+    
+    elif args.process_files:
+        result = pipeline.process_specific_files(args.process_files)
+        print(f"\nProcess specific files:")
+        print(f"Status: {result['status']}")
+        print(f"Processed: {len(result['processed_files'])}")
+        print(f"Failed: {len(result['failed_files'])}")
+        print(f"Cost: ${result['total_cost']:.4f}")
+    
+    elif args.remove_files:
+        result = pipeline.remove_specific_files(args.remove_files)
+        print(f"\nRemove specific files:")
+        print(f"Status: {result['status']}")
+        print(f"Removed: {len(result['removed_files'])}")
+        print(f"Failed: {len(result['failed_removals'])}")
+        print(f"Rebuild cost: ${result['total_rebuild_cost']:.4f}")
+    
+    elif args.incremental:
+        result = pipeline.run_incremental_update()
+        print(f"\nIncremental update:")
+        print(f"Status: {result['status']}")
+        print(f"Total cost: ${result['total_cost']:.4f}")
+    
+    elif args.full_auto:
+        result = pipeline.run_full_auto_update()
+        print(f"\nFull automated update:")
+        print(f"Status: {result['status']}")
+        if result['status'] == 'success':
+            print(f"Duration: {result['duration_seconds']}s")
+            print(f"Total cost: ${result['total_cost']:.4f}")
+        else:
+            print(f"Error: {result['error']}")
     
     else:
-        result = pipeline.run_full_update()
-        print(f"\n=== Auto Update Results ===")
-        print(f"Model: {pipeline.model}")
-        print(f"Regulations found: {result['regulations_found']}")
-        print(f"Files downloaded: {result['files_downloaded']}")
-        print(f"Processing results: {len(result['processing_results'])}")
-        
-        if result['processing_results']:
-            total_cost = sum(r['estimated_cost'] for r in result['processing_results'] if r.get('estimated_cost', 0) >= 0)
-            skipped_files = [r for r in result['processing_results'] if r.get('estimated_cost', 0) == -1]
-            successful_files = [r for r in result['processing_results'] if r.get('status') == 'success']
-            print(f"Files processed successfully: {len(successful_files)}")
-            print(f"Files skipped (already exist): {len(skipped_files)}")
-            print(f"Total cost: ${total_cost:.4f}") 
+        print("Please specify an operation. Use --help for options.")
+        parser.print_help()

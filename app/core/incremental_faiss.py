@@ -1,7 +1,8 @@
 """
 incremental_faiss.py
 
-Module for incrementally updating FAISS index with new embeddings.
+Enhanced FAISS index manager with CRUD operations for embeddings.
+Provides atomic operations for adding, updating, and removing embeddings with proper error handling.
 """
 import json
 import os
@@ -13,27 +14,28 @@ import openai
 import tiktoken
 import sys
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import time
 import random
+import logging
 
 # Add the app directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
 # Configure logging
-import logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class IncrementalFAISS:
     """
-    Class for incrementally updating FAISS index with new embeddings.
+    Enhanced FAISS index manager with CRUD operations.
     
-    This class supports:
-    - Loading existing FAISS index
-    - Generating embeddings for new chunks
-    - Adding new embeddings to existing index
-    - Updating metadata files
+    Provides atomic operations for:
+    - Create: Add embeddings for new chunks
+    - Read: Load and query existing index
+    - Update: Update embeddings for modified files
+    - Delete: Remove embeddings for deleted files
     """
     
     def __init__(self, model: str = None):
@@ -41,8 +43,7 @@ class IncrementalFAISS:
         Initialize IncrementalFAISS.
         
         Args:
-            model: Embedding model to use. If None, uses default from config.
-                   Available models are defined in config files.
+            model: Embedding model to use (from config if None)
         """
         # Load environment variables
         load_dotenv()
@@ -56,13 +57,14 @@ class IncrementalFAISS:
         # Set model from config
         self.model = model if model else config.default_embedding_model
         
-        # Get model configuration from config
+        # Get model configuration
         try:
             self.model_config = config.get_embedding_model_config(self.model)
-        except ValueError as e:
+            self.model_price = config.get_embedding_model_price(self.model)
+        except Exception as e:
             raise ValueError(f"Invalid model '{self.model}': {e}")
         
-        # Setup tokenizer based on model configuration
+        # Setup tokenizer
         encoding_type = config.get_embedding_model_encoding(self.model)
         if encoding_type == "cl100k_base":
             self.encoding = tiktoken.get_encoding("cl100k_base")
@@ -70,523 +72,596 @@ class IncrementalFAISS:
             self.encoding = tiktoken.encoding_for_model(encoding_type)
         
         # Configuration
-        self.max_tokens_per_batch = 8191
-        self.max_tokens_per_chunk = 8191
+        self.max_tokens_per_batch = self.model_config.get('max_tokens_per_batch', 8191)
+        self.max_tokens_per_chunk = self.model_config.get('max_tokens_per_chunk', 8191)
         self.safety_margin = 50
         
         # Paths
-        self.output_folder = config.build_faiss_output_folder
-        self.chunks_path = os.path.join(self.output_folder, "chunks.json")
-        self.faiss_index_path = config.faiss_index_path
-        self.metadata_path = os.path.join(self.output_folder, "faiss_metadata.json")
+        self.output_folder = Path(config.build_faiss_output_folder)
+        self.output_folder.mkdir(parents=True, exist_ok=True)
         
-        logger.info(f"🚀 Initialized IncrementalFAISS with model: {self.model}")
-        logger.info(f"💰 Model pricing: ${config.get_embedding_model_price(self.model):.5f} per 1K tokens")
-        logger.info(f"📝 Model description: {config.get_embedding_model_description(self.model)}")
-        logger.info(f"📁 Output folder: {self.output_folder}")
+        self.faiss_index_path = config.faiss_index_path
+        self.metadata_path = self.output_folder / "faiss_metadata.json"
+        self.chunks_path = self.output_folder / "chunks.json"
+        
+        logger.info(f"🚀 Initialized IncrementalFAISS")
+        logger.info(f"💰 Model: {self.model} (${self.model_price:.5f}/1K tokens)")
+        logger.info(f"📁 Index path: {self.faiss_index_path}")
+        logger.info(f"📁 Metadata path: {self.metadata_path}")
 
     def count_tokens(self, text: str) -> int:
         """Count tokens in text."""
         return len(self.encoding.encode(text))
 
-    def split_into_chunks(self, text: str, max_tokens: int) -> List[str]:
-        """Split long text into smaller parts by sentence."""
+    def estimate_cost(self, chunks: List[Dict]) -> float:
+        """Estimate cost for processing chunks."""
+        total_tokens = sum(self.count_tokens(chunk.get("text", "")) for chunk in chunks)
+        return total_tokens / 1000 * self.model_price
+
+    def split_text_to_fit_tokens(self, text: str, max_tokens: int) -> List[str]:
+        """Split text into chunks that fit within token limits."""
+        if self.count_tokens(text) <= max_tokens:
+            return [text]
+        
+        # Split by sentences
         sentences = text.split('. ')
         chunks = []
-        current = ""
+        current_chunk = ""
+        
         for sentence in sentences:
-            if self.count_tokens(current + sentence) < max_tokens - self.safety_margin:
-                current += sentence + '. '
+            test_chunk = current_chunk + sentence + ". "
+            if self.count_tokens(test_chunk) <= max_tokens - self.safety_margin:
+                current_chunk = test_chunk
             else:
-                chunks.append(current.strip())
-                current = sentence + '. '
-        if current:
-            chunks.append(current.strip())
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = sentence + ". "
+        
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+        
         return chunks
 
-    def get_embeddings_for_chunks(self, chunks: List[str], model: str = None) -> List[List[float]]:
+    def generate_embeddings(self, texts: List[str]) -> Tuple[List[List[float]], float]:
         """
-        Generate embeddings for a list of text chunks.
-        Handles OpenAI API 429 errors with exponential backoff and logs all errors clearly.
-        Only returns embeddings if all succeed; otherwise returns None.
-        """
-        if not chunks:
-            return []
-        if model is None:
-            model = self.model
-        embeddings = []
-        batch = []
-        batch_token_count = 0
-        all_chunks = []
-        max_retries = 5
-        base_delay = 1  # Start with 1 second
+        Generate embeddings for texts with proper error handling and cost tracking.
         
-        # Validate and prepare chunks
-        for text in chunks:
-            if self.count_tokens(text) > self.max_tokens_per_chunk - self.safety_margin:
-                sub_chunks = self.split_into_chunks(text, self.max_tokens_per_chunk)
+        Args:
+            texts: List of text strings
+            
+        Returns:
+            Tuple of (embeddings, actual_cost)
+        """
+        if not texts:
+            return [], 0.0
+        
+        # Prepare texts and validate token limits
+        processed_texts = []
+        total_tokens = 0
+        
+        for text in texts:
+            if not isinstance(text, str) or not text.strip():
+                continue
+                
+            token_count = self.count_tokens(text)
+            if token_count > self.max_tokens_per_chunk - self.safety_margin:
+                # Split large text
+                sub_texts = self.split_text_to_fit_tokens(text, self.max_tokens_per_chunk)
+                processed_texts.extend(sub_texts)
+                total_tokens += sum(self.count_tokens(t) for t in sub_texts)
             else:
-                sub_chunks = [text]
-            for chunk in sub_chunks:
-                if isinstance(chunk, str) and chunk.strip():
-                    tokens = self.count_tokens(chunk)
-                    if tokens > self.max_tokens_per_chunk - self.safety_margin:
-                        encoded = self.encoding.encode(chunk)
-                        chunk = self.encoding.decode(encoded[:self.max_tokens_per_chunk - self.safety_margin])
-                    all_chunks.append(chunk)
+                processed_texts.append(text)
+                total_tokens += token_count
         
-        def embed_batch(batch, model):
-            """Embed a batch with robust rate limit handling."""
+        if not processed_texts:
+            logger.warning("⚠️ No valid texts to process after filtering")
+            return [], 0.0
+        
+        logger.info(f"📝 Generating embeddings for {len(processed_texts)} texts ({total_tokens} tokens)")
+        
+        embeddings = []
+        actual_tokens = 0
+        max_retries = 5
+        base_delay = 1
+        
+        def embed_batch(batch: List[str]) -> Optional[List[List[float]]]:
+            """Embed a batch with retry logic."""
             for attempt in range(max_retries):
                 try:
-                    # Validate batch size before sending
-                    total_tokens = sum(self.count_tokens(text) for text in batch)
-                    if total_tokens > self.max_tokens_per_batch:
-                        logger.warning(f"⚠️ Batch too large ({total_tokens} tokens), splitting...")
-                        # Split batch if too large
+                    batch_tokens = sum(self.count_tokens(text) for text in batch)
+                    if batch_tokens > self.max_tokens_per_batch:
+                        # Split batch
                         mid = len(batch) // 2
-                        first_half = embed_batch(batch[:mid], model)
-                        second_half = embed_batch(batch[mid:], model)
+                        if mid == 0:
+                            logger.error(f"❌ Single text too large: {batch_tokens} tokens")
+                            return None
+                        
+                        first_half = embed_batch(batch[:mid])
+                        second_half = embed_batch(batch[mid:])
+                        
                         if first_half is None or second_half is None:
                             return None
+                        
                         return first_half + second_half
                     
-                    response = self.client.embeddings.create(input=batch, model=model)
+                    # Make API call
+                    response = self.client.embeddings.create(
+                        input=batch,
+                        model=self.model
+                    )
+                    
+                    nonlocal actual_tokens
+                    actual_tokens += response.usage.total_tokens
+                    
                     return [r.embedding for r in response.data]
                     
                 except openai.RateLimitError as e:
-                    # Exponential backoff with jitter
                     wait_time = base_delay * (2 ** attempt) + random.uniform(0, 1)
-                    logger.warning(f"⚠️ Rate limit hit (attempt {attempt + 1}/{max_retries}). Waiting {wait_time:.2f}s...")
+                    logger.warning(f"⚠️ Rate limit (attempt {attempt + 1}/{max_retries}). Waiting {wait_time:.1f}s...")
                     time.sleep(wait_time)
                     
                 except openai.BadRequestError as e:
-                    logger.error(f"❌ Bad request error: {e}")
-                    # Check if it's a token limit issue
-                    if "maximum context length" in str(e).lower():
-                        logger.error(f"❌ Token limit exceeded. Batch size: {len(batch)}, tokens: {total_tokens}")
-                        # Try with smaller batch
-                        if len(batch) > 1:
-                            mid = len(batch) // 2
-                            first_half = embed_batch(batch[:mid], model)
-                            second_half = embed_batch(batch[mid:], model)
-                            if first_half is None or second_half is None:
-                                return None
-                            return first_half + second_half
+                    logger.error(f"❌ Bad request: {e}")
+                    if "maximum context length" in str(e).lower() and len(batch) > 1:
+                        # Try smaller batch
+                        mid = len(batch) // 2
+                        first_half = embed_batch(batch[:mid])
+                        second_half = embed_batch(batch[mid:])
+                        if first_half is None or second_half is None:
+                            return None
+                        return first_half + second_half
                     break
                     
                 except Exception as e:
-                    logger.error(f"❌ OpenAI API error: {e}")
+                    logger.error(f"❌ API error: {e}")
                     if attempt == max_retries - 1:
-                        logger.error(f"❌ Failed after {max_retries} attempts")
-                    break
+                        break
+                    time.sleep(base_delay * (2 ** attempt))
             
-            logger.error(f"❌ Failed to get embeddings after {max_retries} retries")
             return None
         
-        with tqdm(total=len(all_chunks), desc=f"Generating embeddings ({model})", unit="chunk") as pbar:
-            for chunk in all_chunks:
-                tokens = self.count_tokens(chunk)
+        # Process in batches
+        batch_size = 50  # Conservative batch size
+        with tqdm(total=len(processed_texts), desc=f"Embedding ({self.model})", unit="text") as pbar:
+            for i in range(0, len(processed_texts), batch_size):
+                batch = processed_texts[i:i + batch_size]
                 
-                # Check if adding this chunk would exceed batch limit
-                if batch_token_count + tokens > self.max_tokens_per_batch - self.safety_margin:
-                    if batch:
-                        result = embed_batch(batch, model)
-                        if result is None:
-                            logger.error("❌ Batch embedding failed, aborting all processing")
-                            return None
-                        embeddings.extend(result)
-                        pbar.update(len(batch))
-                        batch = []
-                        batch_token_count = 0
+                batch_embeddings = embed_batch(batch)
+                if batch_embeddings is None:
+                    logger.error(f"❌ Failed to embed batch {i//batch_size + 1}")
+                    raise RuntimeError("Embedding generation failed")
                 
-                batch.append(chunk)
-                batch_token_count += tokens
-            
-            # Process final batch
-            if batch:
-                result = embed_batch(batch, model)
-                if result is None:
-                    logger.error("❌ Final batch embedding failed")
-                    return None
-                embeddings.extend(result)
+                embeddings.extend(batch_embeddings)
                 pbar.update(len(batch))
         
-        return embeddings
+        actual_cost = actual_tokens / 1000 * self.model_price
+        logger.info(f"✅ Generated {len(embeddings)} embeddings, cost: ${actual_cost:.4f}")
+        
+        return embeddings, actual_cost
 
-    def load_existing_index(self) -> Optional[faiss.Index]:
-        """Load existing FAISS index if it exists."""
+    def load_index(self) -> Optional[faiss.Index]:
+        """Load existing FAISS index."""
         if os.path.exists(self.faiss_index_path):
-            logger.info(f"📁 Loading existing FAISS index from {self.faiss_index_path}")
-            return faiss.read_index(self.faiss_index_path)
+            try:
+                index = faiss.read_index(self.faiss_index_path)
+                logger.info(f"📁 Loaded FAISS index: {index.ntotal} vectors, dim={index.d}")
+                return index
+            except Exception as e:
+                logger.error(f"❌ Error loading FAISS index: {e}")
+                return None
         else:
-            logger.info("🆕 No existing FAISS index found, will create new one")
+            logger.info("🆕 No existing FAISS index found")
             return None
 
-    def load_existing_metadata(self) -> List[Dict]:
-        """Load existing metadata if it exists."""
-        if os.path.exists(self.metadata_path):
-            with open(self.metadata_path, "r") as f:
-                return json.load(f)
+    def load_metadata(self) -> List[Dict]:
+        """Load metadata."""
+        if self.metadata_path.exists():
+            try:
+                with open(self.metadata_path, 'r') as f:
+                    metadata = json.load(f)
+                logger.info(f"📁 Loaded {len(metadata)} metadata entries")
+                return metadata
+            except Exception as e:
+                logger.error(f"❌ Error loading metadata: {e}")
+                return []
         return []
 
-    def create_new_index(self, dimension: int) -> faiss.Index:
-        """Create a new FAISS index."""
-        logger.info(f"🔍 Creating new FAISS index with dimension {dimension}")
-        return faiss.IndexFlatL2(dimension)
+    def save_index(self, index: faiss.Index) -> None:
+        """Save FAISS index."""
+        try:
+            faiss.write_index(index, self.faiss_index_path)
+            logger.info(f"💾 Saved FAISS index: {index.ntotal} vectors")
+        except Exception as e:
+            logger.error(f"❌ Error saving FAISS index: {e}")
+            raise
 
-    def update_index_with_new_chunks(self, new_chunks: List[Dict]) -> int:
+    def save_metadata(self, metadata: List[Dict]) -> None:
+        """Save metadata."""
+        try:
+            with open(self.metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            logger.info(f"💾 Saved {len(metadata)} metadata entries")
+        except Exception as e:
+            logger.error(f"❌ Error saving metadata: {e}")
+            raise
+
+    def create_embeddings_for_chunks(self, chunks: List[Dict]) -> Dict:
         """
-        Update FAISS index with new chunks.
-        This method ensures that the same exact chunks are used for both embeddings and metadata.
+        Create embeddings for new chunks and add to index.
+        This is an atomic operation.
         
         Args:
-            new_chunks: List of new chunk dictionaries
+            chunks: List of chunk dictionaries
             
         Returns:
-            Number of new embeddings added
+            Dictionary with operation results
         """
-        if not new_chunks:
-            logger.info("✅ No new chunks to process")
-            return 0
+        if not chunks:
+            return {
+                'chunks_processed': 0,
+                'embeddings_added': 0,
+                'cost': 0.0,
+                'status': 'success'
+            }
         
-        # Extract and prepare text chunks (same logic as get_embeddings_for_chunks)
-        all_chunks = []
-        for chunk in new_chunks:
-            text = chunk["text"]
+        logger.info(f"🔄 Creating embeddings for {len(chunks)} chunks")
+        
+        try:
+            # Extract texts
+            texts = [chunk.get("text", "") for chunk in chunks]
+            texts = [t for t in texts if t.strip()]  # Filter empty texts
             
-            if self.count_tokens(text) > self.max_tokens_per_chunk - self.safety_margin:
-                sub_chunks = self.split_into_chunks(text, self.max_tokens_per_chunk)
-            else:
-                sub_chunks = [text]
+            if not texts:
+                logger.warning("⚠️ No valid texts found in chunks")
+                return {
+                    'chunks_processed': 0,
+                    'embeddings_added': 0,
+                    'cost': 0.0,
+                    'status': 'no_valid_texts'
+                }
             
-            for sub_chunk in sub_chunks:
-                if isinstance(sub_chunk, str) and sub_chunk.strip():
-                    tokens = self.count_tokens(sub_chunk)
-                    if tokens > self.max_tokens_per_chunk - self.safety_margin:
-                        encoded = self.encoding.encode(sub_chunk)
-                        sub_chunk = self.encoding.decode(encoded[:self.max_tokens_per_chunk - self.safety_margin])
-                    
-                    # Store both the processed text and original chunk metadata
-                    all_chunks.append({
-                        "text": sub_chunk,
-                        "original_chunk": chunk
-                    })
-        
-        if not all_chunks:
-            logger.warning("⚠️ No valid chunks after processing")
-            return 0
-        
-        # Extract text for embedding generation
-        texts = [chunk["text"] for chunk in all_chunks]
-        logger.info(f"📝 Processing {len(texts)} text chunks with model: {self.model}")
-        
-        # Generate embeddings
-        embeddings = self.get_embeddings_for_chunks(texts)
-        
-        if not embeddings:
-            logger.warning("⚠️ No embeddings generated")
-            return 0
-        
-        # Load or create index
-        index = self.load_existing_index()
-        if index is None:
-            dimension = len(embeddings[0])
-            index = self.create_new_index(dimension)
-        
-        # Convert embeddings to numpy array
-        embedding_matrix = np.array(embeddings).astype("float32")
-        
-        # Add embeddings to index
-        logger.info(f"📥 Adding {len(embedding_matrix)} embeddings to FAISS index")
-        index.add(embedding_matrix)
-        
-        # Save updated index
-        faiss.write_index(index, self.faiss_index_path)
-        logger.info(f"✅ FAISS index saved to {self.faiss_index_path}")
-        
-        # Update metadata with the exact same chunks that were embedded
-        self._update_metadata_with_processed_chunks(all_chunks)
-        
-        return len(embeddings)
-
-    def _update_metadata_with_processed_chunks(self, processed_chunks: List[Dict]) -> None:
-        """
-        Update metadata with the exact chunks that were processed for embeddings.
-        
-        Args:
-            processed_chunks: List of processed chunks with text and original_chunk
-        """
-        existing_metadata = self.load_existing_metadata()
-        
-        # Create metadata entries for each processed chunk
-        new_metadata_entries = []
-        for processed_chunk in processed_chunks:
-            original_chunk = processed_chunk["original_chunk"]
-            new_metadata_entries.append({
-                "text": processed_chunk["text"],
-                "section_header": original_chunk["section_header"],
-                "metadata": original_chunk["metadata"]
-            })
-        
-        # Add new entries to existing metadata
-        existing_metadata.extend(new_metadata_entries)
-        
-        # Save updated metadata
-        with open(self.metadata_path, "w") as f:
-            json.dump(existing_metadata, f, indent=2)
-        
-        logger.info(f"📦 Updated metadata: {len(existing_metadata)} total entries")
-
-    def remove_metadata_for_file(self, file_path: str) -> int:
-        """
-        Remove metadata entries for a specific file and update FAISS index accordingly.
-        
-        Args:
-            file_path: Path to the file (relative to data directory)
+            # Generate embeddings
+            embeddings, cost = self.generate_embeddings(texts)
             
-        Returns:
-            Number of metadata entries removed
-        """
-        existing_metadata = self.load_existing_metadata()
-        original_count = len(existing_metadata)
-        
-        # Filter out entries for the specified file
-        filtered_metadata = []
-        for entry in existing_metadata:
-            entry_file = entry["metadata"].get("source_file", "")
-            if entry_file != file_path:
-                filtered_metadata.append(entry)
-        
-        removed_count = original_count - len(filtered_metadata)
-        
-        if removed_count > 0:
-            # Save updated metadata
-            with open(self.metadata_path, "w") as f:
-                json.dump(filtered_metadata, f, indent=2)
+            if not embeddings:
+                raise RuntimeError("No embeddings generated")
             
-            # Rebuild FAISS index to match the filtered metadata
-            logger.info(f"🔄 Rebuilding FAISS index after removing {removed_count} entries for {file_path}")
-            rebuild_result = self.rebuild_index_from_existing_embeddings()
+            # Load existing index and metadata
+            index = self.load_index()
+            metadata = self.load_metadata()
             
-            if "error" in rebuild_result:
-                logger.warning(f"⚠️ Efficient rebuild failed: {rebuild_result['error']}")
-                logger.info("🔄 Falling back to full rebuild with API calls")
-                rebuild_result = self.rebuild_index_from_chunks()
+            # Create new index if needed
+            if index is None:
+                dimension = len(embeddings[0])
+                index = faiss.IndexFlatL2(dimension)
+                logger.info(f"🆕 Created new FAISS index with dimension {dimension}")
             
-            logger.info(f"🧹 Removed {removed_count} metadata entries for {file_path}")
-        
-        return removed_count
-
-    def update_metadata_with_new_chunks(self, new_chunks: List[Dict]) -> None:
-        """
-        Update metadata file with new chunks.
-        This method should match the exact chunks that were used to generate embeddings.
-        """
-        existing_metadata = self.load_existing_metadata()
-        
-        # Process new chunks to match exactly what was sent to embedding API
-        new_metadata_entries = []
-        for chunk in new_chunks:
-            text = chunk["text"]
+            # Add embeddings to index
+            embedding_matrix = np.array(embeddings).astype('float32')
+            index.add(embedding_matrix)
             
-            # Use the same splitting logic as get_embeddings_for_chunks
-            if self.count_tokens(text) > self.max_tokens_per_chunk - self.safety_margin:
-                sub_chunks = self.split_into_chunks(text, self.max_tokens_per_chunk)
-            else:
-                sub_chunks = [text]
+            # Update metadata - match exactly with what was embedded
+            new_metadata = []
+            text_idx = 0
             
-            for sub_chunk in sub_chunks:
-                if not isinstance(sub_chunk, str) or not sub_chunk.strip():
+            for chunk in chunks:
+                chunk_text = chunk.get("text", "").strip()
+                if not chunk_text:
                     continue
                 
-                # Apply the same token limit as in get_embeddings_for_chunks
-                if self.count_tokens(sub_chunk) > self.max_tokens_per_chunk - self.safety_margin:
-                    encoded = self.encoding.encode(sub_chunk)
-                    sub_chunk = self.encoding.decode(encoded[:self.max_tokens_per_chunk - self.safety_margin])
-                
-                new_metadata_entries.append({
-                    "text": sub_chunk,
-                    "section_header": chunk["section_header"],
-                    "metadata": chunk["metadata"]
-                })
-        
-        # Add new entries to existing metadata
-        existing_metadata.extend(new_metadata_entries)
-        
-        # Save updated metadata
-        with open(self.metadata_path, "w") as f:
-            json.dump(existing_metadata, f, indent=2)
-        
-        logger.info(f"📦 Updated metadata: {len(existing_metadata)} total entries")
+                # Handle text splitting
+                if self.count_tokens(chunk_text) > self.max_tokens_per_chunk - self.safety_margin:
+                    sub_texts = self.split_text_to_fit_tokens(chunk_text, self.max_tokens_per_chunk)
+                    for sub_text in sub_texts:
+                        if text_idx < len(embeddings):
+                            new_metadata.append({
+                                'text': sub_text,
+                                'section_header': chunk.get('section_header', ''),
+                                'metadata': chunk.get('metadata', {})
+                            })
+                            text_idx += 1
+                else:
+                    if text_idx < len(embeddings):
+                        new_metadata.append({
+                            'text': chunk_text,
+                            'section_header': chunk.get('section_header', ''),
+                            'metadata': chunk.get('metadata', {})
+                        })
+                        text_idx += 1
+            
+            # Add new metadata
+            metadata.extend(new_metadata)
+            
+            # Save index and metadata atomically
+            self.save_index(index)
+            self.save_metadata(metadata)
+            
+            logger.info(f"✅ Added {len(embeddings)} embeddings, cost: ${cost:.4f}")
+            
+            return {
+                'chunks_processed': len(chunks),
+                'embeddings_added': len(embeddings),
+                'cost': cost,
+                'status': 'success'
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error creating embeddings: {e}")
+            return {
+                'chunks_processed': len(chunks),
+                'embeddings_added': 0,
+                'cost': 0.0,
+                'status': 'error',
+                'error': str(e)
+            }
 
-    def process_incremental_update(self, new_chunks: List[Dict]) -> Dict:
+    def remove_embeddings_for_file(self, file_path: str) -> Dict:
         """
-        Process incremental update with new chunks.
+        Remove embeddings for a specific file.
+        This rebuilds the index without the specified file's embeddings.
         
         Args:
-            new_chunks: List of new chunk dictionaries
+            file_path: Path to file (just filename, not full path)
             
         Returns:
-            Dictionary with update statistics
+            Dictionary with operation results
         """
-        logger.info(f"🔄 Starting incremental FAISS update with {len(new_chunks)} new chunks")
+        logger.info(f"🗑️ Removing embeddings for file: {file_path}")
         
-        # Update FAISS index and metadata (metadata is now handled within update_index_with_new_chunks)
-        new_embeddings_count = self.update_index_with_new_chunks(new_chunks)
+        try:
+            # Load current metadata
+            metadata = self.load_metadata()
+            if not metadata:
+                logger.info("✅ No metadata found, nothing to remove")
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'status': 'success'
+                }
+            
+            # Filter metadata to exclude the specified file
+            filename = os.path.basename(file_path)  # Handle both full paths and filenames
+            filtered_metadata = []
+            removed_count = 0
+            
+            for entry in metadata:
+                entry_file = entry.get('metadata', {}).get('source_file', '')
+                if entry_file != filename:
+                    filtered_metadata.append(entry)
+                else:
+                    removed_count += 1
+            
+            if removed_count == 0:
+                logger.info(f"✅ No embeddings found for file: {file_path}")
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'status': 'success'
+                }
+            
+            # Rebuild index with filtered metadata
+            if filtered_metadata:
+                # Need to regenerate embeddings for remaining metadata
+                # This is expensive but ensures consistency
+                texts = [entry['text'] for entry in filtered_metadata]
+                embeddings, cost = self.generate_embeddings(texts)
+                
+                if embeddings:
+                    # Create new index
+                    dimension = len(embeddings[0])
+                    new_index = faiss.IndexFlatL2(dimension)
+                    
+                    # Add embeddings
+                    embedding_matrix = np.array(embeddings).astype('float32')
+                    new_index.add(embedding_matrix)
+                    
+                    # Save new index and metadata
+                    self.save_index(new_index)
+                    self.save_metadata(filtered_metadata)
+                    
+                    logger.info(f"✅ Removed {removed_count} embeddings, rebuilt index with {len(embeddings)} remaining")
+                    
+                    return {
+                        'file_path': file_path,
+                        'embeddings_removed': removed_count,
+                        'embeddings_remaining': len(embeddings),
+                        'rebuild_cost': cost,
+                        'status': 'success'
+                    }
+                else:
+                    raise RuntimeError("Failed to regenerate embeddings for remaining metadata")
+            else:
+                # No metadata remaining, remove index
+                if os.path.exists(self.faiss_index_path):
+                    os.remove(self.faiss_index_path)
+                self.save_metadata([])
+                
+                logger.info(f"✅ Removed all embeddings, index cleared")
+                
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': removed_count,
+                    'embeddings_remaining': 0,
+                    'rebuild_cost': 0.0,
+                    'status': 'success'
+                }
+                
+        except Exception as e:
+            logger.error(f"❌ Error removing embeddings for {file_path}: {e}")
+            return {
+                'file_path': file_path,
+                'embeddings_removed': 0,
+                'status': 'error',
+                'error': str(e)
+            }
+
+    def update_embeddings_for_file(self, file_path: str, chunks: List[Dict]) -> Dict:
+        """
+        Update embeddings for a specific file (remove old + add new).
+        This is an atomic operation.
         
-        # Calculate costs
-        total_tokens = sum(self.count_tokens(chunk["text"]) for chunk in new_chunks)
-        estimated_cost = total_tokens / 1000 * config.get_embedding_model_price(self.model)
+        Args:
+            file_path: Path to file
+            chunks: New chunks for the file
+            
+        Returns:
+            Dictionary with operation results
+        """
+        logger.info(f"🔄 Updating embeddings for file: {file_path}")
         
-        stats = {
-            "new_chunks_processed": len(new_chunks),
-            "new_embeddings_added": new_embeddings_count,
-            "total_tokens": total_tokens,
-            "estimated_cost": round(estimated_cost, 4),
-            "model_used": self.model,
-            "model_pricing": config.get_embedding_model_price(self.model)
+        try:
+            # Step 1: Remove existing embeddings for this file
+            remove_result = self.remove_embeddings_for_file(file_path)
+            if remove_result['status'] != 'success':
+                raise RuntimeError(f"Failed to remove old embeddings: {remove_result.get('error', 'Unknown')}")
+            
+            # Step 2: Add new embeddings
+            add_result = self.create_embeddings_for_chunks(chunks)
+            if add_result['status'] != 'success':
+                raise RuntimeError(f"Failed to add new embeddings: {add_result.get('error', 'Unknown')}")
+            
+            total_cost = remove_result.get('rebuild_cost', 0.0) + add_result.get('cost', 0.0)
+            
+            logger.info(f"✅ Updated embeddings for {file_path}: -{remove_result['embeddings_removed']}, +{add_result['embeddings_added']}")
+            
+            return {
+                'file_path': file_path,
+                'embeddings_removed': remove_result['embeddings_removed'],
+                'embeddings_added': add_result['embeddings_added'],
+                'total_cost': total_cost,
+                'status': 'success'
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error updating embeddings for {file_path}: {e}")
+            return {
+                'file_path': file_path,
+                'embeddings_removed': 0,
+                'embeddings_added': 0,
+                'total_cost': 0.0,
+                'status': 'error',
+                'error': str(e)
+            }
+
+    def get_status(self) -> Dict:
+        """Get current status of FAISS index and metadata."""
+        index = self.load_index()
+        metadata = self.load_metadata()
+        
+        status = {
+            'model': self.model,
+            'model_price_per_1k_tokens': self.model_price,
+            'index_exists': index is not None,
+            'index_size': index.ntotal if index else 0,
+            'index_dimension': index.d if index else 0,
+            'metadata_entries': len(metadata),
+            'index_path': self.faiss_index_path,
+            'metadata_path': str(self.metadata_path)
         }
         
-        logger.info(f"✅ Incremental update completed:")
-        logger.info(f"   - New chunks: {stats['new_chunks_processed']}")
-        logger.info(f"   - New embeddings: {stats['new_embeddings_added']}")
-        logger.info(f"   - Total tokens: {stats['total_tokens']}")
-        logger.info(f"   - Model: {stats['model_used']}")
-        logger.info(f"   - Estimated cost: ${stats['estimated_cost']}")
+        # Check consistency
+        if index and metadata:
+            if index.ntotal != len(metadata):
+                status['consistency_warning'] = f"Index has {index.ntotal} vectors but metadata has {len(metadata)} entries"
         
-        return stats
+        return status
 
-    def get_index_stats(self) -> Dict:
-        """Get statistics about the current FAISS index."""
-        if not os.path.exists(self.faiss_index_path):
-            return {"error": "FAISS index not found"}
+    def validate_consistency(self) -> Dict:
+        """Validate consistency between index, metadata, and chunks."""
+        issues = []
+        warnings = []
         
-        index = faiss.read_index(self.faiss_index_path)
-        metadata = self.load_existing_metadata()
+        # Load all data
+        index = self.load_index()
+        metadata = self.load_metadata()
+        
+        if self.chunks_path.exists():
+            try:
+                with open(self.chunks_path, 'r') as f:
+                    chunks = json.load(f)
+            except Exception as e:
+                issues.append(f"Cannot load chunks.json: {e}")
+                chunks = []
+        else:
+            issues.append("chunks.json not found")
+            chunks = []
+        
+        # Check index vs metadata
+        if index and metadata:
+            if index.ntotal != len(metadata):
+                issues.append(f"Index-metadata mismatch: {index.ntotal} vectors vs {len(metadata)} metadata entries")
+        elif index and not metadata:
+            issues.append("Index exists but no metadata found")
+        elif metadata and not index:
+            issues.append("Metadata exists but no index found")
+        
+        # Check for orphaned metadata (metadata without corresponding chunks)
+        if chunks and metadata:
+            chunk_texts = {chunk['text'] for chunk in chunks}
+            orphaned_metadata = 0
+            for entry in metadata:
+                if entry['text'] not in chunk_texts:
+                    orphaned_metadata += 1
+            
+            if orphaned_metadata > 0:
+                warnings.append(f"{orphaned_metadata} metadata entries have no corresponding chunks")
         
         return {
-            "index_size": index.ntotal,
-            "index_dimension": index.d,
-            "metadata_entries": len(metadata),
-            "index_path": self.faiss_index_path
+            'valid': len(issues) == 0,
+            'issues': issues,
+            'warnings': warnings,
+            'stats': {
+                'index_size': index.ntotal if index else 0,
+                'metadata_entries': len(metadata),
+                'chunk_count': len(chunks)
+            }
         }
-
-    def rebuild_index_from_existing_embeddings(self) -> Dict:
-        """
-        Rebuild FAISS index using existing embeddings (no API calls).
-        This is more efficient when files are deleted.
-        
-        Returns:
-            Dictionary with rebuild statistics
-        """
-        logger.info("🔄 Rebuilding FAISS index from existing embeddings (no API calls)")
-        
-        # Load existing index and metadata
-        if not os.path.exists(self.faiss_index_path):
-            logger.error(f"❌ FAISS index not found: {self.faiss_index_path}")
-            return {"error": "FAISS index not found"}
-        
-        if not os.path.exists(self.metadata_path):
-            logger.error(f"❌ Metadata not found: {self.metadata_path}")
-            return {"error": "Metadata not found"}
-        
-        # Load chunks to get the current valid chunks
-        chunks_file = os.path.join(self.output_folder, "chunks.json")
-        if not os.path.exists(chunks_file):
-            logger.error(f"❌ Chunks file not found: {chunks_file}")
-            return {"error": "Chunks file not found"}
-        
-        with open(chunks_file, "r") as f:
-            current_chunks = json.load(f)
-        
-        with open(self.metadata_path, "r") as f:
-            existing_metadata = json.load(f)
-        
-        # Create a set of valid chunk texts for fast lookup
-        valid_chunk_texts = {chunk["text"] for chunk in current_chunks}
-        
-        # Filter metadata to only include chunks that still exist
-        filtered_metadata = []
-        valid_embeddings = []
-        
-        logger.info(f"🔍 Filtering {len(existing_metadata)} metadata entries")
-        
-        for i, metadata_entry in enumerate(existing_metadata):
-            if metadata_entry["text"] in valid_chunk_texts:
-                filtered_metadata.append(metadata_entry)
-                # Extract embedding from existing index
-                if i < len(existing_metadata):  # Safety check
-                    valid_embeddings.append(i)
-        
-        if not filtered_metadata:
-            logger.warning("⚠️ No valid metadata entries found after filtering")
-            return {"error": "No valid metadata entries found"}
-        
-        logger.info(f"✅ Filtered to {len(filtered_metadata)} valid entries")
-        
-        # Load existing index and extract valid embeddings
-        existing_index = faiss.read_index(self.faiss_index_path)
-        
-        if len(valid_embeddings) > existing_index.ntotal:
-            logger.warning(f"⚠️ More valid embeddings ({len(valid_embeddings)}) than index size ({existing_index.ntotal})")
-            valid_embeddings = valid_embeddings[:existing_index.ntotal]
-        
-        # Extract embeddings for valid entries
-        embeddings_list = []
-        for idx in valid_embeddings:
-            if idx < existing_index.ntotal:
-                embedding = existing_index.reconstruct(idx)
-                embeddings_list.append(embedding)
-        
-        if not embeddings_list:
-            logger.error("❌ No valid embeddings extracted")
-            return {"error": "No valid embeddings extracted"}
-        
-        # Create new index
-        dimension = len(embeddings_list[0])
-        new_index = self.create_new_index(dimension)
-        
-        # Convert embeddings to numpy array
-        embedding_matrix = np.array(embeddings_list).astype("float32")
-        
-        # Add embeddings to new index
-        logger.info(f"📥 Adding {len(embedding_matrix)} embeddings to new FAISS index")
-        new_index.add(embedding_matrix)
-        
-        # Save new index
-        faiss.write_index(new_index, self.faiss_index_path)
-        logger.info(f"✅ New FAISS index saved to {self.faiss_index_path}")
-        
-        # Save filtered metadata
-        with open(self.metadata_path, "w") as f:
-            json.dump(filtered_metadata, f, indent=2)
-        
-        logger.info(f"📦 Updated metadata: {len(filtered_metadata)} total entries")
-        
-        stats = {
-            "chunks_processed": len(current_chunks),
-            "embeddings_kept": len(embeddings_list),
-            "embeddings_removed": len(existing_metadata) - len(filtered_metadata),
-            "estimated_cost": 0.0,  # No API calls
-            "index_size": new_index.ntotal,
-            "index_dimension": new_index.d
-        }
-        
-        logger.info(f"✅ Index rebuild completed (no API calls):")
-        logger.info(f"   - Chunks: {stats['chunks_processed']}")
-        logger.info(f"   - Embeddings kept: {stats['embeddings_kept']}")
-        logger.info(f"   - Embeddings removed: {stats['embeddings_removed']}")
-        logger.info(f"   - Cost: $0.00 (no API calls)")
-        
-        return stats
 
 
 # -------- MAIN INCREMENTAL FAISS RUNNER --------
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Incremental FAISS index manager")
+    
+    parser = argparse.ArgumentParser(description="Incremental FAISS index manager with CRUD operations")
+    parser.add_argument("--status", "-s", action="store_true", help="Show system status")
+    parser.add_argument("--validate", "-v", action="store_true", help="Validate system consistency")
+    parser.add_argument("--model", "-m", type=str, help="Embedding model to use")
+    parser.add_argument("--remove-file", type=str, help="Remove embeddings for specific file")
+    
     args = parser.parse_args()
-
-    faiss_mgr = IncrementalFAISS()
-    print("No action specified. Only incremental and cleanup operations are supported.") 
+    
+    faiss_mgr = IncrementalFAISS(model=args.model)
+    
+    if args.status:
+        status = faiss_mgr.get_status()
+        print("\n=== Incremental FAISS Status ===")
+        for key, value in status.items():
+            print(f"{key}: {value}")
+    
+    elif args.validate:
+        validation = faiss_mgr.validate_consistency()
+        print("\n=== System Validation ===")
+        print(f"Valid: {validation['valid']}")
+        
+        if validation['issues']:
+            print("\nIssues:")
+            for issue in validation['issues']:
+                print(f"  ❌ {issue}")
+        
+        if validation['warnings']:
+            print("\nWarnings:")
+            for warning in validation['warnings']:
+                print(f"  ⚠️ {warning}")
+        
+        print(f"\nStats: {validation['stats']}")
+    
+    elif args.remove_file:
+        result = faiss_mgr.remove_embeddings_for_file(args.remove_file)
+        print(f"\nRemoved embeddings for {args.remove_file}:")
+        print(f"Status: {result['status']}")
+        print(f"Embeddings removed: {result['embeddings_removed']}")
+        if result['status'] == 'error':
+            print(f"Error: {result['error']}")
+    
+    else:
+        print("Please specify an operation. Use --help for options.")
