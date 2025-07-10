@@ -476,40 +476,55 @@ class IncrementalFAISS:
             
             # Efficiently remove vectors from FAISS index
             if filtered_metadata:
-                # For safety, fall back to rebuilding from metadata
-                # This avoids potential segfaults with index.reconstruct()
-                logger.info(f"🔄 Rebuilding index from {len(filtered_metadata)} remaining metadata entries")
-                
-                # Extract texts from filtered metadata
-                texts = [entry['text'] for entry in filtered_metadata]
-                
-                # Regenerate embeddings for remaining metadata
-                embeddings, cost = self.generate_embeddings(texts)
-                
-                if embeddings:
-                    # Create new index
-                    dimension = len(embeddings[0])
-                    new_index = faiss.IndexFlatL2(dimension)
+                # Use FAISS's built-in remove_ids method for efficient removal
+                try:
+                    # Convert removed_indices to numpy array
+                    import numpy as np
+                    remove_ids = np.array(removed_indices, dtype=np.int64)
                     
-                    # Add embeddings
-                    embedding_matrix = np.array(embeddings).astype('float32')
-                    new_index.add(embedding_matrix)
+                    # Remove vectors from index
+                    index.remove_ids(remove_ids)
                     
-                    # Save new index and metadata
-                    self.save_index(new_index)
+                    # Save updated index and metadata
+                    self.save_index(index)
                     self.save_metadata(filtered_metadata)
                     
-                    logger.info(f"✅ Removed {removed_count} embeddings, rebuilt index with {len(embeddings)} remaining")
+                    logger.info(f"✅ Removed {removed_count} embeddings, kept {index.ntotal} remaining")
                     
                     return {
                         'file_path': file_path,
                         'embeddings_removed': removed_count,
-                        'embeddings_remaining': len(embeddings),
-                        'rebuild_cost': cost,
+                        'embeddings_remaining': index.ntotal,
+                        'rebuild_cost': 0.0,  # No API calls needed
                         'status': 'success'
                     }
-                else:
-                    raise RuntimeError("Failed to regenerate embeddings for remaining metadata")
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ FAISS remove_ids failed: {e}, falling back to rebuild")
+                    # Fallback: rebuild from metadata (expensive but safe)
+                    texts = [entry['text'] for entry in filtered_metadata]
+                    embeddings, cost = self.generate_embeddings(texts)
+                    
+                    if embeddings:
+                        dimension = len(embeddings[0])
+                        new_index = faiss.IndexFlatL2(dimension)
+                        embedding_matrix = np.array(embeddings).astype('float32')
+                        new_index.add(embedding_matrix)
+                        
+                        self.save_index(new_index)
+                        self.save_metadata(filtered_metadata)
+                        
+                        logger.info(f"✅ Removed {removed_count} embeddings, rebuilt index with {len(embeddings)} remaining")
+                        
+                        return {
+                            'file_path': file_path,
+                            'embeddings_removed': removed_count,
+                            'embeddings_remaining': len(embeddings),
+                            'rebuild_cost': cost,
+                            'status': 'success'
+                        }
+                    else:
+                        raise RuntimeError("Failed to regenerate embeddings for remaining metadata")
             else:
                 # No metadata remaining, remove index
                 if os.path.exists(self.faiss_index_path):
