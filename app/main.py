@@ -130,8 +130,8 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         try:
             data = validate_json_request(required_fields=["query"])
             query = data.get("query")
-            response = chat_service.ask_query(query)
-            return jsonify({"response": response})
+            result, chunks = chat_service.ask_question(query)
+            return jsonify({"response": result["answer"]})
         except Exception as e:
             logger.error(f"Error in chat endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
