@@ -416,7 +416,7 @@ class IncrementalFAISS:
     def remove_embeddings_for_file(self, file_path: str, existing_metadata: List[Dict] = None) -> Dict:
         """
         Remove embeddings for a specific file.
-        This rebuilds the index without the specified file's embeddings.
+        This efficiently removes vectors from the FAISS index without rebuilding.
         
         Args:
             file_path: Path to file (just filename, not full path)
@@ -442,16 +442,28 @@ class IncrementalFAISS:
                     'status': 'success'
                 }
             
+            # Load current index
+            index = self.load_index()
+            if index is None:
+                logger.info("✅ No index found, nothing to remove")
+                return {
+                    'file_path': file_path,
+                    'embeddings_removed': 0,
+                    'status': 'success'
+                }
+            
             # Filter metadata to exclude the specified file
             filename = os.path.basename(file_path)  # Handle both full paths and filenames
             filtered_metadata = []
+            removed_indices = []
             removed_count = 0
             
-            for entry in metadata:
+            for i, entry in enumerate(metadata):
                 entry_file = entry.get('metadata', {}).get('source_file', '')
                 if entry_file != filename:
                     filtered_metadata.append(entry)
                 else:
+                    removed_indices.append(i)
                     removed_count += 1
             
             if removed_count == 0:
@@ -462,37 +474,40 @@ class IncrementalFAISS:
                     'status': 'success'
                 }
             
-            # Rebuild index with filtered metadata
+            # Efficiently remove vectors from FAISS index
             if filtered_metadata:
-                # Need to regenerate embeddings for remaining metadata
-                # This is expensive but ensures consistency
-                texts = [entry['text'] for entry in filtered_metadata]
-                embeddings, cost = self.generate_embeddings(texts)
+                # Create new index with remaining vectors
+                dimension = index.d
+                new_index = faiss.IndexFlatL2(dimension)
                 
-                if embeddings:
-                    # Create new index
-                    dimension = len(embeddings[0])
-                    new_index = faiss.IndexFlatL2(dimension)
-                    
-                    # Add embeddings
-                    embedding_matrix = np.array(embeddings).astype('float32')
+                # Get remaining vectors from original index
+                remaining_vectors = []
+                for i, entry in enumerate(metadata):
+                    if i not in removed_indices:
+                        # Get vector from original index
+                        vector = index.reconstruct(i)
+                        remaining_vectors.append(vector)
+                
+                if remaining_vectors:
+                    # Add remaining vectors to new index
+                    embedding_matrix = np.array(remaining_vectors).astype('float32')
                     new_index.add(embedding_matrix)
                     
                     # Save new index and metadata
                     self.save_index(new_index)
                     self.save_metadata(filtered_metadata)
                     
-                    logger.info(f"✅ Removed {removed_count} embeddings, rebuilt index with {len(embeddings)} remaining")
+                    logger.info(f"✅ Removed {removed_count} embeddings, kept {len(remaining_vectors)} remaining")
                     
                     return {
                         'file_path': file_path,
                         'embeddings_removed': removed_count,
-                        'embeddings_remaining': len(embeddings),
-                        'rebuild_cost': cost,
+                        'embeddings_remaining': len(remaining_vectors),
+                        'rebuild_cost': 0.0,  # No API calls needed
                         'status': 'success'
                     }
                 else:
-                    raise RuntimeError("Failed to regenerate embeddings for remaining metadata")
+                    raise RuntimeError("Failed to extract remaining vectors from index")
             else:
                 # No metadata remaining, remove index
                 if os.path.exists(self.faiss_index_path):
