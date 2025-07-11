@@ -98,7 +98,8 @@ const ChatPanel: React.FC = () => {
                 if (selectedFiles.length > 0) {
                     const selectedDocNames = selectedFiles
                         .map(id => files.find(file => file.id === id)?.name)
-                        .filter(Boolean);
+                        .filter(Boolean)
+                        .map(name => `${name}.xml`); // Add .xml extension
                     requestBody.doc_names = selectedDocNames;
                 }
 
