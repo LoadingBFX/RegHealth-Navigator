@@ -30,6 +30,7 @@ import json
 from typing import List, Dict, Any
 import logging
 # from key import OPENAI_API_KEY
+from rank_bm25 import BM25Okapi
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -57,6 +58,9 @@ class ChatSearchService:
         self.tfidf_vectorizer = TfidfVectorizer(stop_words='english')
         self.doc_texts = [chunk['text'] for chunk in self.all_chunks]
         self.sparse_matrix = self.tfidf_vectorizer.fit_transform(self.doc_texts)
+
+        self.tokenized_docs = [doc.split() for doc in self.doc_texts]
+        self.bm25 = BM25Okapi(self.tokenized_docs)
 
     def embed_text(self, text: str) -> np.ndarray:
         response = self.openai_client.embeddings.create(
@@ -123,28 +127,37 @@ class ChatSearchService:
                 results.append(chunk)
         return results
 
+
     def generate_answer(self, query: str, chunks: List[Dict], max_context_length: int = 4000) -> Dict[str, Any]:
         if not chunks:
             return {
                 "answer": "Sorry, I couldn't find relevant information to answer your question.",
                 "confidence": 0.0,
                 "sources_used": [],
+                "source_file":[],
                 "total_sources": 0
             }
 
         context_parts = []
         current_length = 0
         sources_used = []
+        source_file=[]
+
 
         for i, chunk in enumerate(chunks):
             chunk_text = f"[Source {i+1}] {chunk['text']}"
             context_parts.append(chunk_text)
             current_length += len(chunk_text)
+
+            file_name = chunk.get("metadata", {}).get("source_file", "")
+            source_file.append(file_name)
+
             sources_used.append({
                 "source_id": i+1,
                 "text_preview": chunk['text'][:100] + "..." if len(chunk['text']) > 100 else chunk['text'],
                 "distance": chunk.get('distance', 0),
-                "metadata": chunk.get('metadata', {})
+                "metadata": chunk.get('metadata', {}),
+                "source_file":file_name
             })
 
         context = "\n\n".join(context_parts)
@@ -153,9 +166,10 @@ class ChatSearchService:
 
 Please follow these rules:
 1. Only answer based on the provided content, do not add external knowledge
-3. Cite relevant sources in your answer using the format [Source1], [Source2], etc.
-4. Keep answers accurate, professional, and easy to understand
-5. If there are multiple relevant pieces of information, organize them into a clear structure
+2. Cite relevant sources in your answer using the format [source_file1], [source_file2], etc.
+3. Keep answers accurate, professional, and easy to understand
+4. If there are multiple relevant pieces of information, organize them into a clear structure
+5,For any question involving a calculation, comparison, or logical condition (e.g., percent change, difference, thresholds), first determine if the question requires such reasoning. Then identify all necessary variables, check if they are present in the retrieved sources, and only proceed with step-by-step computation if all variables are available. If any are missing, stop and return a clear message indicating which variable is unavailable. Do not assume, guess, or fabricate missing values. Cite sources using [Source1], [Source2], etc.
 
 Context content:
 {context}
@@ -185,6 +199,7 @@ Answer:"""
                 "answer": answer,
                 "confidence": round(confidence, 2),
                 "sources_used": sources_used,
+                "source_file":source_file,
                 "total_sources": len(chunks),
                 "context_length": current_length
             }
@@ -216,11 +231,22 @@ Answer:"""
 
         chunks = self.search(query, filters=filters, top_k=top_k)
         result = self.generate_answer(query, chunks)
+        sources = []
+        max_num_of_sources = 0
+        if len(result['sources_used']) != 0:
+            for source in result['sources_used']:
+                sources.append(source['metadata']['source_file'])
+                max_num_of_sources += 1
+                #if max_num_of_sources >= 5:
+                #    break
+        sources = list(set(sources))
         result.update({
             "query": query,
             "filters_applied": filters,
-            "retrieval_method": "filtered" if filters else "unfiltered"
+            "retrieval_method": "filtered" if filters else "unfiltered",
+            "sources_used": sources
         })
+
         return result, chunks
 
 def ask_query(query):
@@ -241,7 +267,9 @@ def ask_query(query):
         if len(result['sources_used']) != 0:
             print("\nSource details:")
             for source in result['sources_used']:
-                print(f"  - Source {source['source_id']}: {source['text_preview']}")
+                import pdb;pdb.set_trace()
+                print(f"  - Source file {source['source_file']}")
+                print(f"  - preview {source['source_id']}: {source['text_preview']}")
                 print(f"    Similarity: {1-source['distance']:.3f}")
 
         # prepare final output
@@ -254,3 +282,30 @@ def ask_query(query):
         print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
 
+
+
+questions = [
+    "How are PE RVUs established for specific services?",
+
+]
+for i, query in enumerate(questions, 1):
+    print("\n" + "=" * 60)
+    print(f"📌 Test Case {i}")
+    print("🔎 Question:", query)
+    try:
+        answer, sources = ask_query(query)
+
+        # 显示答案
+        print("\n✅ Answer:\n", answer)
+
+        # 显示前三个来源
+        # print("\n📚 Top 3 Sources:")
+        # for idx, source in enumerate(sources[:3], 1):
+        #     source_text_preview = source['text'][:200] + ("..." if len(source['text']) > 200 else "")
+        #     print(f"  • Source {idx}: {source_text_preview}")
+        #     print(f"    - Distance: {source['distance']:.3f}")
+
+    except Exception as e:
+        print("❌ Error:", e)
+
+    print("=" * 60 + "\n")
