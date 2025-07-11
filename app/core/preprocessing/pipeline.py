@@ -718,26 +718,38 @@ if __name__ == "__main__":
     )
     
     try:
+        # Load base configuration from config files
+        from .config_loader import ConfigLoader
+        config_loader = ConfigLoader()
+        base_config = config_loader.get_processing_config()
+        
+        # Override with command line arguments (higher priority)
+        config_overrides = {}
+        if args.api_key:
+            config_overrides['api_key'] = args.api_key
+        if args.model and args.model != "text-embedding-3-small":  # Only override if different from default
+            config_overrides['model'] = args.model
+        if args.chunk_words != 500:  # Only override if different from default
+            config_overrides['chunk_words'] = args.chunk_words
+        if args.overlap != 1:  # Only override if different from default
+            config_overrides['overlap_sentences'] = args.overlap
+        if args.days_back != 30:  # Only override if different from default
+            config_overrides['days_back'] = args.days_back
+        
+        # Always override paths if provided
+        if args.data_dir:
+            config_overrides['data_dir'] = args.data_dir
+        if args.output_dir:
+            config_overrides['output_dir'] = args.output_dir
+        
+        # Merge configurations (CLI args override config files)
+        final_config = {**base_config, **config_overrides}
+        
         # Choose pipeline type
         if args.auto_update or args.check_regulations or args.download:
-            pipeline = AutoUpdatePipeline(
-                data_dir=args.data_dir,
-                output_dir=args.output_dir,
-                api_key=args.api_key,
-                model=args.model,
-                chunk_words=args.chunk_words,
-                overlap_sentences=args.overlap,
-                days_back=args.days_back
-            )
+            pipeline = AutoUpdatePipeline(**final_config)
         else:
-            pipeline = ProcessingPipeline(
-                data_dir=args.data_dir,
-                output_dir=args.output_dir,
-                api_key=args.api_key,
-                model=args.model,
-                chunk_words=args.chunk_words,
-                overlap_sentences=args.overlap
-            )
+            pipeline = ProcessingPipeline(**final_config)
         
         # Execute requested operation
         if args.status:

@@ -10,13 +10,15 @@ Common utilities used across the preprocessing package including:
 
 from .file_tracker import FileTracker
 from .data_persistence import DataPersistence
-from .error_handler import handle_operation, ProcessingError
+from .error_handler import handle_operation, ProcessingError, ensure_success, combine_results
 from .system_validator import SystemValidator
 
 __all__ = [
     'FileTracker',
     'DataPersistence',
     'handle_operation',
-    'ProcessingError', 
+    'ProcessingError',
+    'ensure_success',
+    'combine_results',
     'SystemValidator'
 ]

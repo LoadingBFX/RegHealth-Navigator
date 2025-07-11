@@ -131,4 +131,10 @@ class Config:
         """Get overlap sentences from config."""
         return self.config['chunking']['overlap_sentences']
 
+    # Regulation fetch configuration
+    @property
+    def regulation_fetch_days_back(self):
+        """Get days back for regulation fetching from config."""
+        return self.config['regulation_fetch']['days_back']
+
 config = Config()

@@ -71,60 +71,61 @@ class ChatSearchService:
         embedding = np.array(response.data[0].embedding, dtype='float32')
         return embedding / np.linalg.norm(embedding)
 
-    # def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20) -> List[Dict]:
-    #     # Step 1: Apply filters if present
-    #     if filters:
-    #         filtered_chunks = []
-    #         for i, chunk in enumerate(self.all_chunks):
-    #             if all(chunk.get("metadata", {}).get(k) == v for k, v in filters.items()):
-    #                 chunk['__original_index__'] = i
-    #                 filtered_chunks.append(chunk)
-    #
-    #         if not filtered_chunks:
-    #             return []
-    #
-    #         embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
-    #         doc_matrix = np.vstack(embeddings).astype("float32")
-    #         doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
-    #     else:
-    #         doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
-    #         doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
-    #         filtered_chunks = self.all_chunks.copy()
-    #
-    #     # Step 2: Embed and normalize the query
-    #     query_embedding = self.embed_text(query).reshape(1, -1)
-    #
-    #     # Step 3: Compute cosine similarity
-    #     similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
-    #
-    #     # Step 4: Hybrid: Get BM25 (TF-IDF) similarity scores
-    #     sparse_query_vec = self.tfidf_vectorizer.transform([query])
-    #     sparse_similarities = cosine_similarity(sparse_query_vec, self.sparse_matrix).flatten()
-    #
-    #     # Step 5: Combine scores (weighted sum)
-    #     alpha = 0.3  # weight for embedding, 0.5 for sparse
-    #     combined_scores = alpha * similarities + (1 - alpha) * sparse_similarities[:len(filtered_chunks)]
-    #
-    #     top_indices = np.argsort(-combined_scores)[:top_k]
-    #
-    #     # Step 6: Prepare results
-    #     results = []
-    #     for i in top_indices:
-    #         chunk = filtered_chunks[i].copy()
-    #         chunk["distance"] = float(1 - combined_scores[i])
-    #         results.append(chunk)
-    #
-    #     return results
-
     def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20):
+        """
+        Search for relevant chunks with optional filtering.
+        
+        Args:
+            query: The search query
+            filters: Optional filters to apply (e.g., {"source_file": ["file1.xml", "file2.xml"]})
+            top_k: Number of top results to return
+            
+        Returns:
+            List of relevant chunks with distance scores
+        """
+        # Step 1: Apply filters if present
+        if filters and "source_file" in filters:
+            filtered_chunks = []
+            for i, chunk in enumerate(self.all_chunks):
+                chunk_source_file = chunk.get("metadata", {}).get("source_file", "")
+                if chunk_source_file in filters["source_file"]:
+                    chunk_copy = chunk.copy()
+                    chunk_copy['__original_index__'] = i
+                    filtered_chunks.append(chunk_copy)
+
+            if not filtered_chunks:
+                return []
+
+            # Get embeddings for filtered chunks
+            embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
+            doc_matrix = np.vstack(embeddings).astype("float32")
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+        else:
+            # No filtering - use all chunks
+            doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+            filtered_chunks = [chunk.copy() for chunk in self.all_chunks]
+            for i, chunk in enumerate(filtered_chunks):
+                chunk['__original_index__'] = i
+
+        # Step 2: Embed and normalize the query
         query_embedding = self.embed_text(query).reshape(1, -1)
-        distances, indices = self.faiss_index.search(query_embedding, top_k)
+
+        # Step 3: Compute cosine similarity
+        similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
+
+        # Step 4: Get top k results
+        top_indices = np.argsort(-similarities)[:top_k]
+
+        # Step 5: Prepare results
         results = []
-        for idx, dist in zip(indices[0], distances[0]):
-            if 0 <= idx < len(self.all_chunks):
-                chunk = self.all_chunks[idx].copy()
-                chunk["distance"] = float(dist)
-                results.append(chunk)
+        for i in top_indices:
+            chunk = filtered_chunks[i].copy()
+            chunk["distance"] = float(1 - similarities[i])
+            # Remove internal index
+            chunk.pop('__original_index__', None)
+            results.append(chunk)
+
         return results
 
 

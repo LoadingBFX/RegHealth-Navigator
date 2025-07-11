@@ -2,7 +2,7 @@
 Configuration Loader
 
 Provides unified configuration loading and management for the preprocessing package,
-integrating with the main application config system.
+integrating with the main application config system and .env file.
 
 Example:
     # Load configuration
@@ -26,6 +26,30 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 import logging
+
+# Load .env file
+try:
+    from dotenv import load_dotenv
+    
+    # Try to find .env file starting from current directory and going up
+    current_dir = Path(__file__).parent
+    env_file = None
+    
+    for _ in range(5):  # Look up to 5 levels up
+        env_candidate = current_dir / '.env'
+        if env_candidate.exists():
+            env_file = env_candidate
+            break
+        current_dir = current_dir.parent
+    
+    if env_file:
+        load_dotenv(env_file)
+        print(f"✅ Loaded .env from: {env_file}")
+    else:
+        print("⚠️  .env file not found")
+        
+except ImportError:
+    print("⚠️  python-dotenv not available, .env file not loaded")
 
 logger = logging.getLogger(__name__)
 
@@ -66,10 +90,11 @@ class ConfigLoader:
             
             from config import config
             self._app_config = config
-            logger.debug("Loaded main application config")
+            logger.debug("✅ Loaded main application config")
             
         except ImportError as e:
-            logger.warning(f"Could not load main application config: {e}")
+            logger.warning(f"❌ Could not load main application config: {e}")
+            logger.warning("   Falling back to standalone configuration")
             self._app_config = None
     
     def _get_from_app_config(self, attribute: str, default: Any = None) -> Any:
@@ -116,6 +141,7 @@ class ConfigLoader:
             config = loader.get_embedding_config()
             builder = FAISSBuilder(**config)
         """
+        # Start with defaults
         config = {
             'model': 'text-embedding-3-small',
             'api_key': os.getenv('OPENAI_API_KEY'),
@@ -124,9 +150,21 @@ class ConfigLoader:
             'rate_limit_delay': 1.0
         }
         
-        # Override from app config
+        # Override from app config if available
         if self._app_config:
             config['model'] = self._get_from_app_config('default_embedding_model', config['model'])
+            
+            # Get model-specific configuration from app config
+            try:
+                model_config = self._app_config.get_embedding_model_config(config['model'])
+                config.update({
+                    'price_per_1k_tokens': model_config.get('price_per_1k_tokens', 0.00002),
+                    'encoding': model_config.get('encoding', 'cl100k_base'),
+                    'dimension': model_config.get('dimension', 1536),
+                    'max_tokens': 8191  # Standard for most models
+                })
+            except Exception as e:
+                logger.warning(f"Could not load model config from app: {e}")
         
         # Override from manual config
         config.update(self._config_override.get('embedding', {}))
@@ -159,15 +197,21 @@ class ConfigLoader:
             'tracking_file': project_root / 'rag_data' / 'file_tracking.json'
         }
         
-        # Override from app config
+        # Override from app config if available
         if self._app_config:
             try:
-                config['data_directory'] = Path(self._get_from_app_config('docs_data_path', str(config['data_directory'])))
-                config['output_directory'] = Path(self._get_from_app_config('build_faiss_output_folder', str(config['output_directory'])))
-                config['faiss_index'] = Path(self._get_from_app_config('faiss_index_path', str(config['faiss_index'])))
-                config['faiss_metadata'] = Path(self._get_from_app_config('faiss_metadata_path', str(config['faiss_metadata'])))
+                # Use app config properties directly
+                config['data_directory'] = Path(self._app_config.docs_data_path)
+                config['output_directory'] = Path(self._app_config.build_faiss_output_folder)
+                config['faiss_index'] = Path(self._app_config.faiss_index_path)
+                config['faiss_metadata'] = Path(self._app_config.faiss_metadata_path)
+                # Update other files to match output directory
+                config['chunks_file'] = config['output_directory'] / 'chunks.json'
+                config['tracking_file'] = config['output_directory'] / 'file_tracking.json'
+                logger.debug("✅ Loaded paths from main app config")
             except Exception as e:
-                logger.warning(f"Error loading paths from app config: {e}")
+                logger.warning(f"❌ Error loading paths from app config: {e}")
+                logger.warning("   Using default paths")
         
         # Override from manual config
         paths_override = self._config_override.get('paths', {})
@@ -191,6 +235,7 @@ class ConfigLoader:
         paths = self.get_paths_config()
         chunking = self.get_chunking_config()
         embedding = self.get_embedding_config()
+        regulation_fetch = self.get_regulation_fetch_config()
         
         config = {
             'data_dir': paths['data_directory'],
@@ -199,11 +244,39 @@ class ConfigLoader:
             'model': embedding['model'],
             'chunk_words': chunking['chunk_words'],
             'overlap_sentences': chunking['overlap_sentences'],
-            'days_back': 30  # Default for regulation fetching
+            'days_back': regulation_fetch['days_back']
         }
         
         # Override from manual config
         config.update(self._config_override.get('processing', {}))
+        
+        return config
+    
+    def get_regulation_fetch_config(self) -> Dict[str, Any]:
+        """
+        Get regulation fetching configuration.
+        
+        Returns:
+            Dictionary with regulation fetch settings
+            
+        Example:
+            config = loader.get_regulation_fetch_config()
+            days_back = config['days_back']
+        """
+        # Start with defaults
+        config = {
+            'days_back': 30  # Default days to look back
+        }
+        
+        # Override from app config if available
+        if self._app_config:
+            try:
+                config['days_back'] = self._get_from_app_config('regulation_fetch_days_back', config['days_back'])
+            except Exception as e:
+                logger.warning(f"Could not load regulation fetch config from app: {e}")
+        
+        # Override from manual config
+        config.update(self._config_override.get('regulation_fetch', {}))
         
         return config
     

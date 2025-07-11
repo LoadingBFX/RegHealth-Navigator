@@ -12,6 +12,7 @@ const ChatPanel: React.FC = () => {
         selectedFiles,
         setSelectedFiles,
         files,
+        fetchFiles,
         showDocumentSelector,
         setShowDocumentSelector,
         searchTerm,
@@ -47,6 +48,11 @@ const ChatPanel: React.FC = () => {
         const matchesType = typeFilter === 'all' || file.name.includes(typeFilter);
         return matchesSearch && matchesYear && matchesProgram && matchesType;
     });
+
+    // Fetch documents on component mount
+    useEffect(() => {
+        fetchFiles();
+    }, [fetchFiles]);
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -85,13 +91,24 @@ const ChatPanel: React.FC = () => {
             setInput('');
 
             try {
+                // Prepare request body with selected documents
+                const requestBody: any = { query: messageToSend };
+                
+                // Add selected documents if any are selected
+                if (selectedFiles.length > 0) {
+                    const selectedDocNames = selectedFiles
+                        .map(id => files.find(file => file.id === id)?.name)
+                        .filter(Boolean);
+                    requestBody.doc_names = selectedDocNames;
+                }
+
                 const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.chat}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ query: messageToSend })
+                    body: JSON.stringify(requestBody)
                 });
 
                 // Check if the response is ok

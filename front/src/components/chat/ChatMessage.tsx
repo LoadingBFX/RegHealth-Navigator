@@ -26,7 +26,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const renderContentWithCitations = (text: string, citationList?: string[]) => {
     if (!citationList || citationList.length === 0) return text;
     
-    let parts = [text];
+    let parts: (string | JSX.Element)[] = [text];
     
     citationList.forEach(citation => {
       const newParts: (string | JSX.Element)[] = [];

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import config from '../config';
 
 // Sample data with new naming convention
 const sampleFiles = [
@@ -179,6 +180,9 @@ type FileType = {
   name: string;
   size: string;
   date: string;
+  program?: string;
+  year?: string;
+  type?: string;
 };
 
 type HistoryItem = {
@@ -267,6 +271,8 @@ type StoreState = {
   
   files: FileType[];
   addFile: (file: FileType) => void;
+  setFiles: (files: FileType[]) => void;
+  fetchFiles: () => Promise<void>;
   
   history: HistoryItem[];
   addHistoryItem: (item: HistoryItem) => void;
@@ -330,73 +336,117 @@ type StoreState = {
 };
 
 export const useStore = create<StoreState>((set, get) => ({
+  // Loading state
   isLoading: false,
   setLoading: (loading) => set({ isLoading: loading }),
-  
+
+  // Active tab
   activeTab: 'chat',
   setActiveTab: (tab) => set({ activeTab: tab }),
-  
+
+  // Files management
   files: sampleFiles,
   addFile: (file) => set((state) => ({ files: [...state.files, file] })),
-  
+  setFiles: (files) => set({ files }),
+  fetchFiles: async () => {
+    try {
+      set({ isLoading: true });
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.documents}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch documents: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.documents) {
+        // Transform the API response to match our FileType format
+        const transformedFiles = data.documents.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          size: doc.size,
+          date: doc.date,
+          program: doc.program,
+          year: doc.year,
+          type: doc.type
+        }));
+        
+        set({ files: transformedFiles });
+      }
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      // Keep using sample files if API fails
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // History management
   history: sampleHistory,
-  addHistoryItem: (item) => set((state) => ({ history: [item, ...state.history] })),
-  
+  addHistoryItem: (item) => set((state) => ({ history: [...state.history, item] })),
+
+  // Selected files for chat
   selectedFiles: [],
   setSelectedFiles: (fileIds) => set({ selectedFiles: fileIds }),
-  
-  // messages: sampleChat,
-  messages: [],
+
+  // Chat messages
+  messages: sampleChat,
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),
-  
+
+  // Summary
   summary: sampleSummary,
   setSummary: (summary) => set({ summary }),
-  
+
+  // FAQ
   faq: sampleFAQ,
   setFAQ: (faq) => set({ faq }),
-  
+
+  // Comparison
   comparison: null,
   setComparison: (comparison) => set({ comparison }),
-  
+
+  // Citations
   citations: sampleCitations,
   setCitations: (citations) => set({ citations }),
-  
+
+  // Active citation
   activeCitation: null,
   setActiveCitation: (citation) => set({ activeCitation: citation }),
-  
+
+  // Processing state
   isProcessing: false,
   setProcessing: (processing) => set({ isProcessing: processing }),
-  
+
   processingProgress: 0,
   setProcessingProgress: (progress) => set({ processingProgress: progress }),
-  
+
   // Search and filter state
   searchTerm: '',
   setSearchTerm: (term) => set({ searchTerm: term }),
-  
+
   yearFilter: 'all',
   setYearFilter: (year) => set({ yearFilter: year }),
-  
+
   programFilter: 'all',
   setProgramFilter: (program) => set({ programFilter: program }),
-  
+
   typeFilter: 'all',
   setTypeFilter: (type) => set({ typeFilter: type }),
-  
+
   showFilters: false,
   setShowFilters: (show) => set({ showFilters: show }),
-  
+
   // History modal
   showHistory: false,
   setShowHistory: (show) => set({ showHistory: show }),
-  
+
   // Citation modal
   showCitationModal: false,
   setShowCitationModal: (show) => set({ showCitationModal: show }),
-  
-  // Document selection for chat
+
+  // Document selector
   showDocumentSelector: false,
   setShowDocumentSelector: (show) => set({ showDocumentSelector: show }),
 }));

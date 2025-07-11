@@ -1,116 +1,17 @@
 """
-main.py
-
-Flask app entry point for RegHealth Navigator backend.
+Test backend API endpoints
 """
-import sys
 import os
-import logging
 import json
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
-import yaml
-
-from app.core import summarizer
-from app.core.summarizer import SummaryGenerator
-from .core.search import ChatSearchService
-from .config import config
-from dotenv import load_dotenv
+import logging
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def create_app() -> Flask:
-    """
-    Create and configure the Flask application.
-    
-    Returns:
-        Flask: Configured Flask application instance
-    """
-    # Load environment variables
-    load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    print(f"API Key: {api_key[:5]}...{api_key[-5:]}")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set")
-
-    # Initialize Flask app
-    app = Flask(__name__)
-
-    # Configure CORS
-    CORS(app, origins=config.cors_origins)
-
-    # Initialize services
-    chat_service = ChatSearchService(
-        openai_api_key=api_key,
-        faiss_index_path=config.faiss_index_path,
-        metadata_path=config.faiss_metadata_path
-    )
-
-    summarizer = SummaryGenerator(
-        output_dir="./summary_outputs",
-        openai_api_key=api_key
-    )
-
-    # Register error handlers
-    register_error_handlers(app)
-
-    # Register routes
-    register_routes(app, chat_service)
-
-    return app
-
-
-def list_available_documents() -> List[Dict[str, Any]]:
-    """
-    List all available documents from the data directory.
-    
-    Returns:
-        List[Dict[str, Any]]: List of document information
-    """
-    documents = []
-    data_dir = config.docs_data_path
-    
-    # Define program types
-    programs = ["MPFS", "HOSPICE", "SNF"]
-    
-    for program in programs:
-        program_dir = os.path.join(data_dir, program)
-        if os.path.exists(program_dir):
-            for filename in os.listdir(program_dir):
-                if filename.endswith('.xml'):
-                    file_path = os.path.join(program_dir, filename)
-                    file_stat = os.stat(file_path)
-                    
-                    # Extract year and type from filename
-                    # Example: 2024_MPFS_final_2023-24184.xml
-                    parts = filename.replace('.xml', '').split('_')
-                    if len(parts) >= 3:
-                        year = parts[0]
-                        doc_type = parts[2]  # final or proposed
-                        
-                        documents.append({
-                            "id": filename.replace('.xml', ''),
-                            "name": filename.replace('.xml', ''),
-                            "program": program,
-                            "year": year,
-                            "type": doc_type,
-                            "size": f"{file_stat.st_size / (1024*1024):.1f} MB",
-                            "date": f"{file_stat.st_mtime:.0f}"
-                        })
-    
-    # Sort by year (descending) and then by program
-    documents.sort(key=lambda x: (x["year"], x["program"]), reverse=True)
-    
-    return documents
-
 
 def list_summary() -> List[Dict[str, Any]]:
     """
@@ -155,7 +56,6 @@ def list_summary() -> List[Dict[str, Any]]:
     
     return documents
 
-
 def get_summary(doc_name: str) -> Dict[str, Any]:
     """
     Generate summary for a specific document.
@@ -166,12 +66,6 @@ def get_summary(doc_name: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Summary information in JSON format
     """
-    # This is a placeholder implementation
-    # In a real application, you would:
-    # 1. Load the XML document
-    # 2. Process it with your RAG system
-    # 3. Generate a structured summary
-    
     # Sample summary data based on document type
     if "MPFS" in doc_name and "final" in doc_name:
         year = doc_name.split('_')[0]
@@ -323,189 +217,61 @@ Please review the full document for complete details and implementation guidance
             ]
         }
 
-
-def register_error_handlers(app: Flask) -> None:
+def validate_json_request(required_fields=None):
     """
-    Register error handlers for the Flask application.
-    
-    Args:
-        app: Flask application instance
+    Validate JSON request and required fields.
     """
+    if not request.is_json:
+        raise BadRequest("Request must be JSON")
 
-    @app.errorhandler(404)
-    def not_found(error: HTTPException) -> tuple[Dict[str, str], int]:
-        return jsonify({"error": "Endpoint not found"}), 404
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Request body cannot be empty")
 
-    @app.errorhandler(500)
-    def internal_error(error: HTTPException) -> tuple[Dict[str, str], int]:
-        logger.error(f"Internal server error: {str(error)}")
-        return jsonify({"error": "Internal server error"}), 500
+    if required_fields:
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
 
-    @app.errorhandler(BadRequest)
-    def handle_bad_request(error: BadRequest) -> tuple[Dict[str, str], int]:
-        return jsonify({"error": str(error)}), 400
+    return data
 
+# Create Flask app
+app = Flask(__name__)
+CORS(app, origins=["http://localhost:5173"])
 
-def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
+@app.route("/api/list-summary", methods=["GET"])
+def api_list_summary():
     """
-    Register routes for the Flask application.
-    
-    Args:
-        app: Flask application instance
-        chat_service: ChatSearchService instance
+    List all available documents for summary generation.
     """
+    try:
+        documents = list_summary()
+        return jsonify({"documents": documents})
+    except Exception as e:
+        logger.error(f"Error in list-summary endpoint: {str(e)}")
+        return jsonify({"error": str(e)}), 400
 
-    def validate_json_request(required_fields: Optional[list[str]] = None) -> Dict[str, Any]:
-        """
-        Validate JSON request and required fields.
-        
-        Args:
-            required_fields: List of required field names
-            
-        Returns:
-            Dict[str, Any]: Validated request data
-            
-        Raises:
-            BadRequest: If request is not JSON or missing required fields
-        """
-        if not request.is_json:
-            raise BadRequest("Request must be JSON")
+@app.route("/api/get-summary", methods=["POST"])
+def api_get_summary():
+    """
+    Get summary for a specific document.
+    """
+    try:
+        data = validate_json_request(required_fields=["doc_name"])
+        doc_name = data.get("doc_name")
+        summary = get_summary(doc_name)
+        return jsonify({"summary": summary})
+    except Exception as e:
+        logger.error(f"Error in get-summary endpoint: {str(e)}")
+        return jsonify({"error": str(e)}), 400
 
-        data = request.get_json()
-        if not data:
-            raise BadRequest("Request body cannot be empty")
-
-        if required_fields:
-            missing_fields = [field for field in required_fields if field not in data]
-            if missing_fields:
-                raise BadRequest(f"Missing required fields: {', '.join(missing_fields)}")
-
-        return data
-
-    @app.route("/api/documents", methods=["GET"])
-    def list_documents() -> tuple[Dict[str, Any], int]:
-        """
-        List all available documents for chat filtering.
-        
-        Returns:
-            {
-                "documents": List[Dict[str, Any]]  # List of document information
-            }
-        """
-        try:
-            documents = list_available_documents()
-            return jsonify({"documents": documents})
-        except Exception as e:
-            logger.error(f"Error in documents endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
-
-    @app.route("/api/chat", methods=["POST"])
-    def chat() -> tuple[Dict[str, Any], int]:
-        """
-        Chat endpoint for querying the RAG system.
-        
-        Request body:
-            {
-                "query": str,  # The user's question
-                "doc_names": List[str]  # Optional: List of document names to filter by
-            }
-            
-        Returns:
-            {
-                "response": str  # The system's response
-            }
-        """
-        try:
-            data = validate_json_request(required_fields=["query"])
-            query = data.get("query")
-            doc_names = data.get("doc_names", [])  # Optional document filter
-            
-            # Create filters if doc_names are provided
-            filters = None
-            if doc_names:
-                filters = {"source_file": doc_names}
-            
-            result, chunks = chat_service.ask_question(query, filters=filters)
-            return jsonify({"response": result["answer"]})
-        except Exception as e:
-            logger.error(f"Error in chat endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
-
-    @app.route("/api/summarize", methods=["POST"])
-    def summarize() -> tuple[Dict[str, str], int]:
-        """
-        Simple test endpoint.
-        
-        Request body:
-            {
-                "message": str  # Any message
-            }
-            
-        Returns:
-            {
-                "response": str  # Always returns "hello world!"
-            }
-        """
-        try:
-            data = validate_json_request(required_fields=["message"])
-            summary = summarizer.generate_report(data)
-            return jsonify({"response": summary})
-        except Exception as e:
-            logger.error(f"Error in summarize endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
-
-    @app.route("/api/list-summary", methods=["GET"])
-    def api_list_summary() -> tuple[Dict[str, Any], int]:
-        """
-        List all available documents for summary generation.
-        
-        Returns:
-            {
-                "documents": List[Dict[str, Any]]  # List of document information
-            }
-        """
-        try:
-            documents = list_summary()
-            return jsonify({"documents": documents})
-        except Exception as e:
-            logger.error(f"Error in list-summary endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
-
-    @app.route("/api/get-summary", methods=["POST"])
-    def api_get_summary() -> tuple[Dict[str, Any], int]:
-        """
-        Get summary for a specific document.
-        
-        Request body:
-            {
-                "doc_name": str  # Name of the document (without .xml extension)
-            }
-            
-        Returns:
-            {
-                "summary": Dict[str, Any]  # Summary information
-            }
-        """
-        try:
-            data = validate_json_request(required_fields=["doc_name"])
-            doc_name = data.get("doc_name")
-            summary = get_summary(doc_name)
-            return jsonify({"summary": summary})
-        except Exception as e:
-            logger.error(f"Error in get-summary endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
-
-
-def main() -> None:
-    """Main entry point for the Flask application."""
-    app = create_app()
-    logger.info("Starting Flask app...")
-    app.run(
-        host=config.api_host,
-        port=config.api_port,
-        debug=config.debug
-    )
-
+@app.route("/api/test", methods=["GET"])
+def test():
+    """
+    Test endpoint
+    """
+    return jsonify({"message": "Backend is running!"})
 
 if __name__ == "__main__":
-    main()
+    print("Starting test backend server...")
+    app.run(host="0.0.0.0", port=5000, debug=True) 

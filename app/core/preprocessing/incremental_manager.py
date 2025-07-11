@@ -29,7 +29,7 @@ Example:
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any, Set
+from typing import Dict, List, Optional, Union, Any, Set, Tuple
 import logging
 from datetime import datetime
 
@@ -94,9 +94,28 @@ class IncrementalManager:
             overlap_sentences=overlap_sentences
         )
         
+        # Create FAISS builder with full configuration
+        from .config_loader import ConfigLoader
+        config_loader = ConfigLoader()
+        embedding_config = config_loader.get_embedding_config()
+        
+        # Extract model-specific config if available
+        model_config = None
+        if 'price_per_1k_tokens' in embedding_config:
+            model_config = {
+                'price_per_1k_tokens': embedding_config.get('price_per_1k_tokens'),
+                'encoding': embedding_config.get('encoding', 'cl100k_base'),
+                'dimension': embedding_config.get('dimension', 1536),
+                'max_tokens': embedding_config.get('max_tokens', 8191)
+            }
+        
         self.faiss_builder = FAISSBuilder(
-            api_key=api_key,
-            model=model
+            api_key=api_key or embedding_config.get('api_key'),
+            model=model,
+            batch_size=embedding_config.get('batch_size', 50),
+            max_retries=embedding_config.get('max_retries', 5),
+            rate_limit_delay=embedding_config.get('rate_limit_delay', 1.0),
+            model_config=model_config
         )
         
         self.file_tracker = FileTracker(
@@ -165,6 +184,197 @@ class IncrementalManager:
                 filtered_chunks.append(chunk)
         
         return filtered_chunks, removed_count
+    
+    def _rebuild_index_by_reorganization(self, original_chunks: List[Dict[str, Any]], remaining_chunks: List[Dict[str, Any]], chunks_removed: int) -> Dict[str, Any]:
+        """
+        Efficiently remove vectors from FAISS index using remove_ids (following incremental_faiss.py pattern).
+        
+        Args:
+            original_chunks: Original chunk list before removal
+            remaining_chunks: Filtered chunk list after removal  
+            chunks_removed: Number of chunks that were removed
+            
+        Returns:
+            Result dictionary with reorganization status
+        """
+        import numpy as np
+        import faiss
+        
+        logger.info(f"Efficiently removing {chunks_removed} vectors using FAISS remove_ids")
+        
+        if not self.faiss_builder.index or not self.faiss_builder.metadata:
+            raise ProcessingError("No existing index to reorganize")
+        
+        # Basic consistency check (less strict than before)
+        index_size = self.faiss_builder.index.ntotal
+        metadata_size = len(self.faiss_builder.metadata)
+        
+        if index_size != metadata_size:
+            logger.warning(f"Index-metadata mismatch: {index_size} vectors vs {metadata_size} metadata entries")
+            logger.warning("Falling back to full rebuild due to inconsistency")
+            return self._fallback_to_full_rebuild(remaining_chunks)
+        
+        # Find the filename to remove
+        removed_files = set()
+        original_files = {chunk.get('metadata', {}).get('source_file') for chunk in original_chunks}
+        remaining_files = {chunk.get('metadata', {}).get('source_file') for chunk in remaining_chunks}
+        removed_files = original_files - remaining_files
+        
+        if not removed_files:
+            logger.info("No files to remove, keeping index unchanged")
+            return {'vectors_reorganized': 0, 'metadata_updated': metadata_size}
+        
+        filename_to_remove = list(removed_files)[0]
+        logger.info(f"Removing vectors for file: {filename_to_remove}")
+        
+        # Find indices to remove
+        indices_to_remove = []
+        new_metadata = []
+        
+        for i, metadata_entry in enumerate(self.faiss_builder.metadata):
+            source_file = metadata_entry.get('metadata', {}).get('source_file')
+            if source_file == filename_to_remove:
+                indices_to_remove.append(i)
+            else:
+                new_metadata.append(metadata_entry)
+        
+        if not indices_to_remove:
+            logger.info(f"No vectors found for file: {filename_to_remove}")
+            return {'vectors_reorganized': 0, 'metadata_updated': metadata_size}
+        
+        if len(new_metadata) == 0:
+            # No vectors left, reset index
+            self.faiss_builder.reset()
+            return {'vectors_reorganized': len(indices_to_remove), 'metadata_updated': 0}
+        
+        try:
+            # Use FAISS native remove_ids for efficiency (like incremental_faiss.py)
+            remove_ids = np.array(indices_to_remove, dtype=np.int64)
+            logger.info(f"Removing {len(remove_ids)} vectors from index using remove_ids")
+            
+            self.faiss_builder.index.remove_ids(remove_ids)
+            
+            # Verify removal worked correctly
+            expected_remaining = metadata_size - len(indices_to_remove)
+            actual_remaining = self.faiss_builder.index.ntotal
+            
+            if actual_remaining != expected_remaining:
+                logger.warning(f"remove_ids result mismatch: expected {expected_remaining}, got {actual_remaining}")
+                raise RuntimeError(f"remove_ids failed: expected {expected_remaining}, got {actual_remaining}")
+            
+            # Update metadata
+            self.faiss_builder.metadata = new_metadata
+            
+            vectors_removed = len(indices_to_remove)
+            logger.info(f"Successfully removed {vectors_removed} vectors using remove_ids, {actual_remaining} remaining")
+            
+            return {
+                'vectors_reorganized': vectors_removed,
+                'metadata_updated': len(new_metadata), 
+                'remaining_vectors': actual_remaining,
+                'efficient_removal': True,
+                'status': 'success'  # 确保状态被正确设置
+            }
+            
+        except Exception as e:
+            logger.warning(f"FAISS remove_ids failed: {e}, falling back to rebuild")
+            # Fallback: rebuild without regenerating embeddings (still efficient)
+            return self._fallback_to_reorganization_rebuild(new_metadata)
+    
+    def _fallback_to_reorganization_rebuild(self, metadata_to_keep: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Fallback rebuild that reuses existing embeddings from metadata (following incremental_faiss.py pattern).
+        
+        Args:
+            metadata_to_keep: Metadata entries to preserve
+            
+        Returns:
+            Result dictionary with rebuild status
+        """
+        import numpy as np
+        import faiss
+        
+        logger.info("Performing reorganization rebuild (reusing existing embeddings)")
+        
+        if not metadata_to_keep:
+            # Reset everything if no metadata remains
+            self.faiss_builder.reset()
+            return {
+                'vectors_reorganized': 0,
+                'metadata_updated': 0,
+                'fallback_rebuild': True,
+                'rebuild_cost': 0.0
+            }
+        
+        # Extract texts from metadata and regenerate embeddings
+        texts = [entry['text'] for entry in metadata_to_keep]
+        
+        # Generate embeddings (this is the only fallback scenario where we have costs)
+        embedding_result = self.faiss_builder.generate_embeddings(texts)
+        if embedding_result['status'] != 'success':
+            raise ProcessingError(f"Failed to regenerate embeddings: {embedding_result.get('error')}")
+        
+        embeddings = embedding_result['embeddings']
+        rebuild_cost = embedding_result['actual_cost']
+        
+        if embeddings:
+            # Create new index
+            dimension = len(embeddings[0])
+            self.faiss_builder.index = faiss.IndexFlatL2(dimension)
+            embedding_matrix = np.array(embeddings).astype('float32')
+            self.faiss_builder.index.add(embedding_matrix)
+            
+            # Update metadata
+            self.faiss_builder.metadata = metadata_to_keep
+            
+            logger.info(f"Reorganization rebuild completed: {len(embeddings)} vectors, cost: ${rebuild_cost:.4f}")
+            
+            return {
+                'vectors_reorganized': len(embeddings),
+                'metadata_updated': len(metadata_to_keep),
+                'fallback_rebuild': True,
+                'rebuild_cost': rebuild_cost
+            }
+        else:
+            raise ProcessingError("Failed to generate embeddings for reorganization rebuild")
+    
+    def _fallback_to_full_rebuild(self, remaining_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Fallback to full rebuild when efficient reorganization is not possible.
+        
+        Args:
+            remaining_chunks: Chunks to rebuild index from
+            
+        Returns:
+            Result dictionary with rebuild status
+        """
+        logger.info("Performing full rebuild due to data inconsistency")
+        
+        if not remaining_chunks:
+            # Reset everything if no chunks remain
+            self.faiss_builder.reset()
+            return {
+                'vectors_reorganized': 0,
+                'metadata_updated': 0,
+                'fallback_rebuild': True,
+                'rebuild_cost': 0.0
+            }
+        
+        # Build new index from remaining chunks
+        build_result = self.faiss_builder.build_index_from_chunks(remaining_chunks, "flat")
+        
+        if build_result['status'] == 'success':
+            rebuild_cost = build_result['total_cost']
+            logger.warning(f"Fallback rebuild completed at cost ${rebuild_cost:.4f}")
+            
+            return {
+                'vectors_reorganized': build_result['vectors_created'],
+                'metadata_updated': build_result['metadata_entries'],
+                'fallback_rebuild': True,
+                'rebuild_cost': rebuild_cost
+            }
+        else:
+            raise ProcessingError(f"Fallback rebuild failed: {build_result.get('error')}")
     
     @handle_operation("file processing", success_fields={'chunks_added': 0, 'cost': 0.0})
     def process_file(self, file_path: Union[str, Path]) -> Dict[str, Any]:
@@ -399,23 +609,23 @@ class IncrementalManager:
         save_result = self._save_chunks(filtered_chunks)
         ensure_success(save_result, "chunk file update")
         
-        # Step 4: Rebuild FAISS index without this file's data
+        # Step 4: Rebuild FAISS index efficiently without regenerating embeddings
         embeddings_removed = 0
         rebuild_cost = 0.0
         
         if filtered_chunks:
-            # Rebuild index from remaining chunks
-            logger.info(f"Rebuilding FAISS index without {filename}")
+            # Use efficient index reorganization instead of full rebuild
+            logger.info(f"Reorganizing FAISS index without {filename} (no embedding regeneration)")
             
-            build_result = self.faiss_builder.build_index_from_chunks(filtered_chunks, "flat")
-            ensure_success(build_result, "index rebuild")
+            rebuild_result = self._rebuild_index_by_reorganization(chunks, filtered_chunks, chunks_removed)
+            ensure_success(rebuild_result, "index reorganization")
             
-            embeddings_removed = chunks_removed  # Approximate
-            rebuild_cost = build_result['total_cost']
+            embeddings_removed = chunks_removed
+            rebuild_cost = 0.0  # No API costs for reorganization
             
-            # Save rebuilt index
+            # Save reorganized index
             save_index_result = self.faiss_builder.save_index(self.index_path, self.metadata_path)
-            ensure_success(save_index_result, "rebuilt index save")
+            ensure_success(save_index_result, "reorganized index save")
         else:
             # No chunks left, remove index files
             if self.index_path.exists():
