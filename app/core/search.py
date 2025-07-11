@@ -162,21 +162,22 @@ class ChatSearchService:
 
         context = "\n\n".join(context_parts)
 
-        prompt = f"""Based on the following medical regulation document content, please answer the user's question.
+        prompt = f"""
+                    You are a senior expert in medical policy and regulation analysis. Based on the following medical regulation document content, please answer the user's question.
+                    Please follow these rules:
+                    1. Only answer based on the provided content, do not add external knowledge
+                    2. Cite relevant sources in your answer using the format [Source 1], [Source 2], etc.
+                    3. Keep answers accurate, professional, and easy to understand
+                    4. If there are multiple relevant pieces of information, organize them into a clear structure
+                    5. For any question involving a calculation, comparison, or logical condition (e.g., percent change, difference, thresholds), first determine if the question requires such reasoning. Then identify all necessary variables, check if they are present in the retrieved sources, and only proceed with step-by-step computation if all variables are available. If any are missing, stop and return a clear message indicating which variable is unavailable. Do not assume, guess, or fabricate missing values. Cite sources using [Source 1], [Source 2], etc.
+                    6. If the user question does not specify a year, prioritize using the most recent available source (source_file starts with year) in the sources as the basis for your answer.
 
-Please follow these rules:
-1. Only answer based on the provided content, do not add external knowledge
-2. Cite relevant sources in your answer using the format [source_file1], [source_file2], etc.
-3. Keep answers accurate, professional, and easy to understand
-4. If there are multiple relevant pieces of information, organize them into a clear structure
-5,For any question involving a calculation, comparison, or logical condition (e.g., percent change, difference, thresholds), first determine if the question requires such reasoning. Then identify all necessary variables, check if they are present in the retrieved sources, and only proceed with step-by-step computation if all variables are available. If any are missing, stop and return a clear message indicating which variable is unavailable. Do not assume, guess, or fabricate missing values. Cite sources using [Source1], [Source2], etc.
+                    Context content:
+                    {context}
 
-Context content:
-{context}
+                    User question: {query}
 
-User question: {query}
-
-Answer:"""
+                    Answer:"""
 
         try:
             response = self.openai_client.chat.completions.create(
@@ -231,26 +232,136 @@ Answer:"""
 
         chunks = self.search(query, filters=filters, top_k=top_k)
         result = self.generate_answer(query, chunks)
-        sources = []
-        max_num_of_sources = 0
-        if len(result['sources_used']) != 0:
-            for source in result['sources_used']:
-                sources.append(source['metadata']['source_file'])
-                max_num_of_sources += 1
-                #if max_num_of_sources >= 5:
-                #    break
-        sources = list(set(sources))
+        
+        # Background processing: Extract cited sources and print chunk information
+        self._process_cited_sources_and_print(result, chunks)
+        
+        # Replace [Source X] in answer with corresponding source_file
+        result['answer'] = self._replace_citations_with_files(result['answer'], result.get('sources_used', []))
+        
         result.update({
             "query": query,
             "filters_applied": filters,
-            "retrieval_method": "filtered" if filters else "unfiltered",
-            "sources_used": sources
+            "retrieval_method": "filtered" if filters else "unfiltered"
         })
 
         return result, chunks
 
+    def _process_cited_sources_and_print(self, result: Dict[str, Any], chunks: List[Dict]) -> None:
+        """
+        Background processing: Extract cited sources and print chunk information
+        """
+        import re
+        
+        answer = result.get('answer', '')
+        citation_pattern = r'\[Source\s+(\d+)\]'
+        citations = re.findall(citation_pattern, answer)
+        
+        if not citations:
+            print("🔍 No citations found in answer")
+            return
+            
+        cited_source_numbers = list(set([int(citation) for citation in citations]))
+        cited_source_numbers.sort()
+        
+        print(f"🔍 Found citations in answer: {citations}")
+        print(f"📊 Unique source numbers cited: {cited_source_numbers}")
+        
+        sources_used = result.get('sources_used', [])
+        
+        print("\n" + "="*80)
+        print("📚 CITED CHUNKS INFORMATION (Background)")
+        print("="*80)
+        
+        for source_num in cited_source_numbers:
+            source_index = source_num - 1
+            
+            if 0 <= source_index < len(sources_used):
+                source = sources_used[source_index]
+                if isinstance(source, dict):
+                    source_file = source.get('source_file', '')
+                    citation_count = citations.count(str(source_num))
+                    
+                    print(f"\n--- Source {source_num} (Cited {citation_count} times) ---")
+                    print(f"📄 File: {source_file}")
+                    print(f"📊 Distance: {source.get('distance', 0):.4f}")
+                    print(f"📈 Similarity: {1-source.get('distance', 0):.4f}")
+                    print(f"📝 Preview: {source.get('text_preview', '')}")
+                    
+                    # Find corresponding chunk and print complete information
+                    for chunk in chunks:
+                        chunk_source_file = chunk.get("metadata", {}).get("source_file", "")
+                        if chunk_source_file == source_file:
+                            print(f"📖 Full Text Length: {len(chunk.get('text', ''))} characters")
+                            print(f"📖 Full Text (first 300 chars): {chunk.get('text', '')[:300]}...")
+                            break
+                    
+                    if source.get('metadata'):
+                        print(f"🏷️  Metadata: {source['metadata']}")
+            else:
+                print(f"\n⚠️  Source {source_num} not found in sources_used (index out of range)")
+        
+        print("\n" + "="*80)
+
+    def _replace_citations_with_files(self, answer: str, sources_used: List[Dict]) -> str:
+        """
+        Replace [Source X] in answer with corresponding source_file and format display
+        """
+        import re
+        
+        def format_source_file(filename: str) -> str:
+            """
+            Format filename like 2022_MPFS_proposed_2021-14973.xml to:
+            2022 MPFS proposed, Doc id: 2021-14973
+            """
+            if not filename or not filename.endswith('.xml'):
+                return filename
+            
+            # Remove .xml extension
+            name_without_ext = filename[:-4]
+            
+            # Split by underscore
+            parts = name_without_ext.split('_')
+            
+            if len(parts) >= 4:
+                year = parts[0]
+                program = parts[1]
+                type_name = parts[2]
+                doc_id = parts[3]
+                
+                # Format output
+                return f"{year} {program} {type_name}, Doc id: {doc_id}"
+            else:
+                # If format doesn't match, return original filename
+                return filename
+        
+        def replace_citation(match):
+            source_num = int(match.group(1))
+            source_index = source_num - 1
+            
+            if 0 <= source_index < len(sources_used):
+                source = sources_used[source_index]
+                if isinstance(source, dict):
+                    source_file = source.get('source_file', '')
+                    formatted_name = format_source_file(source_file)
+                    return f"[{formatted_name}]"
+            
+            # If corresponding source not found, keep original
+            return match.group(0)
+        
+        citation_pattern = r'\[Source\s+(\d+)\]'
+        return re.sub(citation_pattern, replace_citation, answer)
+
 def ask_query(query):
-    # Example usage
+    """
+    Ask a query and return the answer along with chunks.
+    
+    Args:
+        query: The question to ask
+        
+    Returns:
+        tuple: (final_output, chunks)
+    """
     try:
         # Initialize service with actual FAISS index and metadata files
         service = ChatSearchService(
@@ -260,17 +371,6 @@ def ask_query(query):
         )
 
         result, chunks = service.ask_question(query, top_k=20)
-        print(f"Question: {result['query']}")
-        print(f"Answer: {result['answer']}")
-        #print(f"Confidence: {result['confidence']}")
-        print(f"Number of sources used: {len(result['sources_used'])}")
-        if len(result['sources_used']) != 0:
-            print("\nSource details:")
-            for source in result['sources_used']:
-                import pdb;pdb.set_trace()
-                print(f"  - Source file {source['source_file']}")
-                print(f"  - preview {source['source_id']}: {source['text_preview']}")
-                print(f"    Similarity: {1-source['distance']:.3f}")
 
         # prepare final output
         final_output = result['answer']
@@ -283,29 +383,21 @@ def ask_query(query):
         print("Also ensure you have set the correct OpenAI API key")
 
 
+if __name__ == "__main__":
+    questions = [
+        "How are PE RVUs established for specific services?",
+    ]
+    for i, query in enumerate(questions, 1):
+        print("\n" + "=" * 60)
+        print(f"📌 Test Case {i}")
+        print("🔎 Question:", query)
+        try:
+            answer, sources = ask_query(query)
 
-questions = [
-    "How are PE RVUs established for specific services?",
+            # 显示答案
+            print("\n✅ Answer:\n", answer)
 
-]
-for i, query in enumerate(questions, 1):
-    print("\n" + "=" * 60)
-    print(f"📌 Test Case {i}")
-    print("🔎 Question:", query)
-    try:
-        answer, sources = ask_query(query)
+        except Exception as e:
+            print("❌ Error:", e)
 
-        # 显示答案
-        print("\n✅ Answer:\n", answer)
-
-        # 显示前三个来源
-        # print("\n📚 Top 3 Sources:")
-        # for idx, source in enumerate(sources[:3], 1):
-        #     source_text_preview = source['text'][:200] + ("..." if len(source['text']) > 200 else "")
-        #     print(f"  • Source {idx}: {source_text_preview}")
-        #     print(f"    - Distance: {source['distance']:.3f}")
-
-    except Exception as e:
-        print("❌ Error:", e)
-
-    print("=" * 60 + "\n")
+        print("=" * 60 + "\n")
