@@ -382,7 +382,7 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   // History management
-  history: sampleHistory,
+  history: [],
   addHistoryItem: (item) => set((state) => ({ history: [...state.history, item] })),
 
   // Selected files for chat
@@ -390,7 +390,7 @@ export const useStore = create<StoreState>((set, get) => ({
   setSelectedFiles: (fileIds) => set({ selectedFiles: fileIds }),
 
   // Chat messages
-  messages: sampleChat,
+  messages: [],
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),
