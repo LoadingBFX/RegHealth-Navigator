@@ -306,7 +306,7 @@ class ChatSearchService:
 
     def _replace_citations_with_files(self, answer: str, sources_used: List[Dict]) -> str:
         """
-        Replace [Source X] in answer with corresponding source_file and format display
+        Remove all [Source X] citations and append unique source files at the end
         """
         import re
         
@@ -336,22 +336,33 @@ class ChatSearchService:
                 # If format doesn't match, return original filename
                 return filename
         
-        def replace_citation(match):
-            source_num = int(match.group(1))
-            source_index = source_num - 1
-            
-            if 0 <= source_index < len(sources_used):
-                source = sources_used[source_index]
-                if isinstance(source, dict):
-                    source_file = source.get('source_file', '')
-                    formatted_name = format_source_file(source_file)
-                    return f"[{formatted_name}]"
-            
-            # If corresponding source not found, keep original
-            return match.group(0)
+        # Remove all [Source X] citations from the answer
+        citation_pattern = r'\[Source\s+\d+\]'
+        answer_without_citations = re.sub(citation_pattern, '', answer)
         
-        citation_pattern = r'\[Source\s+(\d+)\]'
-        return re.sub(citation_pattern, replace_citation, answer)
+        # Clean up any extra spaces or punctuation left by removed citations
+        # Remove multiple spaces and clean up punctuation
+        answer_without_citations = re.sub(r'\s+', ' ', answer_without_citations)  # Multiple spaces to single space
+        answer_without_citations = re.sub(r'\s*,\s*,', ',', answer_without_citations)  # Remove empty commas
+        answer_without_citations = re.sub(r'\s*\.\s*\.', '.', answer_without_citations)  # Remove double periods
+        answer_without_citations = answer_without_citations.strip()
+        
+        # Extract unique source files from sources_used
+        unique_sources = set()
+        for source in sources_used:
+            if isinstance(source, dict):
+                source_file = source.get('source_file', '')
+                if source_file:
+                    formatted_name = format_source_file(source_file)
+                    unique_sources.add(formatted_name)
+        
+        # If there are sources, append them at the end
+        if unique_sources:
+            sources_list = list(unique_sources)
+            sources_text = ', '.join(sources_list)
+            answer_without_citations += f"\n\nSources: {sources_text}"
+        
+        return answer_without_citations
 
 def ask_query(query):
     """
