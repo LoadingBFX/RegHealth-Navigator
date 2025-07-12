@@ -18,7 +18,9 @@ from datetime import datetime, timedelta
 # Add the app directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
-
+# Configure logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 # Import pipeline components
 from incremental_pipeline import IncrementalPipeline
 
@@ -38,9 +40,13 @@ except ImportError as e:
     logger.warning(f"⚠️ Data fetcher not available: {e}")
     DATA_FETCHER_AVAILABLE = False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Import incremental summary component
+try:
+    from incremental_summary import IncrementalSummary
+    SUMMARY_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"⚠️ Incremental summary not available: {e}")
+    SUMMARY_AVAILABLE = False
 
 class AutoUpdatePipeline:
     """
@@ -69,6 +75,11 @@ class AutoUpdatePipeline:
         # Initialize core pipeline
         self.pipeline = IncrementalPipeline(model=self.model)
         
+        # Initialize incremental summary if available
+        self.summary_manager = None
+        if SUMMARY_AVAILABLE:
+            self.summary_manager = IncrementalSummary()
+        
         # Paths
         self.data_dir = Path(config.docs_data_path)
         
@@ -77,6 +88,7 @@ class AutoUpdatePipeline:
         logger.info(f"🗓️ Days back: {self.days_back}")
         logger.info(f"📁 Data directory: {self.data_dir}")
         logger.info(f"🌐 Data fetcher available: {DATA_FETCHER_AVAILABLE}")
+        logger.info(f"📄 Incremental summary available: {SUMMARY_AVAILABLE}")
 
     def check_for_new_regulations(self) -> Dict:
         """
@@ -278,6 +290,15 @@ class AutoUpdatePipeline:
             # Step 3: Run full incremental update (includes new downloads)
             incremental_result = self.pipeline.full_incremental_update()
             
+            # Step 4: Run incremental summary update
+            summary_result = None
+            if self.summary_manager:
+                logger.info("📄 Running incremental summary update...")
+                summary_result = self.summary_manager.run_incremental_summary_update()
+                logger.info(f"📄 Summary update completed: {summary_result['status']}")
+            else:
+                logger.info("📄 Skipping summary update (not available)")
+            
             # Calculate totals
             total_cost = incremental_result['total_cost']
             end_time = time.time()
@@ -293,6 +314,7 @@ class AutoUpdatePipeline:
                 'regulations_check': check_result,
                 'download_result': download_result,
                 'incremental_result': incremental_result,
+                'summary_result': summary_result,
                 'total_cost': total_cost,
                 'duration_seconds': round(end_time - start_time, 2),
                 'status': 'success'
@@ -320,12 +342,24 @@ class AutoUpdatePipeline:
         try:
             result = self.pipeline.full_incremental_update()
             
+            # Run incremental summary update
+            summary_result = None
+            if self.summary_manager:
+                logger.info("📄 Running incremental summary update...")
+                summary_result = self.summary_manager.run_incremental_summary_update()
+                logger.info(f"📄 Summary update completed: {summary_result['status']}")
+            else:
+                logger.info("📄 Skipping summary update (not available)")
+            
             logger.info("✅ Incremental update completed!")
             logger.info(f"   - Files deleted: {len(result['cleanup_result']['deleted_files'])}")
             logger.info(f"   - Files processed: {len(result['process_result']['processed_files'])}")
             logger.info(f"   - Total cost: ${result['total_cost']:.4f}")
             
-            return result
+            return {
+                **result,
+                'summary_result': summary_result
+            }
             
         except Exception as e:
             logger.error(f"❌ Incremental update failed: {e}")
@@ -385,6 +419,13 @@ class AutoUpdatePipeline:
         
         successful_files = [r['file_path'] for r in results if r['status'] == 'success']
         
+        # Generate summaries for processed files
+        summary_result = None
+        if self.summary_manager and successful_files:
+            logger.info("📄 Generating summaries for processed files...")
+            summary_result = self.summary_manager.generate_summary_for_specific_files(successful_files)
+            logger.info(f"📄 Summary generation completed: {summary_result['status']}")
+        
         logger.info(f"✅ Specific file processing completed:")
         logger.info(f"   - Files processed: {len(successful_files)}/{len(resolved_paths)}")
         logger.info(f"   - Total cost: ${total_cost:.4f}")
@@ -395,6 +436,7 @@ class AutoUpdatePipeline:
         return {
             'processed_files': successful_files,
             'failed_files': errors,
+            'summary_result': summary_result,
             'total_cost': total_cost,
             'status': 'success' if not errors else 'partial_success'
         }

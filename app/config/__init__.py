@@ -136,5 +136,13 @@ class Config:
     def regulation_fetch_days_back(self):
         """Get days back for regulation fetching from config."""
         return self.config['regulation_fetch']['days_back']
+    
+    # Summary configuration
+    @property
+    def summary_output_dir(self):
+        """Get summary output directory from config."""
+        project_root = self._project_root
+        rel_path = self.config['summary']['output_dir']
+        return str(project_root / rel_path)
 
 config = Config()

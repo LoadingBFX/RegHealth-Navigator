@@ -19,6 +19,19 @@ build_faiss:
 docs_data:
   path: data/
 
+# Chunking configuration
+chunking:
+  chunk_words: 500
+  overlap_sentences: 1
+
+# Regulation fetching configuration
+regulation_fetch:
+  days_back: 30  # Default days to look back for new regulations
+
+# Summary configuration
+summary:
+  output_dir: summary_outputs
+
 # Embedding model configuration
 embedding:
   # Default model to use for embeddings

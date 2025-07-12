@@ -7,7 +7,10 @@ export const config = {
           generate: '/api/summarize'
         },
         chat: '/api/chat',
-        documents: '/api/documents'
+        documents: '/api/documents',
+
+        getSummary: '/api/get-summary',
+        availableSummaries: '/api/available-summaries'
       }
     }
   };

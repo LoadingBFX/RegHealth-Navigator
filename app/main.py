@@ -56,7 +56,6 @@ def create_app() -> Flask:
     )
 
     summarizer = SummaryGenerator(
-        output_dir="./summary_outputs",
         openai_api_key=api_key
     )
 
@@ -113,53 +112,12 @@ def list_available_documents() -> List[Dict[str, Any]]:
     return documents
 
 
-def list_summary() -> List[Dict[str, Any]]:
-    """
-    List all available documents for summary generation.
-    
-    Returns:
-        List[Dict[str, Any]]: List of document information
-    """
-    documents = []
-    data_dir = "data"
-    
-    # Define program types
-    programs = ["MPFS", "HOSPICE", "SNF"]
-    
-    for program in programs:
-        program_dir = os.path.join(data_dir, program)
-        if os.path.exists(program_dir):
-            for filename in os.listdir(program_dir):
-                if filename.endswith('.xml'):
-                    file_path = os.path.join(program_dir, filename)
-                    file_stat = os.stat(file_path)
-                    
-                    # Extract year and type from filename
-                    # Example: 2024_MPFS_final_2023-24184.xml
-                    parts = filename.replace('.xml', '').split('_')
-                    if len(parts) >= 3:
-                        year = parts[0]
-                        doc_type = parts[2]  # final or proposed
-                        
-                        documents.append({
-                            "id": filename.replace('.xml', ''),
-                            "name": filename.replace('.xml', ''),
-                            "program": program,
-                            "year": year,
-                            "type": doc_type,
-                            "size": f"{file_stat.st_size / (1024*1024):.1f} MB",
-                            "date": f"{file_stat.st_mtime:.0f}"
-                        })
-    
-    # Sort by year (descending) and then by program
-    documents.sort(key=lambda x: (x["year"], x["program"]), reverse=True)
-    
-    return documents
+
 
 
 def get_summary(doc_name: str) -> Dict[str, Any]:
     """
-    Generate summary for a specific document.
+    Get summary for a specific document from saved summary files.
     
     Args:
         doc_name: Name of the document (without .xml extension)
@@ -167,12 +125,49 @@ def get_summary(doc_name: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Summary information in JSON format
     """
-    # This is a placeholder implementation
-    # In a real application, you would:
-    # 1. Load the XML document
-    # 2. Process it with your RAG system
-    # 3. Generate a structured summary
+    from pathlib import Path
     
+    # Check if summary file exists
+    summary_dir = Path(config.summary_output_dir)
+    summary_md_path = summary_dir / f"{doc_name}.md"
+    
+    if summary_md_path.exists():
+        # Read the actual summary content
+        try:
+            with open(summary_md_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Extract title from first line if it's a markdown header
+            lines = content.split('\n')
+            title = lines[0].replace('#', '').strip() if lines and lines[0].startswith('#') else f"{doc_name} Summary"
+            
+            return {
+                "title": title,
+                "document_name": doc_name,
+                "content": content,
+                "source": "generated_summary",
+                "summary_path": str(summary_md_path)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error reading summary file {summary_md_path}: {e}")
+            return get_placeholder_summary(doc_name)
+    
+    # If no summary file exists, return placeholder or trigger generation
+    logger.warning(f"No summary file found for {doc_name}")
+    return get_placeholder_summary(doc_name)
+
+
+def get_placeholder_summary(doc_name: str) -> Dict[str, Any]:
+    """
+    Generate placeholder summary data when no actual summary is available.
+    
+    Args:
+        doc_name: Name of the document (without .xml extension)
+        
+    Returns:
+        Dict[str, Any]: Placeholder summary information
+    """
     # Sample summary data based on document type
     if "MPFS" in doc_name and "final" in doc_name:
         year = doc_name.split('_')[0]
@@ -323,6 +318,71 @@ Please review the full document for complete details and implementation guidance
                 }
             ]
         }
+
+
+def list_available_summaries() -> List[Dict[str, Any]]:
+    """
+    List all available summary files.
+    
+    Returns:
+        List[Dict[str, Any]]: List of available summaries
+    """
+    from pathlib import Path
+    import datetime
+    
+    summaries = []
+    summary_dir = Path(config.summary_output_dir)
+    
+    if not summary_dir.exists():
+        return summaries
+    
+    # Find all .md files in summary directory
+    for summary_file in summary_dir.glob("*.md"):
+        try:
+            file_stat = summary_file.stat()
+            doc_name = summary_file.stem  # filename without extension
+            
+            # Try to extract basic info from filename
+            parts = doc_name.split('_')
+            program = "Unknown"
+            year = "Unknown"
+            doc_type = "Unknown"
+            
+            if len(parts) >= 3:
+                year = parts[0]
+                program = parts[1] if parts[1] in ["MPFS", "HOSPICE", "SNF"] else parts[1].upper()
+                doc_type = parts[2]  # final or proposed
+            
+            # Read first few lines to get title
+            title = f"{doc_name} Summary"
+            try:
+                with open(summary_file, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+                    if first_line.startswith('#'):
+                        title = first_line.replace('#', '').strip()
+            except Exception:
+                pass  # Use default title if reading fails
+            
+            summaries.append({
+                "id": doc_name,
+                "name": doc_name,
+                "title": title,
+                "program": program,
+                "year": year,
+                "type": doc_type,
+                "size": f"{file_stat.st_size / 1024:.1f} KB",
+                "modified_date": datetime.datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
+                "summary_path": str(summary_file)
+            })
+            
+        except Exception as e:
+            logger.warning(f"Error processing summary file {summary_file}: {e}")
+            continue
+    
+    # Sort by year (descending) and then by program
+    summaries.sort(key=lambda x: (x["year"], x["program"]), reverse=True)
+    
+    return summaries
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -489,22 +549,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             logger.error(f"Error in summarize endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
 
-    @app.route("/api/list-summary", methods=["GET"])
-    def api_list_summary() -> tuple[Dict[str, Any], int]:
-        """
-        List all available documents for summary generation.
-        
-        Returns:
-            {
-                "documents": List[Dict[str, Any]]  # List of document information
-            }
-        """
-        try:
-            documents = list_summary()
-            return jsonify({"documents": documents})
-        except Exception as e:
-            logger.error(f"Error in list-summary endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+
 
     @app.route("/api/get-summary", methods=["POST"])
     def api_get_summary() -> tuple[Dict[str, Any], int]:
@@ -528,6 +573,23 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             return jsonify({"summary": summary})
         except Exception as e:
             logger.error(f"Error in get-summary endpoint: {str(e)}")
+            return jsonify({"error": str(e)}), 400
+
+    @app.route("/api/available-summaries", methods=["GET"])
+    def api_available_summaries() -> tuple[Dict[str, Any], int]:
+        """
+        List all available summary files.
+        
+        Returns:
+            {
+                "summaries": List[Dict[str, Any]]  # List of available summaries
+            }
+        """
+        try:
+            summaries = list_available_summaries()
+            return jsonify({"summaries": summaries})
+        except Exception as e:
+            logger.error(f"Error in available-summaries endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
 
     @app.route("/api/federal-register/<doc_number>", methods=["GET"])

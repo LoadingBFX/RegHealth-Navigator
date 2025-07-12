@@ -239,6 +239,7 @@ yarn-error.log*
 faiss.index
 rag_data/chunks.json
 app/core/rag_data/chunks.json
+summary_outputs/
 *.log
 old_front/
 *.zip

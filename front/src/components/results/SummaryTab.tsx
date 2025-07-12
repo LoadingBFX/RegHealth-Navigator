@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store/store';
 import { RefreshCw, Download, Copy, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import config from '../../config';
 
 interface Document {
   id: string;
@@ -51,12 +54,12 @@ const SummaryTab: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://localhost:5000/api/list-summary');
+        const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.availableSummaries}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setDocuments(data.documents || []);
+        setDocuments(data.summaries || []);
       } catch (err) {
         console.error('Error fetching documents:', err);
         setError('Failed to load documents. Please try again.');
@@ -77,7 +80,7 @@ const SummaryTab: React.FC = () => {
     setProcessingProgress(0);
     
     try {
-      const response = await fetch('http://localhost:5000/api/get-summary', {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.getSummary}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +157,7 @@ const SummaryTab: React.FC = () => {
     setProcessingProgress(0);
     
     try {
-      const response = await fetch('http://localhost:5000/api/get-summary', {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.getSummary}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -301,35 +304,12 @@ const SummaryTab: React.FC = () => {
             <div className="p-6 border-b border-neutral-200 bg-white">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-semibold text-neutral-800">{selectedDocument.name}</h2>
+                  <h2 className="text-2xl font-semibold text-neutral-800">Document Summary</h2>
                   <p className="text-sm text-neutral-500 mt-1">
-                    Document Summary • {selectedDocument.size} • {selectedDocument.year} • {selectedDocument.program} • {selectedDocument.type}
+                    {selectedDocument.year} • {selectedDocument.program} • {selectedDocument.type}
                   </p>
                 </div>
-                <div className="flex space-x-2">
-                  <button 
-                    className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-                    title="Copy summary"
-                    onClick={handleCopySummary}
-                    disabled={!selectedSummary}
-                  >
-                    <Copy className="h-5 w-5" />
-                  </button>
-                  <button 
-                    className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-                    title="Download as text"
-                    disabled={!selectedSummary}
-                  >
-                    <Download className="h-5 w-5" />
-                  </button>
-                  <button 
-                    className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-                    title="Regenerate summary"
-                    onClick={handleGenerateSummary}
-                  >
-                    <RefreshCw className="h-5 w-5" />
-                  </button>
-                </div>
+                {/* Removed Copy, Download, and Refresh buttons */}
               </div>
             </div>
             
@@ -339,9 +319,34 @@ const SummaryTab: React.FC = () => {
                 {selectedSummary ? (
                   <div className="bg-white rounded-lg shadow-sm p-8">
                     <div className="prose prose-lg max-w-none">
-                      <div className="whitespace-pre-wrap text-neutral-700 leading-relaxed">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        className="markdown-content"
+                        components={{
+                          // Custom styling for markdown elements
+                          h1: ({node, ...props}) => <h1 className="text-3xl font-bold text-neutral-900 mb-4" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-2xl font-semibold text-neutral-800 mb-3 mt-6" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-xl font-medium text-neutral-700 mb-2 mt-4" {...props} />,
+                          h4: ({node, ...props}) => <h4 className="text-lg font-medium text-neutral-700 mb-2 mt-3" {...props} />,
+                          p: ({node, ...props}) => <p className="text-neutral-700 leading-relaxed mb-4" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc list-inside text-neutral-700 mb-4 space-y-1" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal list-inside text-neutral-700 mb-4 space-y-1" {...props} />,
+                          li: ({node, ...props}) => <li className="text-neutral-700" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-semibold text-neutral-800" {...props} />,
+                          em: ({node, ...props}) => <em className="italic text-neutral-700" {...props} />,
+                          code: ({node, inline, ...props}: any) => 
+                            inline ? 
+                              <code className="bg-neutral-100 px-1 py-0.5 rounded text-sm font-mono text-neutral-800" {...props} /> :
+                              <code className="block bg-neutral-100 p-3 rounded text-sm font-mono text-neutral-800 overflow-x-auto" {...props} />,
+                          pre: ({node, ...props}) => <pre className="bg-neutral-100 p-3 rounded text-sm font-mono text-neutral-800 overflow-x-auto mb-4" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary-500 pl-4 italic text-neutral-600 mb-4" {...props} />,
+                          table: ({node, ...props}) => <table className="w-full border-collapse border border-neutral-300 mb-4" {...props} />,
+                          th: ({node, ...props}) => <th className="border border-neutral-300 px-3 py-2 bg-neutral-50 font-semibold text-left" {...props} />,
+                          td: ({node, ...props}) => <td className="border border-neutral-300 px-3 py-2" {...props} />,
+                        }}
+                      >
                         {selectedSummary.content}
-                      </div>
+                      </ReactMarkdown>
                     </div>
                   </div>
                 ) : (
