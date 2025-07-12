@@ -12,6 +12,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
+import requests
 
 from app.core import summarizer
 from app.core.summarizer import SummaryGenerator
@@ -412,7 +413,8 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             
         Returns:
             {
-                "response": str  # The system's response
+                "response": str,  # The system's response
+                "sources": List[Dict[str, Any]]  # Source information with chunks
             }
         """
         try:
@@ -425,8 +427,41 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             if doc_names:
                 filters = {"source_file": doc_names}
             
-            result, chunks = chat_service.ask_question(query, filters=filters)
-            return jsonify({"response": result["answer"]})
+            result, cited_chunks = chat_service.ask_question(query, filters=filters)
+            
+            # Group cited chunks by source file
+            sources_map = {}
+            for i, chunk in enumerate(cited_chunks):
+                source_file = chunk.get("metadata", {}).get("source_file", "unknown")
+                if source_file not in sources_map:
+                    sources_map[source_file] = {
+                        "name": source_file,
+                        "chunks": []
+                    }
+                sources_map[source_file]["chunks"].append({
+                    "text": chunk.get("text", ""),
+                    "index": i,
+                    "distance": chunk.get("distance", 0)
+                })
+            
+            # Sort chunks within each source by distance (most relevant first)
+            for source_info in sources_map.values():
+                source_info["chunks"].sort(key=lambda x: x["distance"])
+            
+            # Convert to list and sort by relevance (average distance of chunks)
+            sources_list = []
+            for source_info in sources_map.values():
+                if source_info["chunks"]:
+                    avg_distance = sum(chunk["distance"] for chunk in source_info["chunks"]) / len(source_info["chunks"])
+                    source_info["avg_distance"] = avg_distance
+                    sources_list.append(source_info)
+            
+            sources_list.sort(key=lambda x: x["avg_distance"])
+            
+            return jsonify({
+                "response": result["answer"],
+                "sources": sources_list
+            })
         except Exception as e:
             logger.error(f"Error in chat endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
@@ -494,6 +529,56 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         except Exception as e:
             logger.error(f"Error in get-summary endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
+
+    @app.route("/api/federal-register/<doc_number>", methods=["GET"])
+    def get_federal_register_info(doc_number: str) -> tuple[Dict[str, Any], int]:
+        """
+        Get document information from Federal Register API.
+        
+        Args:
+            doc_number: Document number (e.g., "2024-06431")
+            
+        Returns:
+            {
+                "pdf_url": str,  # URL to PDF version
+                "html_url": str,  # URL to HTML version  
+                "title": str,    # Document title
+                "publication_date": str
+            }
+        """
+        try:
+            # Validate doc_number format (YYYY-NNNNN)
+            if not doc_number or len(doc_number.split('-')) != 2:
+                return jsonify({"error": "Invalid document number format"}), 400
+            
+            # Call Federal Register API
+            api_url = f"https://www.federalregister.gov/api/v1/documents/{doc_number}.json"
+            
+            response = requests.get(api_url, timeout=10)
+            if response.status_code == 404:
+                return jsonify({"error": "Document not found"}), 404
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract relevant information
+            result = {
+                "pdf_url": data.get("pdf_url", ""),
+                "html_url": data.get("html_url", ""),
+                "title": data.get("title", ""),
+                "publication_date": data.get("publication_date", ""),
+                "document_number": data.get("document_number", doc_number)
+            }
+            
+            return jsonify(result)
+            
+        except requests.RequestException as e:
+            logger.error(f"Error calling Federal Register API for {doc_number}: {str(e)}")
+            return jsonify({"error": "Failed to fetch document information"}), 503
+        except Exception as e:
+            logger.error(f"Error in federal-register endpoint: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
 
 
 def main() -> None:

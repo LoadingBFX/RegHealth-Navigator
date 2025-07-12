@@ -21,7 +21,16 @@ Steps followed :
         3.4) Compute Confidence
     4) Summary (TODO)
 """
+import sys
 import os
+from pathlib import Path
+
+# Ensure 'app' package is importable regardless of working directory
+current_file = Path(__file__).resolve()
+project_root = current_file.parents[2]  # /RegHealth-Navigator
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import numpy as np
 import faiss
@@ -29,7 +38,6 @@ import openai
 import json
 from typing import List, Dict, Any
 import logging
-# from key import OPENAI_API_KEY
 from rank_bm25 import BM25Okapi
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -40,9 +48,33 @@ logger = logging.getLogger(__name__)
 
 
 class ChatSearchService:
-    def __init__(self, openai_api_key: str, faiss_index_path: str = "./rag_data/faiss.index",
-                 metadata_path: str = "./rag_data/faiss_metadata.json"):
+    def __init__(self, openai_api_key: str, faiss_index_path: str = None,
+                 metadata_path: str = None):
+        """
+        Initialize ChatSearchService with configuration.
+        
+        Args:
+            openai_api_key: OpenAI API key for embeddings and chat
+            faiss_index_path: Path to FAISS index file (from config if None)
+            metadata_path: Path to metadata file (from config if None)
+            
+        Example:
+            service = ChatSearchService(openai_api_key="sk-...")
+        """
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
+        
+        # Load configuration if paths not provided
+        if faiss_index_path is None or metadata_path is None:
+            try:
+                from app.config import config
+                faiss_index_path = faiss_index_path or config.faiss_index_path
+                metadata_path = metadata_path or config.faiss_metadata_path
+                logger.info(f"✅ Loaded paths from config: {faiss_index_path}, {metadata_path}")
+            except ImportError as e:
+                logger.warning(f"❌ Could not load config, using defaults: {e}")
+                faiss_index_path = faiss_index_path or "./rag_data/faiss.index"
+                metadata_path = metadata_path or "./rag_data/faiss_metadata.json"
+        
         self.faiss_index = faiss.read_index(faiss_index_path)
 
         with open(metadata_path, 'r', encoding='utf-8') as f:
@@ -63,9 +95,24 @@ class ChatSearchService:
         self.bm25 = BM25Okapi(self.tokenized_docs)
 
     def embed_text(self, text: str) -> np.ndarray:
+        """
+        Generate embeddings for text using configured model.
+        
+        Args:
+            text: Text to embed
+            
+        Returns:
+            Normalized embedding vector
+        """
+        # Get model from config
+        try:
+            from app.config import config
+            model = config.default_embedding_model
+        except ImportError:
+            model = "text-embedding-3-small"
+            
         response = self.openai_client.embeddings.create(
-            #model="text-embedding-ada-002",
-            model = "text-embedding-3-small",
+            model=model,
             input=text
         )
         embedding = np.array(response.data[0].embedding, dtype='float32')
@@ -237,8 +284,11 @@ class ChatSearchService:
         # Background processing: Extract cited sources and print chunk information
         self._process_cited_sources_and_print(result, chunks)
         
-        # Replace [Source X] in answer with corresponding source_file
-        result['answer'] = self._replace_citations_with_files(result['answer'], result.get('sources_used', []))
+        # Extract only the chunks that are actually cited in the answer (BEFORE removing citations)
+        cited_chunks = self._extract_cited_chunks(result, chunks)
+        
+        # Remove [Source X] citations from answer (sources are handled separately by frontend)
+        result['answer'] = self._remove_citations(result['answer'])
         
         result.update({
             "query": query,
@@ -246,7 +296,41 @@ class ChatSearchService:
             "retrieval_method": "filtered" if filters else "unfiltered"
         })
 
-        return result, chunks
+        return result, cited_chunks
+
+    def _extract_cited_chunks(self, result: Dict[str, Any], chunks: List[Dict]) -> List[Dict]:
+        """
+        Extract only the chunks that are actually cited in the answer.
+        
+        Args:
+            result: The result from generate_answer containing the answer text
+            chunks: All chunks that were retrieved
+            
+        Returns:
+            List[Dict]: Only the chunks that are actually cited in the answer
+        """
+        import re
+        
+        answer = result.get('answer', '')
+        citation_pattern = r'\[Source\s+(\d+)\]'
+        citations = re.findall(citation_pattern, answer)
+        
+        if not citations:
+            # If no citations found, return empty list
+            logger.info("No citations found in answer, returning empty chunks list")
+            return []
+            
+        # Get unique source numbers that are cited (convert to 0-based index)
+        cited_source_numbers = list(set([int(citation) - 1 for citation in citations]))
+        
+        # Extract only the cited chunks
+        cited_chunks = []
+        for source_num in cited_source_numbers:
+            if 0 <= source_num < len(chunks):
+                cited_chunks.append(chunks[source_num])
+        
+        logger.info(f"Found {len(citations)} citations, returning {len(cited_chunks)} cited chunks")
+        return cited_chunks
 
     def _process_cited_sources_and_print(self, result: Dict[str, Any], chunks: List[Dict]) -> None:
         """
@@ -304,63 +388,22 @@ class ChatSearchService:
         
         print("\n" + "="*80)
 
-    def _replace_citations_with_files(self, answer: str, sources_used: List[Dict]) -> str:
+    def _remove_citations(self, answer: str) -> str:
         """
-        Remove all [Source X] citations and append unique source files at the end
+        Remove all [Source X] citations from the answer text.
+        Sources are now handled separately as structured data by the frontend.
         """
         import re
-        
-        def format_source_file(filename: str) -> str:
-            """
-            Format filename like 2022_MPFS_proposed_2021-14973.xml to:
-            2022 MPFS proposed, Doc id: 2021-14973
-            """
-            if not filename or not filename.endswith('.xml'):
-                return filename
-            
-            # Remove .xml extension
-            name_without_ext = filename[:-4]
-            
-            # Split by underscore
-            parts = name_without_ext.split('_')
-            
-            if len(parts) >= 4:
-                year = parts[0]
-                program = parts[1]
-                type_name = parts[2]
-                doc_id = parts[3]
-                
-                # Format output
-                return f"{year} {program} {type_name}, Doc id: {doc_id}"
-            else:
-                # If format doesn't match, return original filename
-                return filename
         
         # Remove all [Source X] citations from the answer
         citation_pattern = r'\[Source\s+\d+\]'
         answer_without_citations = re.sub(citation_pattern, '', answer)
         
         # Clean up any extra spaces or punctuation left by removed citations
-        # Remove multiple spaces and clean up punctuation
         answer_without_citations = re.sub(r'\s+', ' ', answer_without_citations)  # Multiple spaces to single space
         answer_without_citations = re.sub(r'\s*,\s*,', ',', answer_without_citations)  # Remove empty commas
         answer_without_citations = re.sub(r'\s*\.\s*\.', '.', answer_without_citations)  # Remove double periods
         answer_without_citations = answer_without_citations.strip()
-        
-        # Extract unique source files from sources_used
-        unique_sources = set()
-        for source in sources_used:
-            if isinstance(source, dict):
-                source_file = source.get('source_file', '')
-                if source_file:
-                    formatted_name = format_source_file(source_file)
-                    unique_sources.add(formatted_name)
-        
-        # If there are sources, append them at the end
-        if unique_sources:
-            sources_list = list(unique_sources)
-            sources_text = ', '.join(sources_list)
-            answer_without_citations += f"\n\nSources: {sources_text}"
         
         return answer_without_citations
 
@@ -375,11 +418,22 @@ def ask_query(query):
         tuple: (final_output, chunks)
     """
     try:
-        # Initialize service with actual FAISS index and metadata files
+        # Load configuration
+        try:
+            from app.config import config
+            faiss_index_path = config.faiss_index_path
+            metadata_path = config.faiss_metadata_path
+            logger.info(f"✅ Using config paths: {faiss_index_path}, {metadata_path}")
+        except ImportError as e:
+            logger.warning(f"❌ Could not load config, using defaults: {e}")
+            faiss_index_path = "./rag_data/faiss.index"
+            metadata_path = "./rag_data/faiss_metadata.json"
+        
+        # Initialize service with configuration
         service = ChatSearchService(
-            openai_api_key=OPENAI_API_KEY,  # Ensure you have set your OpenAI API key
-            faiss_index_path="./rag_data/faiss.index",
-            metadata_path="./rag_data/faiss_metadata.json"
+            openai_api_key=OPENAI_API_KEY,
+            faiss_index_path=faiss_index_path,
+            metadata_path=metadata_path
         )
 
         result, chunks = service.ask_question(query, top_k=20)
@@ -391,11 +445,25 @@ def ask_query(query):
 
     except Exception as e:
         print(f"Error: {e}")
-        print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
+        print("Please ensure faiss.index and faiss_metadata.json files exist in the configured directory")
         print("Also ensure you have set the correct OpenAI API key")
 
 
 if __name__ == "__main__":
+    # Always resolve config path relative to this script's location
+    config_path = Path(__file__).parent.parent.parent / "config" / "development.yml"
+    config_path = config_path.resolve()
+
+    try:
+        import yaml
+        with open(config_path, 'r') as f:
+            config_data = yaml.safe_load(f)
+        print(f"✅ Loaded config from: {config_path}")
+    except Exception as e:
+        print(f"❌ Could not load config from {config_path}: {e}")
+        print("Using default configuration")
+        config_data = {}
+    
     questions = [
         "How are PE RVUs established for specific services?",
     ]
