@@ -76,7 +76,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-3/4 rounded-lg p-4 bg-neutral-100 text-neutral-800">
+      <div className="max-w-3/4 rounded-lg p-4 bg-neutral-100 text-neutral-800 relative">
+        {/* Demo indicator for sample data */}
+        {message.content.includes('2024 MPFS final rule') || message.content.includes('conversion factor') ? (
+          <div className="absolute -top-2 -right-2">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+              Demo
+            </span>
+          </div>
+        ) : null}
         <div className="text-sm leading-relaxed prose prose-sm max-w-none">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}

@@ -32,7 +32,7 @@ const ChatPanel: React.FC = () => {
     const searchRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const programs = ['MPFS', 'HOSPICE', 'SNF', 'QPP'];
+    const programs = ['MPFS', 'HOSPICE', 'SNF'];
     const types = ['final', 'proposed'];
     const years = ['2024', '2023', '2022', '2021'];
 
@@ -190,6 +190,27 @@ const ChatPanel: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col h-full">
+            {/* Demo Mode Banner */}
+            <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-yellow-800">
+                                Demo Mode - Sample Data
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                                This is a demonstration with sample data. Backend connection is not configured.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Chat Header */}
             <div className="p-4 border-b border-neutral-200 bg-white">
                 <div className="flex justify-between items-center">
@@ -248,12 +269,15 @@ const ChatPanel: React.FC = () => {
                             You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
                         </p>
                         <div className="text-sm text-neutral-600 max-w-md">
-                            <p className="mb-2 font-medium">Example questions:</p>
+                            <p className="mb-2 font-medium">Example questions (demo data):</p>
                             <ul className="text-left space-y-1 text-xs">
                                 <li>• When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?</li>
                                 <li>• What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?</li>
                                 <li>• Why did CMS implement HCPCS code G2211 in 2024?</li>
                             </ul>
+                            <p className="mt-2 text-xs text-yellow-600 font-medium">
+                                ⚠️ Note: These are sample responses for demonstration purposes only.
+                            </p>
                         </div>
                     </div>
                 ) : (

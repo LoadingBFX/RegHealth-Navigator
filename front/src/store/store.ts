@@ -7,7 +7,6 @@ const sampleFiles = [
   { id: '2', name: '2024_MPFS_proposed_2024-12345', size: '187 MB', date: '2024-05-15' },
   { id: '3', name: '2024_HOSPICE_final_2024-15678', size: '92 MB', date: '2024-10-30' },
   { id: '4', name: '2023_SNF_final_2023-23456', size: '134 MB', date: '2023-11-15' },
-  { id: '5', name: '2024_QPP_proposed_2024-16789', size: '98 MB', date: '2024-06-20' },
 ];
 
 const sampleHistory = [
@@ -101,43 +100,7 @@ const sampleSummary = {
   ]
 };
 
-const sampleFAQ = {
-  title: '2024 MPFS Final Rule - FAQ',
-  sections: [
-    {
-      id: '1',
-      title: 'Payment Changes',
-      questions: [
-        {
-          question: 'What is the conversion factor for 2024?',
-          answer: 'The 2024 conversion factor is $32.75, representing a 3.4% decrease from 2023.',
-          citation: '§2.1'
-        },
-        {
-          question: 'How do the new E/M payment rates affect my practice?',
-          answer: 'The new E/M payment methodology simplifies billing and may increase payments for complex visits while standardizing payments for routine visits.',
-          citation: '§2.3'
-        }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Quality Reporting',
-      questions: [
-        {
-          question: 'What are the key MIPS changes for 2024?',
-          answer: 'The performance threshold has increased to 82.5 points, and there are 12 new quality measures focused on chronic care management.',
-          citation: '§3.1'
-        },
-        {
-          question: 'Are there new reporting requirements?',
-          answer: 'Yes, clinicians must now report on at least two high-priority measures and demonstrate improvement activities.',
-          citation: '§3.2'
-        }
-      ]
-    }
-  ]
-};
+
 
 // Sample citations data
 const sampleCitations = {
@@ -217,22 +180,7 @@ type Summary = {
   sections: SummarySection[];
 };
 
-type FAQQuestion = {
-  question: string;
-  answer: string;
-  citation: string;
-};
 
-type FAQSection = {
-  id: string;
-  title: string;
-  questions: FAQQuestion[];
-};
-
-type FAQ = {
-  title: string;
-  sections: FAQSection[];
-};
 
 type Citation = {
   id: string;
@@ -287,9 +235,6 @@ type StoreState = {
   
   summary: Summary | null;
   setSummary: (summary: Summary | null) => void;
-  
-  faq: FAQ | null;
-  setFAQ: (faq: FAQ | null) => void;
   
   comparison: Comparison | null;
   setComparison: (comparison: Comparison | null) => void;
@@ -398,10 +343,6 @@ export const useStore = create<StoreState>((set, get) => ({
   // Summary
   summary: sampleSummary,
   setSummary: (summary) => set({ summary }),
-
-  // FAQ
-  faq: sampleFAQ,
-  setFAQ: (faq) => set({ faq }),
 
   // Comparison
   comparison: null,
