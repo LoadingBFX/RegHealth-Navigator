@@ -662,7 +662,8 @@ if __name__ == "__main__":
     parser.add_argument("--model", "-m", type=str,
                       help="Embedding model to use")
     parser.add_argument("--days", type=int, 
-                      help="Days to look back for regulations")
+                      default=4*365,
+                      help="Days to look back for regulations (default: 1460)")
     
     args = parser.parse_args()
     

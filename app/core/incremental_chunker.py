@@ -165,24 +165,21 @@ class IncrementalChunker:
     def process_single_file(self, file_path: str) -> Dict:
         """
         Process a single XML file and return chunks.
-        
-        Args:
-            file_path: Path to XML file (relative to data directory)
-            
-        Returns:
-            Dictionary with processing results
+        Ensures all chunk metadata includes program, year, rule_type.
         """
         logger.info(f"📄 Processing file: {file_path}")
-        
-        # Convert to absolute path
         absolute_path = self.data_dir / file_path
         if not absolute_path.exists():
             raise FileNotFoundError(f"File not found: {absolute_path}")
-        
         try:
+            # Always infer program/year/rule_type from filename
+            inferred_meta = self.chunker.infer_metadata_from_filename(absolute_path.name)
             # Process file using optimized XMLChunker
             chunks = self.chunker.process_file(str(absolute_path))
-            
+            # Patch each chunk's metadata to ensure program/year/rule_type present
+            for chunk in chunks:
+                if "metadata" in chunk:
+                    chunk["metadata"].update(inferred_meta)
             # Update tracking info
             current_hash = self._get_file_hash(absolute_path)
             self._processed_files[file_path] = {
@@ -191,16 +188,13 @@ class IncrementalChunker:
                 'processed_at': datetime.now().isoformat(),
                 'file_size': absolute_path.stat().st_size
             }
-            
             logger.info(f"✅ Processed {file_path}: {len(chunks)} chunks created")
-            
             return {
                 'file_path': file_path,
                 'chunks': chunks,
                 'chunks_count': len(chunks),
                 'status': 'success'
             }
-            
         except Exception as e:
             logger.error(f"❌ Error processing {file_path}: {e}")
             return {
@@ -214,48 +208,33 @@ class IncrementalChunker:
     def update_chunks_for_file(self, file_path: str) -> Dict:
         """
         Update chunks for a specific file (remove old + add new).
-        This is an atomic operation - either succeeds completely or fails completely.
-        
-        Args:
-            file_path: Path to XML file (relative to data directory)
-            
-        Returns:
-            Dictionary with update results
+        Ensures all chunk metadata includes program, year, rule_type.
         """
         logger.info(f"🔄 Updating chunks for: {file_path}")
-        
         try:
             # Step 1: Load existing chunks
             all_chunks = self.load_existing_chunks()
             original_count = len(all_chunks)
-            
             # Step 2: Remove existing chunks for this file
             filtered_chunks = []
             removed_count = 0
-            
             for chunk in all_chunks:
                 source_file = chunk.get('metadata', {}).get('source_file', '')
                 if source_file != Path(file_path).name:  # Keep chunks from other files
                     filtered_chunks.append(chunk)
                 else:
                     removed_count += 1
-            
             # Step 3: Process file to get new chunks
             process_result = self.process_single_file(file_path)
             if process_result['status'] != 'success':
                 raise Exception(f"Failed to process file: {process_result.get('error', 'Unknown error')}")
-            
             new_chunks = process_result['chunks']
-            
             # Step 4: Add new chunks
             filtered_chunks.extend(new_chunks)
-            
             # Step 5: Save updated chunks (atomic write)
             self.save_chunks(filtered_chunks)
             self._save_processed_files()
-            
             logger.info(f"✅ Updated chunks for {file_path}: -{removed_count}, +{len(new_chunks)}")
-            
             return {
                 'file_path': file_path,
                 'chunks_removed': removed_count,
@@ -263,7 +242,6 @@ class IncrementalChunker:
                 'total_chunks': len(filtered_chunks),
                 'status': 'success'
             }
-            
         except Exception as e:
             logger.error(f"❌ Error updating chunks for {file_path}: {e}")
             return {

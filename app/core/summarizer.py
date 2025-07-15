@@ -39,7 +39,7 @@ class SummaryGenerator:
         generator.generate_report(chunk_data, file_name)
     """
 
-    def __init__(self, output_dir: str = None, openai_api_key: str = os.getenv("OPENAI_API_KEY"), use_async: bool = True):
+    def __init__(self, output_dir: str = None, openai_api_key: str = os.getenv("OPENAI_API_KEY"), use_async: bool = True, batch_size: int = 20):
         if not openai_api_key:
             raise ValueError("OPENAI_API_KEY is not set.")
         
@@ -47,7 +47,7 @@ class SummaryGenerator:
         self.client = OpenAI(api_key=openai_api_key)
         self.async_client = AsyncOpenAI(api_key=openai_api_key) if use_async else None
         self.use_async = use_async
-        
+        self.batch_size = batch_size
         # Use config for output directory if not provided
         if output_dir is None:
             output_dir = config.summary_output_dir
@@ -59,7 +59,8 @@ class SummaryGenerator:
         """Count tokens accurately using tiktoken if available, fallback to estimation."""
         if TIKTOKEN_AVAILABLE:
             try:
-                encoding = tiktoken.encoding_for_model(model)
+                # encoding = tiktoken.encoding_for_model(model)
+                encoding = tiktoken.get_encoding("cl100k_base")
                 return len(encoding.encode(text))
             except Exception as e:
                 print(f"⚠️ Tiktoken failed, using estimation: {e}")
@@ -302,7 +303,7 @@ class SummaryGenerator:
                 individual_summaries = json.load(jf)
         else:
             individual_summaries = []
-            batches = self._chunk_batches(chunks_data, batch_size=5)
+            batches = self._chunk_batches(chunks_data, batch_size=self.batch_size)
             print(f"📄 Processing {len(batches)} batches with caching...")
 
             if self.use_async and self.async_client:
@@ -343,7 +344,7 @@ class SummaryGenerator:
         
         # Check token count and handle large summaries
         token_count = self._count_tokens(json.dumps(individual_summaries, indent=2))
-        max_tokens = 80000  # Conservative limit for GPT-4o-mini
+        max_tokens = 128000 - 16384  # 111616
         
         if token_count > max_tokens:
             print(f"⚠️ Summary data is large ({token_count} tokens), using segmented approach...")

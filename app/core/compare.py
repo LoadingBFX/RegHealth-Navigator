@@ -598,10 +598,14 @@ Executive Summary:"""
 # Example usage
 if __name__ == "__main__":
     load_dotenv()
-    
+    import os
+
+    faiss_index_path = "./rag_data/faiss.index"
+    metadata_path = "./rag_data/faiss_metadata.json"
+        
     comparator = SectionBySectionRuleComparator(
-        faiss_index_path="./rag_data/faiss.index",
-        metadata_path="./rag_data/faiss_metadata.json",
+        faiss_index_path=faiss_index_path,
+        metadata_path=metadata_path,
         api_key=os.getenv("OPENAI_API_KEY")
     )
     

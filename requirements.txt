@@ -25,8 +25,8 @@ rank-bm25==0.2.2
 # Data Processing and Analysis
 numpy==1.26.4
 pandas==2.2.3
-scikit-learn==1.7.0
-scipy==1.15.3
+scikit-learn
+scipy
 
 # Text Processing and Tokenization
 tiktoken==0.6.0
@@ -62,7 +62,6 @@ coverage==7.8.2
 # Logging and Monitoring
 coloredlogs==15.0.1
 rich==14.0.0
-
 # File and System Operations
 watchdog==6.0.0
 watchfiles==1.0.5
@@ -73,11 +72,10 @@ redis==5.0.1
 sqlalchemy==2.0.41
 
 # Machine Learning and AI
-onnxruntime==1.22.0
+onnxruntime
 huggingface-hub==0.32.2
 
 # Web Development (for frontend integration)
-streamlit==1.45.1
 plotly==6.1.1
 altair==5.5.0
 

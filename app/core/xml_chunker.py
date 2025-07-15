@@ -396,29 +396,26 @@ class XMLChunker:
         return chunks
 
     def process_file(self, file_path: str) -> List[Dict]:
-        """Process a single XML file with enhanced text extraction."""
+        """Process a single XML file with enhanced text extraction. Always include program, year, rule_type in metadata."""
         try:
             tree = ET.parse(file_path)
             root = tree.getroot()
-            
-            # Extract basic metadata
+            # Always infer program/year/rule_type from filename
+            inferred_meta = self.infer_metadata_from_filename(os.path.basename(file_path))
             metadata = {
-                "source_file": file_path.split("/")[-1],
+                "source_file": os.path.basename(file_path),
                 "file_type": "xml",
-                "processing_version": "2.0"  # Enhanced version
+                "processing_version": "2.0"
             }
-            
+            metadata.update(inferred_meta)
             # Extract additional metadata from XML structure
             agency = root.find(".//AGENCY")
             if agency is not None:
                 metadata["agency"] = agency.text
-            
             subject = root.find(".//SUBJECT")
             if subject is not None:
                 metadata["subject"] = subject.text
-            
             return self.chunk_document(root, metadata)
-            
         except Exception as e:
             logger.error(f"Error processing file {file_path}: {str(e)}")
             return []
@@ -454,41 +451,35 @@ class XMLChunker:
         return meta
 
     def process_files(self) -> List[Dict]:
-        """Process all XML files in input directory."""
+        """Process all XML files in input directory. Always include program, year, rule_type in metadata."""
         all_chunks = []
         processed_files = []
-
         logger.info(f"Searching for XML files in {self.input_dir.absolute()}")
         xml_files = list(self.input_dir.rglob("*.xml"))
         logger.info(f"Found {len(xml_files)} XML files")
-
         for file_path in xml_files:
             relative_path = file_path.relative_to(self.input_dir)
-            
             if relative_path.parent == Path("."):
                 logger.info(f"⏭️ Skipping root file: {file_path.name}")
                 continue
-            
             try:
                 logger.info(f"📄 Processing {file_path.name} from {relative_path.parent}...")
-                
                 inferred_meta = self.infer_metadata_from_filename(file_path.name)
                 root = ET.parse(file_path).getroot()
                 doc_meta = self.extract_preamb_metadata(root)
                 full_meta = {**inferred_meta, **doc_meta}
-                
                 full_meta["subfolder"] = str(relative_path.parent)
                 full_meta["full_path"] = str(file_path)
-                
+                # Always ensure program/year/rule_type present
+                if "program" not in full_meta or "year" not in full_meta or "rule_type" not in full_meta:
+                    fallback = self.infer_metadata_from_filename(file_path.name)
+                    full_meta.update(fallback)
                 chunks = self.chunk_document(root, full_meta)
                 all_chunks.extend(chunks)
                 processed_files.append(file_path)
-                
                 logger.info(f"   ✅ Created {len(chunks)} chunks")
-                
             except Exception as e:
                 logger.error(f"   ❌ Error processing {file_path.name}: {e}")
-
         return all_chunks
 
     def save_chunks(self, chunks: List[Dict]) -> None:

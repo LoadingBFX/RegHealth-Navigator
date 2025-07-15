@@ -89,17 +89,18 @@ The system includes an automated pipeline that handles both initial setup and on
 #### Automated Update 
 ```bash
 cd app/core
-python auto_update_pipeline.py
+python auto_update_pipeline.py --full-auto
 ```
 
 This command will:
-- Check for new regulations from the Federal Register (looks back 365 days by default)
+- Check for new regulations from the Federal Register (looks back 1460 days by default)
 - Download any new XML files automatically
 - Process only new or modified files (incremental processing)
 - Update the FAISS index with new embeddings
 - Provide detailed cost and time statistics
+- Trigge summarize
 
-**For first-time setup:** The same command will download and process all available regulations from the past year, effectively initializing your system.
+<!-- **For first-time setup:** The same command will download and process all available regulations from the past year, effectively initializing your system.
 
 **For ongoing updates:** It will only process new or modified files, making it cost-efficient.
 
@@ -132,7 +133,7 @@ python scheduled_updater.py
 - Only processing new or modified files
 - Skipping unchanged files using hash-based detection
 - Rebuilding indexes without API calls when possible
-- Providing detailed cost tracking for all operations
+- Providing detailed cost tracking for all operations -->
 
 ---
 
