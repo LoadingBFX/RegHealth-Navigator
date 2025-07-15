@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { useStore } from '../../store/store';
-import { X, ExternalLink } from 'lucide-react';
-
-const CitationModal: React.FC = () => {
-  const { showCitationModal, setShowCitationModal, activeCitation } = useStore();
-=======
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store/store';
 import { X, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -187,7 +179,6 @@ const CitationModal: React.FC = () => {
 
     return null;
   };
->>>>>>> dev
   
   if (!showCitationModal || !activeCitation) {
     return null;
@@ -198,12 +189,6 @@ const CitationModal: React.FC = () => {
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
         {/* Modal Header */}
         <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
-<<<<<<< HEAD
-          <div>
-            <h3 className="text-xl font-semibold text-neutral-800">{activeCitation.id} - {activeCitation.title}</h3>
-            <p className="text-sm text-neutral-500 mt-1">{activeCitation.documentName}</p>
-          </div>
-=======
           <div className="flex-1">
             <h3 className="text-xl font-semibold text-neutral-800">{formatSourceName(activeCitation.documentName)}</h3>
             {availableSources.length > 1 && (
@@ -233,7 +218,6 @@ const CitationModal: React.FC = () => {
             </div>
           )}
           
->>>>>>> dev
           <button
             onClick={() => setShowCitationModal(false)}
             className="p-2 text-neutral-400 hover:text-neutral-600 rounded-full hover:bg-neutral-100"
@@ -256,9 +240,6 @@ const CitationModal: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-neutral-500">
               <ExternalLink className="h-4 w-4 mr-2" />
-<<<<<<< HEAD
-              <span>Source: {activeCitation.documentName}</span>
-=======
               {isLoadingFederalInfo ? (
                 <span className="text-neutral-400">Loading document info...</span>
               ) : getBestDocumentUrl() ? (
@@ -282,7 +263,6 @@ const CitationModal: React.FC = () => {
               ) : (
                 <span>Document: {activeCitation.documentName}</span>
               )}
->>>>>>> dev
             </div>
             <button
               onClick={() => setShowCitationModal(false)}

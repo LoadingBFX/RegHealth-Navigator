@@ -131,8 +131,6 @@ class Config:
         """Get overlap sentences from config."""
         return self.config['chunking']['overlap_sentences']
 
-<<<<<<< HEAD
-=======
     # Regulation fetch configuration
     @property
     def regulation_fetch_days_back(self):
@@ -147,5 +145,4 @@ class Config:
         rel_path = self.config['summary']['output_dir']
         return str(project_root / rel_path)
 
->>>>>>> dev
 config = Config()
