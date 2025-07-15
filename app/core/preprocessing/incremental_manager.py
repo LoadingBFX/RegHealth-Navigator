@@ -29,7 +29,11 @@ Example:
 
 import os
 from pathlib import Path
+<<<<<<< HEAD
+from typing import Dict, List, Optional, Union, Any, Set
+=======
 from typing import Dict, List, Optional, Union, Any, Set, Tuple
+>>>>>>> dev
 import logging
 from datetime import datetime
 
@@ -94,6 +98,11 @@ class IncrementalManager:
             overlap_sentences=overlap_sentences
         )
         
+<<<<<<< HEAD
+        self.faiss_builder = FAISSBuilder(
+            api_key=api_key,
+            model=model
+=======
         # Create FAISS builder with full configuration
         from .config_loader import ConfigLoader
         config_loader = ConfigLoader()
@@ -116,6 +125,7 @@ class IncrementalManager:
             max_retries=embedding_config.get('max_retries', 5),
             rate_limit_delay=embedding_config.get('rate_limit_delay', 1.0),
             model_config=model_config
+>>>>>>> dev
         )
         
         self.file_tracker = FileTracker(
@@ -185,6 +195,8 @@ class IncrementalManager:
         
         return filtered_chunks, removed_count
     
+<<<<<<< HEAD
+=======
     def _rebuild_index_by_reorganization(self, original_chunks: List[Dict[str, Any]], remaining_chunks: List[Dict[str, Any]], chunks_removed: int) -> Dict[str, Any]:
         """
         Efficiently remove vectors from FAISS index using remove_ids (following incremental_faiss.py pattern).
@@ -376,6 +388,7 @@ class IncrementalManager:
         else:
             raise ProcessingError(f"Fallback rebuild failed: {build_result.get('error')}")
     
+>>>>>>> dev
     @handle_operation("file processing", success_fields={'chunks_added': 0, 'cost': 0.0})
     def process_file(self, file_path: Union[str, Path]) -> Dict[str, Any]:
         """
@@ -609,11 +622,29 @@ class IncrementalManager:
         save_result = self._save_chunks(filtered_chunks)
         ensure_success(save_result, "chunk file update")
         
+<<<<<<< HEAD
+        # Step 4: Rebuild FAISS index without this file's data
+=======
         # Step 4: Rebuild FAISS index efficiently without regenerating embeddings
+>>>>>>> dev
         embeddings_removed = 0
         rebuild_cost = 0.0
         
         if filtered_chunks:
+<<<<<<< HEAD
+            # Rebuild index from remaining chunks
+            logger.info(f"Rebuilding FAISS index without {filename}")
+            
+            build_result = self.faiss_builder.build_index_from_chunks(filtered_chunks, "flat")
+            ensure_success(build_result, "index rebuild")
+            
+            embeddings_removed = chunks_removed  # Approximate
+            rebuild_cost = build_result['total_cost']
+            
+            # Save rebuilt index
+            save_index_result = self.faiss_builder.save_index(self.index_path, self.metadata_path)
+            ensure_success(save_index_result, "rebuilt index save")
+=======
             # Use efficient index reorganization instead of full rebuild
             logger.info(f"Reorganizing FAISS index without {filename} (no embedding regeneration)")
             
@@ -626,6 +657,7 @@ class IncrementalManager:
             # Save reorganized index
             save_index_result = self.faiss_builder.save_index(self.index_path, self.metadata_path)
             ensure_success(save_index_result, "reorganized index save")
+>>>>>>> dev
         else:
             # No chunks left, remove index files
             if self.index_path.exists():

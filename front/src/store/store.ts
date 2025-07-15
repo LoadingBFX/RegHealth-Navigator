@@ -1,5 +1,8 @@
 import { create } from 'zustand';
+<<<<<<< HEAD
+=======
 import config from '../config';
+>>>>>>> dev
 
 // Sample data with new naming convention
 const sampleFiles = [
@@ -7,6 +10,10 @@ const sampleFiles = [
   { id: '2', name: '2024_MPFS_proposed_2024-12345', size: '187 MB', date: '2024-05-15' },
   { id: '3', name: '2024_HOSPICE_final_2024-15678', size: '92 MB', date: '2024-10-30' },
   { id: '4', name: '2023_SNF_final_2023-23456', size: '134 MB', date: '2023-11-15' },
+<<<<<<< HEAD
+  { id: '5', name: '2024_QPP_proposed_2024-16789', size: '98 MB', date: '2024-06-20' },
+=======
+>>>>>>> dev
 ];
 
 const sampleHistory = [
@@ -100,7 +107,47 @@ const sampleSummary = {
   ]
 };
 
+<<<<<<< HEAD
+const sampleFAQ = {
+  title: '2024 MPFS Final Rule - FAQ',
+  sections: [
+    {
+      id: '1',
+      title: 'Payment Changes',
+      questions: [
+        {
+          question: 'What is the conversion factor for 2024?',
+          answer: 'The 2024 conversion factor is $32.75, representing a 3.4% decrease from 2023.',
+          citation: '§2.1'
+        },
+        {
+          question: 'How do the new E/M payment rates affect my practice?',
+          answer: 'The new E/M payment methodology simplifies billing and may increase payments for complex visits while standardizing payments for routine visits.',
+          citation: '§2.3'
+        }
+      ]
+    },
+    {
+      id: '2',
+      title: 'Quality Reporting',
+      questions: [
+        {
+          question: 'What are the key MIPS changes for 2024?',
+          answer: 'The performance threshold has increased to 82.5 points, and there are 12 new quality measures focused on chronic care management.',
+          citation: '§3.1'
+        },
+        {
+          question: 'Are there new reporting requirements?',
+          answer: 'Yes, clinicians must now report on at least two high-priority measures and demonstrate improvement activities.',
+          citation: '§3.2'
+        }
+      ]
+    }
+  ]
+};
+=======
 
+>>>>>>> dev
 
 // Sample citations data
 const sampleCitations = {
@@ -143,9 +190,12 @@ type FileType = {
   name: string;
   size: string;
   date: string;
+<<<<<<< HEAD
+=======
   program?: string;
   year?: string;
   type?: string;
+>>>>>>> dev
 };
 
 type HistoryItem = {
@@ -180,7 +230,26 @@ type Summary = {
   sections: SummarySection[];
 };
 
+<<<<<<< HEAD
+type FAQQuestion = {
+  question: string;
+  answer: string;
+  citation: string;
+};
 
+type FAQSection = {
+  id: string;
+  title: string;
+  questions: FAQQuestion[];
+};
+
+type FAQ = {
+  title: string;
+  sections: FAQSection[];
+};
+=======
+
+>>>>>>> dev
 
 type Citation = {
   id: string;
@@ -219,8 +288,11 @@ type StoreState = {
   
   files: FileType[];
   addFile: (file: FileType) => void;
+<<<<<<< HEAD
+=======
   setFiles: (files: FileType[]) => void;
   fetchFiles: () => Promise<void>;
+>>>>>>> dev
   
   history: HistoryItem[];
   addHistoryItem: (item: HistoryItem) => void;
@@ -236,6 +308,12 @@ type StoreState = {
   summary: Summary | null;
   setSummary: (summary: Summary | null) => void;
   
+<<<<<<< HEAD
+  faq: FAQ | null;
+  setFAQ: (faq: FAQ | null) => void;
+  
+=======
+>>>>>>> dev
   comparison: Comparison | null;
   setComparison: (comparison: Comparison | null) => void;
   
@@ -281,6 +359,24 @@ type StoreState = {
 };
 
 export const useStore = create<StoreState>((set, get) => ({
+<<<<<<< HEAD
+  isLoading: false,
+  setLoading: (loading) => set({ isLoading: loading }),
+  
+  activeTab: 'chat',
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  
+  files: sampleFiles,
+  addFile: (file) => set((state) => ({ files: [...state.files, file] })),
+  
+  history: sampleHistory,
+  addHistoryItem: (item) => set((state) => ({ history: [item, ...state.history] })),
+  
+  selectedFiles: [],
+  setSelectedFiles: (fileIds) => set({ selectedFiles: fileIds }),
+  
+  // messages: sampleChat,
+=======
   // Loading state
   isLoading: false,
   setLoading: (loading) => set({ isLoading: loading }),
@@ -335,10 +431,60 @@ export const useStore = create<StoreState>((set, get) => ({
   setSelectedFiles: (fileIds) => set({ selectedFiles: fileIds }),
 
   // Chat messages
+>>>>>>> dev
   messages: [],
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
   setMessages: (messages) => set({ messages }),
   clearMessages: () => set({ messages: [] }),
+<<<<<<< HEAD
+  
+  summary: sampleSummary,
+  setSummary: (summary) => set({ summary }),
+  
+  faq: sampleFAQ,
+  setFAQ: (faq) => set({ faq }),
+  
+  comparison: null,
+  setComparison: (comparison) => set({ comparison }),
+  
+  citations: sampleCitations,
+  setCitations: (citations) => set({ citations }),
+  
+  activeCitation: null,
+  setActiveCitation: (citation) => set({ activeCitation: citation }),
+  
+  isProcessing: false,
+  setProcessing: (processing) => set({ isProcessing: processing }),
+  
+  processingProgress: 0,
+  setProcessingProgress: (progress) => set({ processingProgress: progress }),
+  
+  // Search and filter state
+  searchTerm: '',
+  setSearchTerm: (term) => set({ searchTerm: term }),
+  
+  yearFilter: 'all',
+  setYearFilter: (year) => set({ yearFilter: year }),
+  
+  programFilter: 'all',
+  setProgramFilter: (program) => set({ programFilter: program }),
+  
+  typeFilter: 'all',
+  setTypeFilter: (type) => set({ typeFilter: type }),
+  
+  showFilters: false,
+  setShowFilters: (show) => set({ showFilters: show }),
+  
+  // History modal
+  showHistory: false,
+  setShowHistory: (show) => set({ showHistory: show }),
+  
+  // Citation modal
+  showCitationModal: false,
+  setShowCitationModal: (show) => set({ showCitationModal: show }),
+  
+  // Document selection for chat
+=======
 
   // Summary
   summary: sampleSummary,
@@ -388,6 +534,7 @@ export const useStore = create<StoreState>((set, get) => ({
   setShowCitationModal: (show) => set({ showCitationModal: show }),
 
   // Document selector
+>>>>>>> dev
   showDocumentSelector: false,
   setShowDocumentSelector: (show) => set({ showDocumentSelector: show }),
 }));

@@ -1,12 +1,20 @@
 import React from 'react';
 import ChatPanel from '../chat/ChatPanel';
 import SummaryTab from '../results/SummaryTab';
+<<<<<<< HEAD
+import FAQTab from '../results/FAQTab';
+=======
+>>>>>>> dev
 import ComparisonTab from '../results/ComparisonTab';
 import Header from './Header';
 import HistoryModal from '../history/HistoryModal';
 import CitationModal from '../citation/CitationModal';
 import { useStore } from '../../store/store';
+<<<<<<< HEAD
+import { MessageSquare, FileText, HelpCircle, GitCompare } from 'lucide-react';
+=======
 import { MessageSquare, FileText, GitCompare } from 'lucide-react';
+>>>>>>> dev
 
 const Layout: React.FC = () => {
   const { isProcessing, processingProgress, activeTab, setActiveTab } = useStore();
@@ -14,6 +22,10 @@ const Layout: React.FC = () => {
   const tabs = [
     { id: 'chat', label: 'Chat', icon: MessageSquare },
     { id: 'summary', label: 'Summary', icon: FileText },
+<<<<<<< HEAD
+    { id: 'faq', label: 'FAQ', icon: HelpCircle },
+=======
+>>>>>>> dev
     { id: 'compare', label: 'Compare', icon: GitCompare },
   ];
 
@@ -23,6 +35,11 @@ const Layout: React.FC = () => {
         return <ChatPanel />;
       case 'summary':
         return <SummaryTab />;
+<<<<<<< HEAD
+      case 'faq':
+        return <FAQTab />;
+=======
+>>>>>>> dev
       case 'compare':
         return <ComparisonTab />;
       default:

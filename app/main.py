@@ -6,13 +6,20 @@ Flask app entry point for RegHealth Navigator backend.
 import sys
 import os
 import logging
+<<<<<<< HEAD
+from typing import Dict, Any, Optional
+=======
 import json
 from typing import Dict, Any, Optional, List
+>>>>>>> dev
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest, HTTPException
 import yaml
+<<<<<<< HEAD
+=======
 import requests
+>>>>>>> dev
 
 from app.core import summarizer
 from app.core.summarizer import SummaryGenerator
@@ -56,6 +63,10 @@ def create_app() -> Flask:
     )
 
     summarizer = SummaryGenerator(
+<<<<<<< HEAD
+        output_dir="./summary_outputs",
+=======
+>>>>>>> dev
         openai_api_key=api_key
     )
 
@@ -68,6 +79,8 @@ def create_app() -> Flask:
     return app
 
 
+<<<<<<< HEAD
+=======
 def list_available_documents() -> List[Dict[str, Any]]:
     """
     List all available documents from the data directory.
@@ -385,6 +398,7 @@ def list_available_summaries() -> List[Dict[str, Any]]:
     return summaries
 
 
+>>>>>>> dev
 def register_error_handlers(app: Flask) -> None:
     """
     Register error handlers for the Flask application.
@@ -443,6 +457,8 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
 
         return data
 
+<<<<<<< HEAD
+=======
     @app.route("/api/documents", methods=["GET"])
     def list_documents() -> tuple[Dict[str, Any], int]:
         """
@@ -460,6 +476,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             logger.error(f"Error in documents endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
 
+>>>>>>> dev
     @app.route("/api/chat", methods=["POST"])
     def chat() -> tuple[Dict[str, Any], int]:
         """
@@ -467,19 +484,31 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
         
         Request body:
             {
+<<<<<<< HEAD
+                "query": str  # The user's question
+=======
                 "query": str,  # The user's question
                 "doc_names": List[str]  # Optional: List of document names to filter by
+>>>>>>> dev
             }
             
         Returns:
             {
+<<<<<<< HEAD
+                "response": str  # The system's response
+=======
                 "response": str,  # The system's response
                 "sources": List[Dict[str, Any]]  # Source information with chunks
+>>>>>>> dev
             }
         """
         try:
             data = validate_json_request(required_fields=["query"])
             query = data.get("query")
+<<<<<<< HEAD
+            result, chunks = chat_service.ask_question(query)
+            return jsonify({"response": result["answer"]})
+=======
             doc_names = data.get("doc_names", [])  # Optional document filter
             
             # Create filters if doc_names are provided
@@ -522,6 +551,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
                 "response": result["answer"],
                 "sources": sources_list
             })
+>>>>>>> dev
         except Exception as e:
             logger.error(f"Error in chat endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
@@ -550,6 +580,8 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             return jsonify({"error": str(e)}), 400
 
 
+<<<<<<< HEAD
+=======
 
     @app.route("/api/get-summary", methods=["POST"])
     def api_get_summary() -> tuple[Dict[str, Any], int]:
@@ -643,6 +675,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
 
 
 
+>>>>>>> dev
 def main() -> None:
     """Main entry point for the Flask application."""
     app = create_app()

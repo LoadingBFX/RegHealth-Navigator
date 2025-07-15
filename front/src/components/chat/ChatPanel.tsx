@@ -12,7 +12,10 @@ const ChatPanel: React.FC = () => {
         selectedFiles,
         setSelectedFiles,
         files,
+<<<<<<< HEAD
+=======
         fetchFiles,
+>>>>>>> dev
         showDocumentSelector,
         setShowDocumentSelector,
         searchTerm,
@@ -32,7 +35,11 @@ const ChatPanel: React.FC = () => {
     const searchRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+<<<<<<< HEAD
+    const programs = ['MPFS', 'HOSPICE', 'SNF', 'QPP'];
+=======
     const programs = ['MPFS', 'HOSPICE', 'SNF'];
+>>>>>>> dev
     const types = ['final', 'proposed'];
     const years = ['2024', '2023', '2022', '2021'];
 
@@ -49,11 +56,14 @@ const ChatPanel: React.FC = () => {
         return matchesSearch && matchesYear && matchesProgram && matchesType;
     });
 
+<<<<<<< HEAD
+=======
     // Fetch documents on component mount
     useEffect(() => {
         fetchFiles();
     }, [fetchFiles]);
 
+>>>>>>> dev
     // Auto-scroll to bottom when messages change
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -89,6 +99,10 @@ const ChatPanel: React.FC = () => {
             // Clear input immediately for better UX
             const messageToSend = input;
             setInput('');
+<<<<<<< HEAD
+
+            try {
+=======
             setIsLoading(true);
 
             try {
@@ -104,13 +118,18 @@ const ChatPanel: React.FC = () => {
                     requestBody.doc_names = selectedDocNames;
                 }
 
+>>>>>>> dev
                 const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.chat}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
+<<<<<<< HEAD
+                    body: JSON.stringify({ query: messageToSend })
+=======
                     body: JSON.stringify(requestBody)
+>>>>>>> dev
                 });
 
                 // Check if the response is ok
@@ -137,8 +156,12 @@ const ChatPanel: React.FC = () => {
                     id: (Date.now() + 1).toString(),
                     role: 'assistant' as const,
                     content: data.response || 'No response from server',
+<<<<<<< HEAD
+                    citations: data.citations || []
+=======
                     citations: data.citations || [],
                     sources: data.sources || []
+>>>>>>> dev
                 };
 
                 addMessage(assistantMessage);
@@ -161,8 +184,11 @@ const ChatPanel: React.FC = () => {
                     content: errorMessage,
                     citations: []
                 });
+<<<<<<< HEAD
+=======
             } finally {
                 setIsLoading(false);
+>>>>>>> dev
             }
         }
     };
@@ -190,6 +216,8 @@ const ChatPanel: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col h-full">
+<<<<<<< HEAD
+=======
             {/* Demo Mode Banner */}
             <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
                 <div className="flex items-center justify-between">
@@ -211,6 +239,7 @@ const ChatPanel: React.FC = () => {
                 </div>
             </div>
 
+>>>>>>> dev
             {/* Chat Header */}
             <div className="p-4 border-b border-neutral-200 bg-white">
                 <div className="flex justify-between items-center">
@@ -269,12 +298,24 @@ const ChatPanel: React.FC = () => {
                             You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
                         </p>
                         <div className="text-sm text-neutral-600 max-w-md">
+<<<<<<< HEAD
+                            <p className="mb-2 font-medium">Example questions:</p>
+=======
                             <p className="mb-2 font-medium">Example questions (demo data):</p>
+>>>>>>> dev
                             <ul className="text-left space-y-1 text-xs">
                                 <li>• When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?</li>
                                 <li>• What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?</li>
                                 <li>• Why did CMS implement HCPCS code G2211 in 2024?</li>
                             </ul>
+<<<<<<< HEAD
+                        </div>
+                    </div>
+                ) : (
+                    messages.map(message => (
+                        <ChatMessage key={message.id} message={message}/>
+                    ))
+=======
                             <p className="mt-2 text-xs text-yellow-600 font-medium">
                                 ⚠️ Note: These are sample responses for demonstration purposes only.
                             </p>
@@ -300,6 +341,7 @@ const ChatPanel: React.FC = () => {
                             </div>
                         )}
                     </>
+>>>>>>> dev
                 )}
                 <div ref={messagesEndRef}/>
             </div>

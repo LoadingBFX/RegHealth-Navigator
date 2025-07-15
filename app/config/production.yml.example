@@ -19,6 +19,8 @@ build_faiss:
 docs_data:
   path: data/
 
+<<<<<<< HEAD
+=======
 # Chunking configuration
 chunking:
   chunk_words: 500
@@ -32,6 +34,7 @@ regulation_fetch:
 summary:
   output_dir: summary_outputs
 
+>>>>>>> dev
 # Embedding model configuration
 embedding:
   # Default model to use for embeddings

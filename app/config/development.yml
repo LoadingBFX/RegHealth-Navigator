@@ -31,6 +31,8 @@ chunking:
   chunk_words: 500
   overlap_sentences: 1
 
+<<<<<<< HEAD
+=======
 # Regulation fetching configuration
 regulation_fetch:
   days_back: 30  # Default days to look back for new regulations
@@ -39,6 +41,7 @@ regulation_fetch:
 summary:
   output_dir: summary_outputs
 
+>>>>>>> dev
 # Embedding model configuration
 embedding:
   # Default model to use for embeddings

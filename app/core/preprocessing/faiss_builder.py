@@ -51,8 +51,12 @@ class FAISSBuilder:
         model: str = "text-embedding-3-small",
         batch_size: int = 50,
         max_retries: int = 5,
+<<<<<<< HEAD
+        rate_limit_delay: float = 1.0
+=======
         rate_limit_delay: float = 1.0,
         model_config: Optional[Dict[str, Any]] = None
+>>>>>>> dev
     ):
         """
         Initialize FAISSBuilder with OpenAI configuration.
@@ -63,7 +67,10 @@ class FAISSBuilder:
             batch_size: Number of texts to process per API call
             max_retries: Maximum retry attempts for failed API calls
             rate_limit_delay: Base delay between API calls in seconds
+<<<<<<< HEAD
+=======
             model_config: Optional model configuration dict (price, encoding, etc.)
+>>>>>>> dev
             
         Example:
             builder = FAISSBuilder(
@@ -83,6 +90,34 @@ class FAISSBuilder:
         self.max_retries = max_retries
         self.rate_limit_delay = rate_limit_delay
         
+<<<<<<< HEAD
+        # Model configuration and pricing
+        self.model_configs = {
+            "text-embedding-3-small": {
+                "price_per_1k_tokens": 0.00002,
+                "max_tokens": 8191,
+                "encoding": "cl100k_base",
+                "dimension": 1536
+            },
+            "text-embedding-ada-002": {
+                "price_per_1k_tokens": 0.0001,
+                "max_tokens": 8191,
+                "encoding": "text-embedding-ada-002",
+                "dimension": 1536
+            },
+            "text-embedding-3-large": {
+                "price_per_1k_tokens": 0.00013,
+                "max_tokens": 8191,
+                "encoding": "cl100k_base",
+                "dimension": 3072
+            }
+        }
+        
+        if model not in self.model_configs:
+            raise ProcessingError(f"Unsupported model: {model}. Supported models: {list(self.model_configs.keys())}")
+        
+        self.config = self.model_configs[model]
+=======
         # Store provided model config
         self._model_config = model_config
         
@@ -116,6 +151,7 @@ class FAISSBuilder:
                 raise ProcessingError(f"Unsupported model: {model}. Supported models: {list(self.model_configs.keys())}")
             
             self.config = self.model_configs[model]
+>>>>>>> dev
         
         # Set up tokenizer
         if self.config["encoding"] == "cl100k_base":
