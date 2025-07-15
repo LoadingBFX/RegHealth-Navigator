@@ -718,28 +718,6 @@ if __name__ == "__main__":
     )
     
     try:
-<<<<<<< HEAD
-        # Choose pipeline type
-        if args.auto_update or args.check_regulations or args.download:
-            pipeline = AutoUpdatePipeline(
-                data_dir=args.data_dir,
-                output_dir=args.output_dir,
-                api_key=args.api_key,
-                model=args.model,
-                chunk_words=args.chunk_words,
-                overlap_sentences=args.overlap,
-                days_back=args.days_back
-            )
-        else:
-            pipeline = ProcessingPipeline(
-                data_dir=args.data_dir,
-                output_dir=args.output_dir,
-                api_key=args.api_key,
-                model=args.model,
-                chunk_words=args.chunk_words,
-                overlap_sentences=args.overlap
-            )
-=======
         # Load base configuration from config files
         from .config_loader import ConfigLoader
         config_loader = ConfigLoader()
@@ -772,7 +750,6 @@ if __name__ == "__main__":
             pipeline = AutoUpdatePipeline(**final_config)
         else:
             pipeline = ProcessingPipeline(**final_config)
->>>>>>> dev
         
         # Execute requested operation
         if args.status:

@@ -2,11 +2,7 @@
 Configuration Loader
 
 Provides unified configuration loading and management for the preprocessing package,
-<<<<<<< HEAD
-integrating with the main application config system.
-=======
 integrating with the main application config system and .env file.
->>>>>>> dev
 
 Example:
     # Load configuration
@@ -31,8 +27,6 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import logging
 
-<<<<<<< HEAD
-=======
 # Load .env file
 try:
     from dotenv import load_dotenv
@@ -57,7 +51,6 @@ try:
 except ImportError:
     print("⚠️  python-dotenv not available, .env file not loaded")
 
->>>>>>> dev
 logger = logging.getLogger(__name__)
 
 
@@ -97,18 +90,11 @@ class ConfigLoader:
             
             from config import config
             self._app_config = config
-<<<<<<< HEAD
-            logger.debug("Loaded main application config")
-            
-        except ImportError as e:
-            logger.warning(f"Could not load main application config: {e}")
-=======
             logger.debug("✅ Loaded main application config")
             
         except ImportError as e:
             logger.warning(f"❌ Could not load main application config: {e}")
             logger.warning("   Falling back to standalone configuration")
->>>>>>> dev
             self._app_config = None
     
     def _get_from_app_config(self, attribute: str, default: Any = None) -> Any:
@@ -155,10 +141,7 @@ class ConfigLoader:
             config = loader.get_embedding_config()
             builder = FAISSBuilder(**config)
         """
-<<<<<<< HEAD
-=======
         # Start with defaults
->>>>>>> dev
         config = {
             'model': 'text-embedding-3-small',
             'api_key': os.getenv('OPENAI_API_KEY'),
@@ -167,11 +150,6 @@ class ConfigLoader:
             'rate_limit_delay': 1.0
         }
         
-<<<<<<< HEAD
-        # Override from app config
-        if self._app_config:
-            config['model'] = self._get_from_app_config('default_embedding_model', config['model'])
-=======
         # Override from app config if available
         if self._app_config:
             config['model'] = self._get_from_app_config('default_embedding_model', config['model'])
@@ -187,7 +165,6 @@ class ConfigLoader:
                 })
             except Exception as e:
                 logger.warning(f"Could not load model config from app: {e}")
->>>>>>> dev
         
         # Override from manual config
         config.update(self._config_override.get('embedding', {}))
@@ -220,17 +197,6 @@ class ConfigLoader:
             'tracking_file': project_root / 'rag_data' / 'file_tracking.json'
         }
         
-<<<<<<< HEAD
-        # Override from app config
-        if self._app_config:
-            try:
-                config['data_directory'] = Path(self._get_from_app_config('docs_data_path', str(config['data_directory'])))
-                config['output_directory'] = Path(self._get_from_app_config('build_faiss_output_folder', str(config['output_directory'])))
-                config['faiss_index'] = Path(self._get_from_app_config('faiss_index_path', str(config['faiss_index'])))
-                config['faiss_metadata'] = Path(self._get_from_app_config('faiss_metadata_path', str(config['faiss_metadata'])))
-            except Exception as e:
-                logger.warning(f"Error loading paths from app config: {e}")
-=======
         # Override from app config if available
         if self._app_config:
             try:
@@ -246,7 +212,6 @@ class ConfigLoader:
             except Exception as e:
                 logger.warning(f"❌ Error loading paths from app config: {e}")
                 logger.warning("   Using default paths")
->>>>>>> dev
         
         # Override from manual config
         paths_override = self._config_override.get('paths', {})
@@ -270,10 +235,7 @@ class ConfigLoader:
         paths = self.get_paths_config()
         chunking = self.get_chunking_config()
         embedding = self.get_embedding_config()
-<<<<<<< HEAD
-=======
         regulation_fetch = self.get_regulation_fetch_config()
->>>>>>> dev
         
         config = {
             'data_dir': paths['data_directory'],
@@ -282,11 +244,7 @@ class ConfigLoader:
             'model': embedding['model'],
             'chunk_words': chunking['chunk_words'],
             'overlap_sentences': chunking['overlap_sentences'],
-<<<<<<< HEAD
-            'days_back': 30  # Default for regulation fetching
-=======
             'days_back': regulation_fetch['days_back']
->>>>>>> dev
         }
         
         # Override from manual config
@@ -294,8 +252,6 @@ class ConfigLoader:
         
         return config
     
-<<<<<<< HEAD
-=======
     def get_regulation_fetch_config(self) -> Dict[str, Any]:
         """
         Get regulation fetching configuration.
@@ -324,7 +280,6 @@ class ConfigLoader:
         
         return config
     
->>>>>>> dev
     def get_validation_config(self) -> Dict[str, Any]:
         """
         Get system validation configuration.
