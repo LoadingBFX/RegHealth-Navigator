@@ -12,6 +12,10 @@ const ChatPanel: React.FC = () => {
         selectedFiles,
         setSelectedFiles,
         files,
+<<<<<<< HEAD
+=======
+        fetchFiles,
+>>>>>>> dev
         showDocumentSelector,
         setShowDocumentSelector,
         searchTerm,
@@ -31,7 +35,11 @@ const ChatPanel: React.FC = () => {
     const searchRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+<<<<<<< HEAD
     const programs = ['MPFS', 'HOSPICE', 'SNF', 'QPP'];
+=======
+    const programs = ['MPFS', 'HOSPICE', 'SNF'];
+>>>>>>> dev
     const types = ['final', 'proposed'];
     const years = ['2024', '2023', '2022', '2021'];
 
@@ -48,6 +56,14 @@ const ChatPanel: React.FC = () => {
         return matchesSearch && matchesYear && matchesProgram && matchesType;
     });
 
+<<<<<<< HEAD
+=======
+    // Fetch documents on component mount
+    useEffect(() => {
+        fetchFiles();
+    }, [fetchFiles]);
+
+>>>>>>> dev
     // Auto-scroll to bottom when messages change
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -83,15 +99,37 @@ const ChatPanel: React.FC = () => {
             // Clear input immediately for better UX
             const messageToSend = input;
             setInput('');
+<<<<<<< HEAD
 
             try {
+=======
+            setIsLoading(true);
+
+            try {
+                // Prepare request body with selected documents
+                const requestBody: any = { query: messageToSend };
+                
+                // Add selected documents if any are selected
+                if (selectedFiles.length > 0) {
+                    const selectedDocNames = selectedFiles
+                        .map(id => files.find(file => file.id === id)?.name)
+                        .filter(Boolean)
+                        .map(name => `${name}.xml`); // Add .xml extension
+                    requestBody.doc_names = selectedDocNames;
+                }
+
+>>>>>>> dev
                 const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.chat}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
+<<<<<<< HEAD
                     body: JSON.stringify({ query: messageToSend })
+=======
+                    body: JSON.stringify(requestBody)
+>>>>>>> dev
                 });
 
                 // Check if the response is ok
@@ -118,7 +156,12 @@ const ChatPanel: React.FC = () => {
                     id: (Date.now() + 1).toString(),
                     role: 'assistant' as const,
                     content: data.response || 'No response from server',
+<<<<<<< HEAD
                     citations: data.citations || []
+=======
+                    citations: data.citations || [],
+                    sources: data.sources || []
+>>>>>>> dev
                 };
 
                 addMessage(assistantMessage);
@@ -141,6 +184,11 @@ const ChatPanel: React.FC = () => {
                     content: errorMessage,
                     citations: []
                 });
+<<<<<<< HEAD
+=======
+            } finally {
+                setIsLoading(false);
+>>>>>>> dev
             }
         }
     };
@@ -168,6 +216,30 @@ const ChatPanel: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col h-full">
+<<<<<<< HEAD
+=======
+            {/* Demo Mode Banner */}
+            <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-yellow-800">
+                                Demo Mode - Sample Data
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                                This is a demonstration with sample data. Backend connection is not configured.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+>>>>>>> dev
             {/* Chat Header */}
             <div className="p-4 border-b border-neutral-200 bg-white">
                 <div className="flex justify-between items-center">
@@ -226,18 +298,50 @@ const ChatPanel: React.FC = () => {
                             You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
                         </p>
                         <div className="text-sm text-neutral-600 max-w-md">
+<<<<<<< HEAD
                             <p className="mb-2 font-medium">Example questions:</p>
+=======
+                            <p className="mb-2 font-medium">Example questions (demo data):</p>
+>>>>>>> dev
                             <ul className="text-left space-y-1 text-xs">
                                 <li>• When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?</li>
                                 <li>• What is the finalized conversion factor for CY 2024, and how does it compare to CY 2023?</li>
                                 <li>• Why did CMS implement HCPCS code G2211 in 2024?</li>
                             </ul>
+<<<<<<< HEAD
                         </div>
                     </div>
                 ) : (
                     messages.map(message => (
                         <ChatMessage key={message.id} message={message}/>
                     ))
+=======
+                            <p className="mt-2 text-xs text-yellow-600 font-medium">
+                                ⚠️ Note: These are sample responses for demonstration purposes only.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {messages.map(message => (
+                            <ChatMessage key={message.id} message={message}/>
+                        ))}
+                        {isLoading && (
+                            <div className="flex justify-start">
+                                <div className="max-w-3/4 rounded-lg p-4 bg-neutral-100 text-neutral-800">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex space-x-1">
+                                            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                                            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                                            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                                        </div>
+                                        <span className="text-sm text-neutral-500">Thinking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+>>>>>>> dev
                 )}
                 <div ref={messagesEndRef}/>
             </div>

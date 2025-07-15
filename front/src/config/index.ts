@@ -6,7 +6,15 @@ export const config = {
           list: '/api/summarize/list',
           generate: '/api/summarize'
         },
+<<<<<<< HEAD
         chat: '/api/chat'
+=======
+        chat: '/api/chat',
+        documents: '/api/documents',
+
+        getSummary: '/api/get-summary',
+        availableSummaries: '/api/available-summaries'
+>>>>>>> dev
       }
     }
   };

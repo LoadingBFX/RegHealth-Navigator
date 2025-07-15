@@ -21,7 +21,20 @@ Steps followed :
         3.4) Compute Confidence
     4) Summary (TODO)
 """
+<<<<<<< HEAD
 import os
+=======
+import sys
+import os
+from pathlib import Path
+
+# Ensure 'app' package is importable regardless of working directory
+current_file = Path(__file__).resolve()
+project_root = current_file.parents[2]  # /RegHealth-Navigator
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+>>>>>>> dev
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import numpy as np
 import faiss
@@ -29,7 +42,11 @@ import openai
 import json
 from typing import List, Dict, Any
 import logging
+<<<<<<< HEAD
 # from key import OPENAI_API_KEY
+=======
+from rank_bm25 import BM25Okapi
+>>>>>>> dev
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -39,9 +56,39 @@ logger = logging.getLogger(__name__)
 
 
 class ChatSearchService:
+<<<<<<< HEAD
     def __init__(self, openai_api_key: str, faiss_index_path: str = "./rag_data/faiss.index",
                  metadata_path: str = "./rag_data/faiss_metadata.json"):
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
+=======
+    def __init__(self, openai_api_key: str, faiss_index_path: str = None,
+                 metadata_path: str = None):
+        """
+        Initialize ChatSearchService with configuration.
+        
+        Args:
+            openai_api_key: OpenAI API key for embeddings and chat
+            faiss_index_path: Path to FAISS index file (from config if None)
+            metadata_path: Path to metadata file (from config if None)
+            
+        Example:
+            service = ChatSearchService(openai_api_key="sk-...")
+        """
+        self.openai_client = openai.OpenAI(api_key=openai_api_key)
+        
+        # Load configuration if paths not provided
+        if faiss_index_path is None or metadata_path is None:
+            try:
+                from app.config import config
+                faiss_index_path = faiss_index_path or config.faiss_index_path
+                metadata_path = metadata_path or config.faiss_metadata_path
+                logger.info(f"✅ Loaded paths from config: {faiss_index_path}, {metadata_path}")
+            except ImportError as e:
+                logger.warning(f"❌ Could not load config, using defaults: {e}")
+                faiss_index_path = faiss_index_path or "./rag_data/faiss.index"
+                metadata_path = metadata_path or "./rag_data/faiss_metadata.json"
+        
+>>>>>>> dev
         self.faiss_index = faiss.read_index(faiss_index_path)
 
         with open(metadata_path, 'r', encoding='utf-8') as f:
@@ -58,15 +105,41 @@ class ChatSearchService:
         self.doc_texts = [chunk['text'] for chunk in self.all_chunks]
         self.sparse_matrix = self.tfidf_vectorizer.fit_transform(self.doc_texts)
 
+<<<<<<< HEAD
     def embed_text(self, text: str) -> np.ndarray:
         response = self.openai_client.embeddings.create(
             #model="text-embedding-ada-002",
             model = "text-embedding-3-small",
+=======
+        self.tokenized_docs = [doc.split() for doc in self.doc_texts]
+        self.bm25 = BM25Okapi(self.tokenized_docs)
+
+    def embed_text(self, text: str) -> np.ndarray:
+        """
+        Generate embeddings for text using configured model.
+        
+        Args:
+            text: Text to embed
+            
+        Returns:
+            Normalized embedding vector
+        """
+        # Get model from config
+        try:
+            from app.config import config
+            model = config.default_embedding_model
+        except ImportError:
+            model = "text-embedding-3-small"
+            
+        response = self.openai_client.embeddings.create(
+            model=model,
+>>>>>>> dev
             input=text
         )
         embedding = np.array(response.data[0].embedding, dtype='float32')
         return embedding / np.linalg.norm(embedding)
 
+<<<<<<< HEAD
     # def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20) -> List[Dict]:
     #     # Step 1: Apply filters if present
     #     if filters:
@@ -123,32 +196,114 @@ class ChatSearchService:
                 results.append(chunk)
         return results
 
+=======
+    def search(self, query: str, filters: Dict[str, Any] = None, top_k: int = 20):
+        """
+        Search for relevant chunks with optional filtering.
+        
+        Args:
+            query: The search query
+            filters: Optional filters to apply (e.g., {"source_file": ["file1.xml", "file2.xml"]})
+            top_k: Number of top results to return
+            
+        Returns:
+            List of relevant chunks with distance scores
+        """
+        # Step 1: Apply filters if present
+        if filters and "source_file" in filters:
+            filtered_chunks = []
+            for i, chunk in enumerate(self.all_chunks):
+                chunk_source_file = chunk.get("metadata", {}).get("source_file", "")
+                if chunk_source_file in filters["source_file"]:
+                    chunk_copy = chunk.copy()
+                    chunk_copy['__original_index__'] = i
+                    filtered_chunks.append(chunk_copy)
+
+            if not filtered_chunks:
+                return []
+
+            # Get embeddings for filtered chunks
+            embeddings = [self.faiss_index.reconstruct(chunk['__original_index__']) for chunk in filtered_chunks]
+            doc_matrix = np.vstack(embeddings).astype("float32")
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+        else:
+            # No filtering - use all chunks
+            doc_matrix = np.vstack([self.faiss_index.reconstruct(i) for i in range(self.faiss_index.ntotal)])
+            doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True)
+            filtered_chunks = [chunk.copy() for chunk in self.all_chunks]
+            for i, chunk in enumerate(filtered_chunks):
+                chunk['__original_index__'] = i
+
+        # Step 2: Embed and normalize the query
+        query_embedding = self.embed_text(query).reshape(1, -1)
+
+        # Step 3: Compute cosine similarity
+        similarities = np.dot(doc_matrix, query_embedding.T).squeeze()
+
+        # Step 4: Get top k results
+        top_indices = np.argsort(-similarities)[:top_k]
+
+        # Step 5: Prepare results
+        results = []
+        for i in top_indices:
+            chunk = filtered_chunks[i].copy()
+            chunk["distance"] = float(1 - similarities[i])
+            # Remove internal index
+            chunk.pop('__original_index__', None)
+            results.append(chunk)
+
+        return results
+
+
+>>>>>>> dev
     def generate_answer(self, query: str, chunks: List[Dict], max_context_length: int = 4000) -> Dict[str, Any]:
         if not chunks:
             return {
                 "answer": "Sorry, I couldn't find relevant information to answer your question.",
                 "confidence": 0.0,
                 "sources_used": [],
+<<<<<<< HEAD
+=======
+                "source_file":[],
+>>>>>>> dev
                 "total_sources": 0
             }
 
         context_parts = []
         current_length = 0
         sources_used = []
+<<<<<<< HEAD
+=======
+        source_file=[]
+
+>>>>>>> dev
 
         for i, chunk in enumerate(chunks):
             chunk_text = f"[Source {i+1}] {chunk['text']}"
             context_parts.append(chunk_text)
             current_length += len(chunk_text)
+<<<<<<< HEAD
+=======
+
+            file_name = chunk.get("metadata", {}).get("source_file", "")
+            source_file.append(file_name)
+
+>>>>>>> dev
             sources_used.append({
                 "source_id": i+1,
                 "text_preview": chunk['text'][:100] + "..." if len(chunk['text']) > 100 else chunk['text'],
                 "distance": chunk.get('distance', 0),
+<<<<<<< HEAD
                 "metadata": chunk.get('metadata', {})
+=======
+                "metadata": chunk.get('metadata', {}),
+                "source_file":file_name
+>>>>>>> dev
             })
 
         context = "\n\n".join(context_parts)
 
+<<<<<<< HEAD
         prompt = f"""Based on the following medical regulation document content, please answer the user's question.
 
 Please follow these rules:
@@ -163,6 +318,24 @@ Context content:
 User question: {query}
 
 Answer:"""
+=======
+        prompt = f"""
+                    You are a senior expert in medical policy and regulation analysis. Based on the following medical regulation document content, please answer the user's question.
+                    Please follow these rules:
+                    1. Only answer based on the provided content, do not add external knowledge
+                    2. Cite relevant sources in your answer using the format [Source 1], [Source 2], etc.
+                    3. Keep answers accurate, professional, and easy to understand
+                    4. If there are multiple relevant pieces of information, organize them into a clear structure
+                    5. For any question involving a calculation, comparison, or logical condition (e.g., percent change, difference, thresholds), first determine if the question requires such reasoning. Then identify all necessary variables, check if they are present in the retrieved sources, and only proceed with step-by-step computation if all variables are available. If any are missing, stop and return a clear message indicating which variable is unavailable. Do not assume, guess, or fabricate missing values. Cite sources using [Source 1], [Source 2], etc.
+                    6. If the user question does not specify a year, prioritize using the most recent available source (source_file starts with year) in the sources as the basis for your answer.
+
+                    Context content:
+                    {context}
+
+                    User question: {query}
+
+                    Answer:"""
+>>>>>>> dev
 
         try:
             response = self.openai_client.chat.completions.create(
@@ -185,6 +358,10 @@ Answer:"""
                 "answer": answer,
                 "confidence": round(confidence, 2),
                 "sources_used": sources_used,
+<<<<<<< HEAD
+=======
+                "source_file":source_file,
+>>>>>>> dev
                 "total_sources": len(chunks),
                 "context_length": current_length
             }
@@ -216,11 +393,25 @@ Answer:"""
 
         chunks = self.search(query, filters=filters, top_k=top_k)
         result = self.generate_answer(query, chunks)
+<<<<<<< HEAD
+=======
+        
+        # Background processing: Extract cited sources and print chunk information
+        self._process_cited_sources_and_print(result, chunks)
+        
+        # Extract only the chunks that are actually cited in the answer (BEFORE removing citations)
+        cited_chunks = self._extract_cited_chunks(result, chunks)
+        
+        # Remove [Source X] citations from answer (sources are handled separately by frontend)
+        result['answer'] = self._remove_citations(result['answer'])
+        
+>>>>>>> dev
         result.update({
             "query": query,
             "filters_applied": filters,
             "retrieval_method": "filtered" if filters else "unfiltered"
         })
+<<<<<<< HEAD
         return result, chunks
 
 def ask_query(query):
@@ -243,6 +434,150 @@ def ask_query(query):
             for source in result['sources_used']:
                 print(f"  - Source {source['source_id']}: {source['text_preview']}")
                 print(f"    Similarity: {1-source['distance']:.3f}")
+=======
+
+        return result, cited_chunks
+
+    def _extract_cited_chunks(self, result: Dict[str, Any], chunks: List[Dict]) -> List[Dict]:
+        """
+        Extract only the chunks that are actually cited in the answer.
+        
+        Args:
+            result: The result from generate_answer containing the answer text
+            chunks: All chunks that were retrieved
+            
+        Returns:
+            List[Dict]: Only the chunks that are actually cited in the answer
+        """
+        import re
+        
+        answer = result.get('answer', '')
+        citation_pattern = r'\[Source\s+(\d+)\]'
+        citations = re.findall(citation_pattern, answer)
+        
+        if not citations:
+            # If no citations found, return empty list
+            logger.info("No citations found in answer, returning empty chunks list")
+            return []
+            
+        # Get unique source numbers that are cited (convert to 0-based index)
+        cited_source_numbers = list(set([int(citation) - 1 for citation in citations]))
+        
+        # Extract only the cited chunks
+        cited_chunks = []
+        for source_num in cited_source_numbers:
+            if 0 <= source_num < len(chunks):
+                cited_chunks.append(chunks[source_num])
+        
+        logger.info(f"Found {len(citations)} citations, returning {len(cited_chunks)} cited chunks")
+        return cited_chunks
+
+    def _process_cited_sources_and_print(self, result: Dict[str, Any], chunks: List[Dict]) -> None:
+        """
+        Background processing: Extract cited sources and print chunk information
+        """
+        import re
+        
+        answer = result.get('answer', '')
+        citation_pattern = r'\[Source\s+(\d+)\]'
+        citations = re.findall(citation_pattern, answer)
+        
+        if not citations:
+            print("🔍 No citations found in answer")
+            return
+            
+        cited_source_numbers = list(set([int(citation) for citation in citations]))
+        cited_source_numbers.sort()
+        
+        print(f"🔍 Found citations in answer: {citations}")
+        print(f"📊 Unique source numbers cited: {cited_source_numbers}")
+        
+        sources_used = result.get('sources_used', [])
+        
+        print("\n" + "="*80)
+        print("📚 CITED CHUNKS INFORMATION (Background)")
+        print("="*80)
+        
+        for source_num in cited_source_numbers:
+            source_index = source_num - 1
+            
+            if 0 <= source_index < len(sources_used):
+                source = sources_used[source_index]
+                if isinstance(source, dict):
+                    source_file = source.get('source_file', '')
+                    citation_count = citations.count(str(source_num))
+                    
+                    print(f"\n--- Source {source_num} (Cited {citation_count} times) ---")
+                    print(f"📄 File: {source_file}")
+                    print(f"📊 Distance: {source.get('distance', 0):.4f}")
+                    print(f"📈 Similarity: {1-source.get('distance', 0):.4f}")
+                    print(f"📝 Preview: {source.get('text_preview', '')}")
+                    
+                    # Find corresponding chunk and print complete information
+                    for chunk in chunks:
+                        chunk_source_file = chunk.get("metadata", {}).get("source_file", "")
+                        if chunk_source_file == source_file:
+                            print(f"📖 Full Text Length: {len(chunk.get('text', ''))} characters")
+                            print(f"📖 Full Text (first 300 chars): {chunk.get('text', '')[:300]}...")
+                            break
+                    
+                    if source.get('metadata'):
+                        print(f"🏷️  Metadata: {source['metadata']}")
+            else:
+                print(f"\n⚠️  Source {source_num} not found in sources_used (index out of range)")
+        
+        print("\n" + "="*80)
+
+    def _remove_citations(self, answer: str) -> str:
+        """
+        Remove all [Source X] citations from the answer text.
+        Sources are now handled separately as structured data by the frontend.
+        """
+        import re
+        
+        # Remove all [Source X] citations from the answer
+        citation_pattern = r'\[Source\s+\d+\]'
+        answer_without_citations = re.sub(citation_pattern, '', answer)
+        
+        # Clean up any extra spaces or punctuation left by removed citations
+        answer_without_citations = re.sub(r'\s+', ' ', answer_without_citations)  # Multiple spaces to single space
+        answer_without_citations = re.sub(r'\s*,\s*,', ',', answer_without_citations)  # Remove empty commas
+        answer_without_citations = re.sub(r'\s*\.\s*\.', '.', answer_without_citations)  # Remove double periods
+        answer_without_citations = answer_without_citations.strip()
+        
+        return answer_without_citations
+
+def ask_query(query):
+    """
+    Ask a query and return the answer along with chunks.
+    
+    Args:
+        query: The question to ask
+        
+    Returns:
+        tuple: (final_output, chunks)
+    """
+    try:
+        # Load configuration
+        try:
+            from app.config import config
+            faiss_index_path = config.faiss_index_path
+            metadata_path = config.faiss_metadata_path
+            logger.info(f"✅ Using config paths: {faiss_index_path}, {metadata_path}")
+        except ImportError as e:
+            logger.warning(f"❌ Could not load config, using defaults: {e}")
+            faiss_index_path = "./rag_data/faiss.index"
+            metadata_path = "./rag_data/faiss_metadata.json"
+        
+        # Initialize service with configuration
+        service = ChatSearchService(
+            openai_api_key=OPENAI_API_KEY,
+            faiss_index_path=faiss_index_path,
+            metadata_path=metadata_path
+        )
+
+        result, chunks = service.ask_question(query, top_k=20)
+>>>>>>> dev
 
         # prepare final output
         final_output = result['answer']
@@ -251,6 +586,45 @@ def ask_query(query):
 
     except Exception as e:
         print(f"Error: {e}")
+<<<<<<< HEAD
         print("Please ensure faiss.index and faiss_metadata.json files exist in the ./rag_data/ directory")
         print("Also ensure you have set the correct OpenAI API key")
 
+=======
+        print("Please ensure faiss.index and faiss_metadata.json files exist in the configured directory")
+        print("Also ensure you have set the correct OpenAI API key")
+
+
+if __name__ == "__main__":
+    # Always resolve config path relative to this script's location
+    config_path = Path(__file__).parent.parent.parent / "config" / "development.yml"
+    config_path = config_path.resolve()
+
+    try:
+        import yaml
+        with open(config_path, 'r') as f:
+            config_data = yaml.safe_load(f)
+        print(f"✅ Loaded config from: {config_path}")
+    except Exception as e:
+        print(f"❌ Could not load config from {config_path}: {e}")
+        print("Using default configuration")
+        config_data = {}
+    
+    questions = [
+        "How are PE RVUs established for specific services?",
+    ]
+    for i, query in enumerate(questions, 1):
+        print("\n" + "=" * 60)
+        print(f"📌 Test Case {i}")
+        print("🔎 Question:", query)
+        try:
+            answer, sources = ask_query(query)
+
+            # 显示答案
+            print("\n✅ Answer:\n", answer)
+
+        except Exception as e:
+            print("❌ Error:", e)
+
+        print("=" * 60 + "\n")
+>>>>>>> dev
