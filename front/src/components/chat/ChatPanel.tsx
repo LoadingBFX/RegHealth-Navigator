@@ -192,27 +192,24 @@ const ChatPanel: React.FC = () => {
         <div className="flex-1 flex flex-col h-full">
             {/* Chat Header */}
             <div className="p-4 border-b border-neutral-200 bg-white">
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <div className="bg-teal-100 p-2 rounded-lg mr-3">
-                                <MessageSquare className="h-5 w-5 text-teal-600" />
-                            </div>
-                            <h2 className="text-lg font-medium text-neutral-800">Chat</h2>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <div className="bg-teal-100 p-2 rounded-lg mr-3">
+                            <MessageSquare className="h-5 w-5 text-teal-600" />
                         </div>
-                        <button
-                            onClick={() => clearMessages()}
-                            className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-                            title="Clear conversation"
-                        >
-                            <RefreshCw className="h-4 w-4"/>
-                        </button>
+                        <h2 className="text-lg font-medium text-neutral-800">Chat</h2>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-3 ml-12">
-                        Ask questions about regulations or select specific documents as your knowledge base for inquiry.
-                    </p>
+                    <button
+                        onClick={() => clearMessages()}
+                        className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
+                        title="Clear conversation"
+                    >
+                        <RefreshCw className="h-4 w-4"/>
+                    </button>
                 </div>
-
+                <p className="text-sm text-neutral-500 mt-1">
+                    Ask questions about regulations or select specific documents as your knowledge base for inquiry.
+                </p>
                 {/* Selected Files Tags */}
                 {selectedFiles.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
@@ -242,16 +239,16 @@ const ChatPanel: React.FC = () => {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                        <div className="bg-teal-100 p-6 rounded-full mb-6 shadow-lg border-2 border-teal-200 flex items-center justify-center">
-                            <MessageSquare className="h-12 w-12 text-teal-600" />
+                    <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+                        <div className="bg-teal-100 p-4 sm:p-6 rounded-full mb-4 sm:mb-6 shadow-lg border-2 border-teal-200 flex items-center justify-center">
+                            <MessageSquare className="h-8 w-8 sm:h-12 sm:w-12 text-teal-600" />
                         </div>
-                        <h3 className="text-lg font-medium text-neutral-800 mb-2">Start a Conversation</h3>
-                        <p className="text-neutral-500 mb-4 max-w-md">
+                        <h3 className="text-base sm:text-lg font-medium text-neutral-800 mb-2">Start a Conversation</h3>
+                        <p className="text-neutral-500 mb-4 text-sm sm:text-base max-w-sm sm:max-w-md lg:max-w-lg">
                             You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
                         </p>
-                        <div className="w-full max-w-lg">
-                            <p className="mb-3 font-medium text-neutral-600">Example questions:</p>
+                        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+                            <p className="mb-3 font-medium text-neutral-600 text-sm sm:text-base">Example questions:</p>
                             <div className="space-y-2">
                                 {[
                                     "When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?",
@@ -261,7 +258,7 @@ const ChatPanel: React.FC = () => {
                                 ].map((suggestion, i) => (
                                     <button
                                         key={i}
-                                        className="w-full text-left p-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm text-neutral-700 transition-colors"
+                                        className="w-full text-left p-2 sm:p-3 bg-teal-100 hover:bg-teal-200 rounded-lg text-xs sm:text-sm text-teal-800 transition-colors"
                                         onClick={() => setInput(suggestion)}
                                     >
                                         {suggestion}

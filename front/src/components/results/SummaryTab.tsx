@@ -192,23 +192,25 @@ const SummaryTab: React.FC = () => {
   const renderGridView = () => (
     <div className="flex-1 p-6 bg-gray-50 overflow-y-auto h-full">
       {/* Header */}
-      <div className="mb-6 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="bg-pink-100 p-2 rounded-lg mr-3">
-              <FileText className="h-5 w-5 text-pink-600" />
+      <div className="max-w-3xl mx-auto w-full px-4">
+        <div className="mb-6 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="bg-pink-100 p-2 rounded-lg mr-3">
+                <FileText className="h-5 w-5 text-pink-600" />
+              </div>
+              <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
             </div>
-            <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
+            <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+              <p className="text-sm text-teal-700 font-medium">
+                {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
+              </p>
+            </div>
           </div>
-          <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
-            <p className="text-sm text-teal-700 font-medium">
-              {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
-            </p>
-          </div>
+          <p className="text-sm text-neutral-500 mt-3 ml-12">
+            Browse and review summaries of regulatory documents. Select a document for detailed analysis.
+          </p>
         </div>
-        <p className="text-sm text-neutral-500 mt-3 ml-12">
-          Browse and review summaries of regulatory documents. Select a document for detailed analysis.
-        </p>
       </div>
       
       {/* Document Grid */}
@@ -654,22 +656,22 @@ const SummaryTab: React.FC = () => {
           </>
         ) : (
           /* Back to Grid Button */
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] text-center px-4">
             <button
               onClick={() => {
                 setIsGridView(true);
                 setSelectedDocumentId(null);
                 setSelectedSummary(null);
               }}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors mb-4"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors mb-4 text-sm sm:text-base"
             >
               ← Back to All Documents
             </button>
-            <div className="bg-primary-50 p-6 rounded-full mb-6">
-              <FileText className="h-12 w-12 text-primary-700" />
+            <div className="bg-primary-50 p-4 sm:p-6 rounded-full mb-4 sm:mb-6">
+              <FileText className="h-8 w-8 sm:h-12 sm:w-12 text-primary-700" />
             </div>
-            <h3 className="text-2xl font-medium text-neutral-800 mb-4">Select a Document</h3>
-            <p className="text-neutral-500 text-center max-w-md">
+            <h3 className="text-lg sm:text-2xl font-medium text-neutral-800 mb-2 sm:mb-4">Select a Document</h3>
+            <p className="text-neutral-500 text-center text-sm sm:text-base max-w-sm sm:max-w-md lg:max-w-lg">
               Choose a document from the list on the left to view its summary.
             </p>
           </div>

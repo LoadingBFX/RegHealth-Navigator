@@ -95,31 +95,19 @@ const ComparisonTab: React.FC = () => {
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-neutral-200 bg-white">
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-2 rounded-lg mr-3">
-                <GitCompare className="h-5 w-5 text-yellow-600" />
-              </div>
-              <h2 className="text-lg font-medium text-neutral-800">Document Comparison</h2>
-            </div>
-            {comparisonResult && (
-              <button
-                onClick={handleNewComparison}
-                className="text-sm bg-primary-100 hover:bg-primary-200 text-primary-700 px-3 py-1 rounded-lg transition-colors"
-              >
-                New Comparison
-              </button>
-            )}
+        <div className="flex items-center">
+          <div className="bg-yellow-100 p-2 rounded-lg mr-3">
+            <GitCompare className="h-5 w-5 text-yellow-600" />
           </div>
-          <p className="text-sm text-neutral-500 mt-3 ml-12">
-            Ask questions about differences between documents
-          </p>
+          <h2 className="text-lg font-medium text-neutral-800">Document Comparison</h2>
         </div>
+        <p className="text-sm text-neutral-500 mt-1">
+          Ask questions about differences between documents
+        </p>
       </div>
       
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="max-w-3xl mx-auto w-full px-4 mt-6">
         {comparisonResult ? (
           // Show comparison results
           <div className="p-4">
@@ -129,15 +117,15 @@ const ComparisonTab: React.FC = () => {
           // Show chat interface
           <div className="p-4 space-y-4">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-6">
-                <div className="bg-yellow-100 p-6 rounded-full mb-6 shadow-lg border-2 border-yellow-200 flex items-center justify-center">
-                  <GitCompare className="h-12 w-12 text-yellow-600" />
+              <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+                <div className="bg-yellow-100 p-4 sm:p-6 rounded-full mb-4 sm:mb-6 shadow-lg border-2 border-yellow-200 flex items-center justify-center">
+                  <GitCompare className="h-8 w-8 sm:h-12 sm:w-12 text-yellow-600" />
                 </div>
-                <h3 className="text-xl font-medium text-neutral-800 mb-4">Compare Documents</h3>
-                <p className="text-neutral-500 mb-6 max-w-md">
+                <h3 className="text-base sm:text-xl font-medium text-neutral-800 mb-2 sm:mb-4">Compare Documents</h3>
+                <p className="text-neutral-500 mb-4 sm:mb-6 text-sm sm:text-base max-w-sm sm:max-w-md lg:max-w-lg">
                   Ask questions about differences between documents. For example, "What's the difference between 2024 MPFS final and proposed rules?"
                 </p>
-                <div className="space-y-3 w-full max-w-lg">
+                <div className="space-y-2 sm:space-y-3 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
                   {[
                     "What's the difference between 2024 MPFS final and proposed rules?",
                     "How do 2024 and 2023 MPFS payment rates compare?",
@@ -145,7 +133,7 @@ const ComparisonTab: React.FC = () => {
                   ].map((suggestion, i) => (
                     <button
                       key={i}
-                      className="w-full text-left p-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm text-neutral-700 transition-colors"
+                      className="w-full text-left p-2 sm:p-3 bg-teal-100 hover:bg-teal-200 rounded-lg text-xs sm:text-sm text-teal-800 transition-colors"
                       onClick={() => setInput(suggestion)}
                       disabled={isComparing}
                     >
