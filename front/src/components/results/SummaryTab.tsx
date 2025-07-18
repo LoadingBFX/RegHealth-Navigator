@@ -103,6 +103,17 @@ const SummaryTab: React.FC = () => {
 
     fetchDocuments();
   }, []);
+
+  // Auto-load summaries for current page documents
+  useEffect(() => {
+    if (currentFiles.length > 0 && !loading) {
+      currentFiles.forEach(file => {
+        if (!documentSummaries[file.id]) {
+          fetchDocumentSummary(file.id);
+        }
+      });
+    }
+  }, [currentFiles, loading, documentSummaries]);
   
   const selectedDocument = selectedDocumentId ? documents.find(f => f.id === selectedDocumentId) : null;
 
@@ -324,15 +335,7 @@ const SummaryTab: React.FC = () => {
                         </div>
                       ) : (
                         <div className="flex items-center justify-center h-20">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              fetchDocumentSummary(file.id);
-                            }}
-                            className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
-                          >
-                            Click to load summary
-                          </button>
+                          <div className="text-neutral-400 text-sm">Loading summary...</div>
                         </div>
                       )}
                     </div>
