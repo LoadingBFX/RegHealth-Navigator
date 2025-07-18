@@ -182,32 +182,34 @@ const ComparisonTab: React.FC = () => {
       
       {/* Input */}
       {!comparisonResult && (
-        <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-yellow-50 to-orange-50 shadow-lg">
-          <form onSubmit={handleSubmit} className="flex items-center space-x-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={isComparing ? "Comparing documents..." : "Ask about differences between documents..."}
-              disabled={isComparing}
-              className="flex-1 px-6 py-4 border-2 border-yellow-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 bg-white shadow-lg hover:shadow-xl transition-all duration-200 text-lg"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isComparing}
-              className={`p-4 rounded-xl transition-all duration-200 ${
-                input.trim() && !isComparing
-                  ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                  : 'bg-pink-100 text-pink-300 cursor-not-allowed shadow-md'
-              }`}
-            >
-              {isComparing ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <SendHorizontal className="h-6 w-6" />
-              )}
-            </button>
-          </form>
+        <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <div className="max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="flex items-center space-x-3 bg-white rounded-2xl shadow-2xl p-2 border border-yellow-200">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={isComparing ? "Comparing documents..." : "Ask about differences between documents..."}
+                disabled={isComparing}
+                className="flex-1 px-6 py-4 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-200 bg-transparent text-lg"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isComparing}
+                className={`p-4 rounded-xl transition-all duration-200 ${
+                  input.trim() && !isComparing
+                    ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                    : 'bg-pink-100 text-pink-300 cursor-not-allowed shadow-md'
+                }`}
+              >
+                {isComparing ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <SendHorizontal className="h-6 w-6" />
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -295,169 +295,171 @@ const ChatPanel: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-teal-50 to-blue-50 shadow-lg">
-                <form onSubmit={handleSubmit} className="flex gap-3">
-                    <div className="relative flex-1">
-                        <button
-                            type="button"
-                            onClick={() => setShowDocumentSelector(!showDocumentSelector)}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors z-10"
-                        >
-                            <Plus className="h-4 w-4"/>
-                        </button>
-
-                        {showDocumentSelector && (
-                            <div
-                                ref={searchRef}
-                                className="absolute bottom-full left-0 right-0 mb-3 bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden"
+            <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-teal-50 to-blue-50">
+                <div className="max-w-2xl mx-auto">
+                    <form onSubmit={handleSubmit} className="flex gap-3 bg-white rounded-2xl shadow-2xl p-2 border border-teal-200">
+                        <div className="relative flex-1">
+                            <button
+                                type="button"
+                                onClick={() => setShowDocumentSelector(!showDocumentSelector)}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors z-10"
                             >
-                                <div className="p-3 border-b border-neutral-200">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400"/>
-                                        <input
-                                            type="text"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            placeholder="Search documents..."
-                                            className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                        />
-                                    </div>
+                                <Plus className="h-4 w-4"/>
+                            </button>
 
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowFilters(!showFilters)}
-                                            className="flex items-center gap-1 px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                                        >
-                                            <Filter className="h-4 w-4"/>
-                                            Filters
-                                            {hasActiveFilters && (
-                                                <span className="ml-1 px-1.5 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs">
-                                                    Active
-                                                </span>
-                                            )}
-                                        </button>
+                            {showDocumentSelector && (
+                                <div
+                                    ref={searchRef}
+                                    className="absolute bottom-full left-0 right-0 mb-3 bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden"
+                                >
+                                    <div className="p-3 border-b border-neutral-200">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400"/>
+                                            <input
+                                                type="text"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                placeholder="Search documents..."
+                                                className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                            />
+                                        </div>
 
-                                        {hasActiveFilters && (
+                                        <div className="flex items-center gap-2 mt-2">
                                             <button
                                                 type="button"
-                                                onClick={clearAllFilters}
-                                                className="text-sm text-primary-700 hover:text-primary-800"
+                                                onClick={() => setShowFilters(!showFilters)}
+                                                className="flex items-center gap-1 px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                                             >
-                                                Clear all
+                                                <Filter className="h-4 w-4"/>
+                                                Filters
+                                                {hasActiveFilters && (
+                                                    <span className="ml-1 px-1.5 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs">
+                                                        Active
+                                                    </span>
+                                                )}
                                             </button>
+
+                                            {hasActiveFilters && (
+                                                <button
+                                                    type="button"
+                                                    onClick={clearAllFilters}
+                                                    className="text-sm text-primary-700 hover:text-primary-800"
+                                                >
+                                                    Clear all
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {showFilters && (
+                                            <div className="mt-2 space-y-2">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-neutral-700 mb-1">
+                                                        Year
+                                                    </label>
+                                                    <select
+                                                        value={yearFilter}
+                                                        onChange={(e) => setYearFilter(e.target.value)}
+                                                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                                    >
+                                                        <option value="all">All Years</option>
+                                                        {years.map(year => (
+                                                            <option key={year} value={year}>{year}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-medium text-neutral-700 mb-1">
+                                                        Program
+                                                    </label>
+                                                    <select
+                                                        value={programFilter}
+                                                        onChange={(e) => setProgramFilter(e.target.value)}
+                                                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                                    >
+                                                        <option value="all">All Programs</option>
+                                                        {programs.map(program => (
+                                                            <option key={program} value={program}>{program}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-xs font-medium text-neutral-700 mb-1">
+                                                        Type
+                                                    </label>
+                                                    <select
+                                                        value={typeFilter}
+                                                        onChange={(e) => setTypeFilter(e.target.value)}
+                                                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                                    >
+                                                        <option value="all">All Types</option>
+                                                        {types.map(type => (
+                                                            <option key={type} value={type}>{type}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
 
-                                    {showFilters && (
-                                        <div className="mt-2 space-y-2">
-                                            <div>
-                                                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                                                    Year
-                                                </label>
-                                                <select
-                                                    value={yearFilter}
-                                                    onChange={(e) => setYearFilter(e.target.value)}
-                                                    className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                                >
-                                                    <option value="all">All Years</option>
-                                                    {years.map(year => (
-                                                        <option key={year} value={year}>{year}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                                                    Program
-                                                </label>
-                                                <select
-                                                    value={programFilter}
-                                                    onChange={(e) => setProgramFilter(e.target.value)}
-                                                    className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                                >
-                                                    <option value="all">All Programs</option>
-                                                    {programs.map(program => (
-                                                        <option key={program} value={program}>{program}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                                                    Type
-                                                </label>
-                                                <select
-                                                    value={typeFilter}
-                                                    onChange={(e) => setTypeFilter(e.target.value)}
-                                                    className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                                >
-                                                    <option value="all">All Types</option>
-                                                    {types.map(type => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="max-h-60 overflow-y-auto">
-                                    {filteredFiles.length > 0 ? (
-                                        <div className="divide-y divide-neutral-200">
-                                            {filteredFiles.map(file => (
-                                                <div
-                                                    key={file.id}
-                                                    className={`p-3 cursor-pointer transition-colors ${
-                                                        selectedFiles.includes(file.id)
-                                                            ? 'bg-primary-50 border border-primary-200'
-                                                            : 'hover:bg-neutral-50'
-                                                    }`}
-                                                    onClick={() => handleFileSelect(file.id)}
-                                                >
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-neutral-800 truncate">{file.name}</p>
-                                                        <div className="flex text-xs text-neutral-500 mt-1">
-                                                            <span className="mr-2">{file.size}</span>
-                                                            <span>{file.date}</span>
+                                    <div className="max-h-60 overflow-y-auto">
+                                        {filteredFiles.length > 0 ? (
+                                            <div className="divide-y divide-neutral-200">
+                                                {filteredFiles.map(file => (
+                                                    <div
+                                                        key={file.id}
+                                                        className={`p-3 cursor-pointer transition-colors ${
+                                                            selectedFiles.includes(file.id)
+                                                                ? 'bg-primary-50 border border-primary-200'
+                                                                : 'hover:bg-neutral-50'
+                                                        }`}
+                                                        onClick={() => handleFileSelect(file.id)}
+                                                    >
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-neutral-800 truncate">{file.name}</p>
+                                                            <div className="flex text-xs text-neutral-500 mt-1">
+                                                                <span className="mr-2">{file.size}</span>
+                                                                <span>{file.date}</span>
+                                                            </div>
                                                         </div>
+                                                        {selectedFiles.includes(file.id) && (
+                                                            <div
+                                                                className="ml-2 w-2 h-2 bg-primary-600 rounded-full"></div>
+                                                        )}
                                                     </div>
-                                                    {selectedFiles.includes(file.id) && (
-                                                        <div
-                                                            className="ml-2 w-2 h-2 bg-primary-600 rounded-full"></div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-4 text-center text-neutral-500 text-sm">
-                                            No documents found
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="p-4 text-center text-neutral-500 text-sm">
+                                                No documents found
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <input
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Ask about the documents..."
-                            className="w-full pl-12 pr-4 py-4 border-2 border-teal-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 bg-white shadow-lg hover:shadow-xl transition-all duration-200 text-lg"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={!input.trim()}
-                        className={`p-4 rounded-xl transition-all duration-200 ${
-                            input.trim()
-                                ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                                : 'bg-pink-100 text-pink-300 cursor-not-allowed shadow-md'
-                        }`}
-                    >
-                        <SendHorizontal className="h-6 w-6"/>
-                    </button>
-                </form>
+                            <input
+                                type="text"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder="Ask about the documents..."
+                                className="w-full pl-12 pr-4 py-4 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-200 bg-transparent text-lg"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={!input.trim()}
+                            className={`p-4 rounded-xl transition-all duration-200 ${
+                                input.trim()
+                                    ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                                    : 'bg-pink-100 text-pink-300 cursor-not-allowed shadow-md'
+                            }`}
+                        >
+                            <SendHorizontal className="h-6 w-6"/>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
