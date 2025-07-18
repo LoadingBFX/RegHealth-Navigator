@@ -1,7 +1,7 @@
 # 🏥 RegHealth Navigator
 
 **Authors:**  
-Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, 
+Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi
 
 **Last Updated:** Jul 2025
 **Status:** 🚀 Pre-release v0.7
