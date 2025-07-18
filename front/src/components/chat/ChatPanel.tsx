@@ -258,7 +258,7 @@ const ChatPanel: React.FC = () => {
                                 ].map((suggestion, i) => (
                                     <button
                                         key={i}
-                                        className="w-full text-left p-2 sm:p-3 bg-teal-100 hover:bg-teal-200 rounded-lg text-xs sm:text-sm text-teal-800 transition-colors"
+                                        className="w-full text-left p-2 sm:p-3 border border-neutral-200 hover:bg-neutral-50 rounded-lg text-xs sm:text-sm text-neutral-700 transition-colors"
                                         onClick={() => setInput(suggestion)}
                                     >
                                         {suggestion}
@@ -443,7 +443,7 @@ const ChatPanel: React.FC = () => {
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Ask about the documents..."
+                                placeholder="Ask about the documents... (Click + to select specific files)"
                                 className="w-full pl-12 pr-4 py-4 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-200 bg-transparent text-lg"
                             />
                         </div>

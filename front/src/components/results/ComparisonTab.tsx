@@ -133,7 +133,7 @@ const ComparisonTab: React.FC = () => {
                   ].map((suggestion, i) => (
                     <button
                       key={i}
-                      className="w-full text-left p-2 sm:p-3 bg-teal-100 hover:bg-teal-200 rounded-lg text-xs sm:text-sm text-teal-800 transition-colors"
+                      className="w-full text-left p-2 sm:p-3 border border-neutral-200 hover:bg-neutral-50 rounded-lg text-xs sm:text-sm text-neutral-700 transition-colors"
                       onClick={() => setInput(suggestion)}
                       disabled={isComparing}
                     >
