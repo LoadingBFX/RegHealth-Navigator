@@ -15,6 +15,7 @@ import yaml
 import requests
 
 from app.core import summarizer
+from app.core.compare import SectionBySectionRuleComparator
 from app.core.summarizer import SummaryGenerator
 from .core.search import ChatSearchService
 from .config import config
@@ -59,11 +60,17 @@ def create_app() -> Flask:
         openai_api_key=api_key
     )
 
+    comparator = SectionBySectionRuleComparator(
+        faiss_index_path=config.faiss_index_path,
+        metadata_path=config.faiss_metadata_path,
+        api_key=api_key
+    )
+
     # Register error handlers
     register_error_handlers(app)
 
     # Register routes
-    register_routes(app, chat_service)
+    register_routes(app, chat_service, summarizer, comparator)
 
     return app
 
@@ -407,7 +414,7 @@ def register_error_handlers(app: Flask) -> None:
         return jsonify({"error": str(error)}), 400
 
 
-def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
+def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: SummaryGenerator, comparator: SectionBySectionRuleComparator) -> None:
     """
     Register routes for the Flask application.
     
@@ -549,8 +556,6 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             logger.error(f"Error in summarize endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 400
 
-
-
     @app.route("/api/get-summary", methods=["POST"])
     def api_get_summary() -> tuple[Dict[str, Any], int]:
         """
@@ -641,7 +646,16 @@ def register_routes(app: Flask, chat_service: ChatSearchService) -> None:
             logger.error(f"Error in federal-register endpoint: {str(e)}")
             return jsonify({"error": str(e)}), 500
 
-
+    @app.route("/api/compare", methods=["POST"])
+    def compare() -> tuple[Dict[str, Any], int]:
+        try:
+            data = validate_json_request(required_fields=["message"])
+            query = data.get("message")
+            response = comparator.compare_rules(query)
+            return response#jsonify({"response": response})
+        except Exception as e:
+            logger.error(f"Error in summarize endpoint: {str(e)}")
+            return jsonify({"error": str(e)}), 500
 
 def main() -> None:
     """Main entry point for the Flask application."""
