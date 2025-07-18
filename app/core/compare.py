@@ -442,14 +442,50 @@ Executive Summary:"""
             rule2, unmatched_rule2, rule2_sections, "Rule 2"
         )
         
-        # Step 8: Generate final comprehensive summary
+        # Step 8: Extract source file information from chunks
+        def extract_source_info_from_chunks(chunks):
+            """Extract source file info from the first chunk"""
+            if not chunks:
+                return {}
+            
+            first_chunk = chunks[0]
+            metadata = first_chunk.get("metadata", {})
+            source_file = metadata.get("source_file", "")
+            
+            # Extract document number from source file and call federal register API
+            import re
+            import requests
+            
+            doc_match = re.search(r'(\d{4}-\d{5})', source_file)
+            if doc_match:
+                doc_number = doc_match.group(1)
+                try:
+                    api_url = f"https://www.federalregister.gov/api/v1/documents/{doc_number}.json"
+                    response = requests.get(api_url, timeout=5)
+                    if response.status_code == 200:
+                        data = response.json()
+                        return {
+                            "source_file": source_file,
+                            "pdf_url": data.get("pdf_url", ""),
+                            "html_url": data.get("html_url", ""),
+                            "document_title": data.get("title", "")
+                        }
+                except Exception as e:
+                    print(f"Failed to fetch document info for {doc_number}: {e}")
+            
+            return {"source_file": source_file}
+        
+        rule1_source_info = extract_source_info_from_chunks(rule1_relevant)
+        rule2_source_info = extract_source_info_from_chunks(rule2_relevant)
+
+        # Step 9: Generate final comprehensive summary
         final_summary = self.generate_final_summary(
             section_comparisons, rule1_unique, rule2_unique, rule1, rule2, query
         )
         
         result = {
-            "rule1": rule1,
-            "rule2": rule2,
+            "rule1": {**rule1, **rule1_source_info},
+            "rule2": {**rule2, **rule2_source_info},
             "topic": topic,
             "section_comparisons": section_comparisons,
             "rule1_unique_sections": rule1_unique,

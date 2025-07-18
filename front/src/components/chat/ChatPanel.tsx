@@ -192,22 +192,25 @@ const ChatPanel: React.FC = () => {
         <div className="flex-1 flex flex-col h-full">
             {/* Chat Header */}
             <div className="p-4 border-b border-neutral-200 bg-white">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h2 className="text-lg font-medium text-neutral-800">Chat</h2>
-                        {selectedFiles.length > 0 && (
-                            <p className="text-sm text-neutral-500 mt-1">
-                                Analyzing: {selectedFileNames.join(', ')}
-                            </p>
-                        )}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <div className="bg-teal-100 p-2 rounded-lg mr-3">
+                                <MessageSquare className="h-5 w-5 text-teal-600" />
+                            </div>
+                            <h2 className="text-lg font-medium text-neutral-800">Chat</h2>
+                        </div>
+                        <button
+                            onClick={() => clearMessages()}
+                            className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
+                            title="Clear conversation"
+                        >
+                            <RefreshCw className="h-4 w-4"/>
+                        </button>
                     </div>
-                    <button
-                        onClick={() => clearMessages()}
-                        className="p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
-                        title="Clear conversation"
-                    >
-                        <RefreshCw className="h-4 w-4"/>
-                    </button>
+                    <p className="text-sm text-neutral-500 mt-3 ml-12">
+                        Ask questions about regulations or select specific documents as your knowledge base for inquiry.
+                    </p>
                 </div>
 
                 {/* Selected Files Tags */}
@@ -240,21 +243,32 @@ const ChatPanel: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
-                        <div className="bg-primary-50 p-4 rounded-full mb-4">
-                            <MessageSquare className="h-8 w-8 text-primary-700" />
+                        <div className="bg-teal-100 p-6 rounded-full mb-6 shadow-lg border-2 border-teal-200 flex items-center justify-center">
+                            <MessageSquare className="h-12 w-12 text-teal-600" />
                         </div>
                         <h3 className="text-lg font-medium text-neutral-800 mb-2">Start a Conversation</h3>
                         <p className="text-neutral-500 mb-4 max-w-md">
                             You can select a document and ask me questions, or ask me directly. For more accurate answers, please specify the year, program, and type in your question.
                         </p>
-                        <div className="text-sm text-neutral-600 max-w-md">
-                            <p className="mb-2 font-medium">Example questions:</p>
-                            <ul className="text-left space-y-1 text-xs">
-                                <li>• When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?</li>
-                                <li>• How are PE RVUs established for specific services?</li>
-                                <li>• Why did CMS implement HCPCS code G2211 in 2024?</li>
-                            </ul>
-                            <p className="mt-2 text-xs text-yellow-600 font-medium">
+                        <div className="w-full max-w-lg">
+                            <p className="mb-3 font-medium text-neutral-600">Example questions:</p>
+                            <div className="space-y-2">
+                                {[
+                                    "When did the CY 2024 Medicare Physician Fee Schedule (MPFS) Final Rule become effective?",
+                                    "How are PE RVUs established for specific services?",
+                                    "Why did CMS implement HCPCS code G2211 in 2024?",
+                                    "What are the key changes in the 2024 MPFS payment methodology?"
+                                ].map((suggestion, i) => (
+                                    <button
+                                        key={i}
+                                        className="w-full text-left p-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm text-neutral-700 transition-colors"
+                                        onClick={() => setInput(suggestion)}
+                                    >
+                                        {suggestion}
+                                    </button>
+                                ))}
+                            </div>
+                            <p className="mt-4 text-xs text-yellow-600 font-medium text-center">
                                 RegHealth-Navigator can make mistakes. Please double-check responses.
                             </p>
                         </div>
@@ -432,7 +446,7 @@ const ChatPanel: React.FC = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask about the documents..."
-                            className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full pl-10 pr-4 py-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-teal-50"
                         />
                     </div>
                     <button
@@ -440,8 +454,8 @@ const ChatPanel: React.FC = () => {
                         disabled={!input.trim()}
                         className={`p-3 rounded-lg transition-colors ${
                             input.trim()
-                                ? 'bg-primary-700 hover:bg-primary-800 text-white'
-                                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                                ? 'bg-pink-400 hover:bg-pink-500 text-white shadow-md hover:shadow-lg'
+                                : 'bg-pink-100 text-pink-300 cursor-not-allowed'
                         }`}
                     >
                         <SendHorizontal className="h-5 w-5"/>

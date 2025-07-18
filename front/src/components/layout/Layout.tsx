@@ -36,15 +36,15 @@ const Layout: React.FC = () => {
       
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-xl font-semibold mb-4 text-primary-700">Processing Document</h3>
-            <div className="w-full bg-neutral-200 rounded-full h-2.5 mb-4">
+          <div className="bg-teal-50 p-6 rounded-lg shadow-lg max-w-md w-full border-2 border-teal-200">
+            <h3 className="text-xl font-semibold mb-4 text-teal-700">Processing Document</h3>
+            <div className="w-full bg-teal-100 rounded-full h-2.5 mb-4">
               <div 
-                className="bg-primary-600 h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+                className="bg-teal-400 h-2.5 rounded-full transition-all duration-300 ease-in-out" 
                 style={{ width: `${processingProgress}%` }}
               ></div>
             </div>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-teal-700">
               {processingProgress < 100 
                 ? `Processing document (${processingProgress}%)...` 
                 : 'Finalizing and caching results...'}
@@ -54,19 +54,26 @@ const Layout: React.FC = () => {
       )}
       
       {/* Tab Navigation */}
-      <div className="bg-white border-b border-neutral-200">
+      <div className="bg-teal-50">
         <div className="flex space-x-1 px-4">
-          {tabs.map((tab) => {
+          {tabs.map((tab, idx) => {
             const Icon = tab.icon;
+            // Assign pastel backgrounds for each tab for variety
+            const pastelBg = [
+              'bg-teal-100',
+              'bg-pink-100',
+              'bg-yellow-100'
+            ];
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
-                }`}
+                className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-all rounded-xl relative z-10
+                  ${activeTab === tab.id
+                    ? `${pastelBg[idx]} border-teal-400 text-neutral-800 shadow-lg scale-105 -translate-y-1`
+                    : 'bg-teal-50 border-transparent text-neutral-500 hover:bg-teal-100 hover:text-neutral-700 hover:border-teal-200 shadow-sm'}
+                `}
+                style={{ marginBottom: '-1px', transition: 'all 0.18s cubic-bezier(.4,2,.6,1)' }}
               >
                 <Icon className="h-4 w-4 mr-2" />
                 {tab.label}

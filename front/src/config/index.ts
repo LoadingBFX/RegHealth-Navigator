@@ -8,9 +8,10 @@ export const config = {
         },
         chat: '/api/chat',
         documents: '/api/documents',
-
+        compare: '/api/compare',
         getSummary: '/api/get-summary',
-        availableSummaries: '/api/available-summaries'
+        availableSummaries: '/api/available-summaries',
+        federalRegister: '/api/federal-register'
       }
     }
   };

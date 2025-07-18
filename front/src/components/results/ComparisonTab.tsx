@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../../store/store';
-import { SendHorizontal, GitCompare } from 'lucide-react';
+import { SendHorizontal, GitCompare, Loader2, AlertCircle } from 'lucide-react';
 import ChatMessage from '../chat/ChatMessage';
+import ComparisonResult from '../comparison/ComparisonResult';
 
 const ComparisonTab: React.FC = () => {
   const { 
@@ -10,49 +11,22 @@ const ComparisonTab: React.FC = () => {
     setActiveCitation,
     setShowCitationModal,
     addMessage,
-    clearMessages
+    clearMessages,
+    comparisonResult,
+    isComparing,
+    comparisonError,
+    performComparison,
+    setComparisonResult,
+    setComparisonError
   } = useStore();
   
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      role: 'user' as const,
-      content: "What's the difference between 2024 MPFS final rule and 2024 MPFS proposed rule?"
-    },
-    {
-      id: '2',
-      role: 'assistant' as const,
-      content: `Based on my analysis of the 2024 MPFS documents, here are the key differences between the proposed and final rules:
-
-**Payment Updates:**
-- **Proposed Rule**: Suggested conversion factor of $33.06 for 2024
-- **Final Rule**: Finalized conversion factor at $32.75 for 2024 [§2.1]
-- **Impact**: The final rule resulted in a lower conversion factor than initially proposed
-
-**MIPS Performance Threshold:**
-- **Proposed Rule**: Recommended performance threshold of 85 points
-- **Final Rule**: Set performance threshold at 82.5 points [§3.1]
-- **Rationale**: Reduced based on stakeholder feedback about implementation challenges
-
-**E/M Services Payment:**
-- **Proposed Rule**: Immediate implementation upon rule effective date
-- **Final Rule**: Extended implementation timeline to allow for additional provider training [§2.3]
-- **Benefit**: Gives healthcare providers more time to adapt to new requirements
-
-**Telehealth Provisions:**
-- **Proposed Rule**: Basic telehealth policy framework
-- **Final Rule**: Expanded telehealth flexibilities through 2024 with new reimbursement rates for remote patient monitoring [§4.1]
-
-**Stakeholder Input Integration:**
-- The final rule incorporated over 2,000 public comments received during the comment period
-- Added hardship exception criteria for MIPS based on stakeholder feedback [§3.2]
-- Budget neutrality adjustments were applied based on public comments [§2.1]
-
-**Key Takeaway**: The final rule generally became more provider-friendly compared to the proposed rule, with lower thresholds, extended timelines, and expanded flexibilities based on industry feedback.`,
-      citations: ['§2.1', '§3.1', '§2.3', '§4.1', '§3.2']
-    }
-  ]);
+  const [messages, setMessages] = useState<Array<{
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    citations?: string[];
+  }>>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -63,75 +37,43 @@ const ComparisonTab: React.FC = () => {
     }
   }, [messages]);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim()) {
-      // Add user message
+    if (input.trim() && !isComparing) {
+      const query = input.trim();
+      setInput('');
+      
+      // Clear any previous error
+      setComparisonError(null);
+      
+      // Add user message to chat
       const userMessage = {
         id: Date.now().toString(),
         role: 'user' as const,
-        content: input
+        content: query
       };
-      
       setMessages(prev => [...prev, userMessage]);
       
-      // Simulate assistant response for comparison
-      setTimeout(() => {
-        const comparisonResponses = [
-          {
-            content: `I've analyzed the differences between these documents. Here are the key changes:
-
-**Major Policy Changes:**
-- Payment methodology updates with revised conversion factors [§1.1]
-- Quality measure modifications affecting MIPS scoring [§3.2]
-- Telehealth policy expansions and new coverage areas [§4.1]
-
-**Implementation Timeline Differences:**
-- The final rule extended several implementation deadlines based on provider feedback
-- New grace periods were added for certain quality reporting requirements [§3.3]
-
-**Financial Impact:**
-- Updated budget neutrality calculations resulted in different payment adjustments
-- Regional variations in payment rates were modified [§2.2]
-
-The analysis shows significant evolution from proposed to final rule based on stakeholder input.`,
-            citations: ['§1.1', '§3.2', '§4.1', '§3.3', '§2.2']
-          },
-          {
-            content: `Based on the document comparison, here are the primary differences:
-
-**Regulatory Framework Changes:**
-- Streamlined documentation requirements in the final version [§5.1]
-- Simplified reporting procedures for smaller practices [§5.2]
-- Enhanced compliance pathways with reduced administrative burden [§5.3]
-
-**Coverage Expansions:**
-- Additional services covered under the final rule
-- Expanded eligibility criteria for certain programs [§6.1]
-- New payment categories for emerging technologies [§6.2]
-
-**Stakeholder Feedback Integration:**
-- Over 1,500 comments were incorporated into the final rule
-- Industry concerns about implementation costs were addressed [§7.1]
-
-The final rule demonstrates significant responsiveness to public input while maintaining regulatory objectives.`,
-            citations: ['§5.1', '§5.2', '§5.3', '§6.1', '§6.2', '§7.1']
-          }
-        ];
+      try {
+        // Perform the comparison
+        await performComparison(query);
         
-        const randomResponse = comparisonResponses[Math.floor(Math.random() * comparisonResponses.length)];
-        
-        const assistantMessage = {
+        // Add a success message to chat
+        const successMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant' as const,
-          content: randomResponse.content,
-          citations: randomResponse.citations
+          content: `I've completed the comparison analysis for: "${query}". You can view the detailed results below, including section-by-section comparisons, unique sections, and an executive summary.`
         };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-      }, 1000);
-      
-      setInput('');
+        setMessages(prev => [...prev, successMessage]);
+      } catch (error) {
+        // Add error message to chat
+        const errorMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant' as const,
+          content: `I encountered an error while performing the comparison: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again or refine your query.`
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     }
   };
 
@@ -143,83 +85,143 @@ The final rule demonstrates significant responsiveness to public input while mai
     }
   };
 
+  const handleNewComparison = () => {
+    setComparisonResult(null);
+    setComparisonError(null);
+    clearMessages();
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-neutral-200 bg-white">
-        <div className="flex items-center">
-          <GitCompare className="h-5 w-5 text-primary-600 mr-2" />
-          <h2 className="text-lg font-medium text-neutral-800">Document Comparison</h2>
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="bg-yellow-100 p-2 rounded-lg mr-3">
+                <GitCompare className="h-5 w-5 text-yellow-600" />
+              </div>
+              <h2 className="text-lg font-medium text-neutral-800">Document Comparison</h2>
+            </div>
+            {comparisonResult && (
+              <button
+                onClick={handleNewComparison}
+                className="text-sm bg-primary-100 hover:bg-primary-200 text-primary-700 px-3 py-1 rounded-lg transition-colors"
+              >
+                New Comparison
+              </button>
+            )}
+          </div>
+          <p className="text-sm text-neutral-500 mt-3 ml-12">
+            Ask questions about differences between documents
+          </p>
         </div>
-        <p className="text-sm text-neutral-500 mt-1">
-          Ask questions about differences between documents
-        </p>
       </div>
       
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6">
-            <div className="bg-primary-50 p-6 rounded-full mb-6">
-              <GitCompare className="h-12 w-12 text-primary-700" />
-            </div>
-            <h3 className="text-xl font-medium text-neutral-800 mb-4">Compare Documents</h3>
-            <p className="text-neutral-500 mb-6 max-w-md">
-              Ask questions about differences between documents. For example, "What's the difference between 2024 MPFS final and proposed rules?"
-            </p>
-            <div className="space-y-3 w-full max-w-lg">
-              {[
-                "What's the difference between 2024 MPFS final and proposed rules?",
-                "How do 2024 and 2023 MPFS payment rates compare?",
-                "What changed between the proposed and final hospice rules?"
-              ].map((suggestion, i) => (
-                <button
-                  key={i}
-                  className="w-full text-left p-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm text-neutral-700 transition-colors"
-                  onClick={() => setInput(suggestion)}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        {comparisonResult ? (
+          // Show comparison results
+          <div className="p-4">
+            <ComparisonResult result={comparisonResult} />
           </div>
         ) : (
-          <>
-            {messages.map((message) => (
-              <ChatMessage 
-                key={message.id} 
-                message={message}
-                onCitationClick={handleCitationClick}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </>
+          // Show chat interface
+          <div className="p-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6">
+                <div className="bg-yellow-100 p-6 rounded-full mb-6 shadow-lg border-2 border-yellow-200 flex items-center justify-center">
+                  <GitCompare className="h-12 w-12 text-yellow-600" />
+                </div>
+                <h3 className="text-xl font-medium text-neutral-800 mb-4">Compare Documents</h3>
+                <p className="text-neutral-500 mb-6 max-w-md">
+                  Ask questions about differences between documents. For example, "What's the difference between 2024 MPFS final and proposed rules?"
+                </p>
+                <div className="space-y-3 w-full max-w-lg">
+                  {[
+                    "What's the difference between 2024 MPFS final and proposed rules?",
+                    "How do 2024 and 2023 MPFS payment rates compare?",
+                    "What changed between the proposed and final hospice rules?"
+                  ].map((suggestion, i) => (
+                    <button
+                      key={i}
+                      className="w-full text-left p-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm text-neutral-700 transition-colors"
+                      onClick={() => setInput(suggestion)}
+                      disabled={isComparing}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <ChatMessage 
+                    key={message.id} 
+                    message={message}
+                    onCitationClick={handleCitationClick}
+                  />
+                ))}
+                
+                {/* Loading indicator */}
+                {isComparing && (
+                  <div className="flex items-center justify-center p-6">
+                    <div className="bg-white border rounded-lg p-4 flex items-center space-x-3">
+                      <Loader2 className="h-5 w-5 text-primary-600 animate-spin" />
+                      <span className="text-gray-600">Analyzing documents and comparing rules...</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Error display */}
+                {comparisonError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                      <span className="text-red-700 font-medium">Comparison Error</span>
+                    </div>
+                    <p className="text-red-600 mt-2">{comparisonError}</p>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
         )}
       </div>
       
       {/* Input */}
-      <div className="p-4 border-t border-neutral-200 bg-white">
-        <form onSubmit={handleSubmit} className="flex items-center space-x-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about differences between documents..."
-            className="flex-1 p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className={`p-3 rounded-lg transition-colors ${
-              input.trim()
-                ? 'bg-primary-700 hover:bg-primary-800 text-white'
-                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-            }`}
-          >
-            <SendHorizontal className="h-5 w-5" />
-          </button>
-        </form>
-      </div>
+      {!comparisonResult && (
+        <div className="p-4 border-t border-neutral-200 bg-white">
+          <form onSubmit={handleSubmit} className="flex items-center space-x-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={isComparing ? "Comparing documents..." : "Ask about differences between documents..."}
+              disabled={isComparing}
+              className="flex-1 px-4 py-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-teal-50"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isComparing}
+              className={`p-3 rounded-lg transition-colors ${
+                input.trim() && !isComparing
+                  ? 'bg-pink-400 hover:bg-pink-500 text-white shadow-md hover:shadow-lg'
+                  : 'bg-pink-100 text-pink-300 cursor-not-allowed'
+              }`}
+            >
+              {isComparing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <SendHorizontal className="h-5 w-5" />
+              )}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

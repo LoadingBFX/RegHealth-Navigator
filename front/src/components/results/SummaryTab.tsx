@@ -192,60 +192,23 @@ const SummaryTab: React.FC = () => {
   const renderGridView = () => (
     <div className="flex-1 p-6 bg-gray-50 overflow-y-auto h-full">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-neutral-800 mb-2">Document Summaries</h2>
-        <p className="text-neutral-600">
-          {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
-        </p>
-        
-        {/* Search and Filters */}
-        <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
-          <div className="relative mb-4">
-            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Search documents..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+      <div className="mb-6 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="bg-pink-100 p-2 rounded-lg mr-3">
+              <FileText className="h-5 w-5 text-pink-600" />
+            </div>
+            <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <select
-              value={selectedProgram}
-              onChange={(e) => setSelectedProgram(e.target.value)}
-              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Programs</option>
-              {uniquePrograms.map(program => (
-                <option key={program} value={program}>{program}</option>
-              ))}
-            </select>
-            
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Years</option>
-              {uniqueYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-            
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Types</option>
-              {uniqueTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
+          <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+            <p className="text-sm text-teal-700 font-medium">
+              {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
+            </p>
           </div>
         </div>
+        <p className="text-sm text-neutral-500 mt-3 ml-12">
+          Browse and review summaries of regulatory documents. Select a document for detailed analysis.
+        </p>
       </div>
       
       {/* Document Grid */}

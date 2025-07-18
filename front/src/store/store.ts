@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import config from '../config';
+import { ComparisonResult, apiService } from '../services/api';
 
 // Sample data with new naming convention
 const sampleFiles = [
@@ -191,6 +192,7 @@ type Citation = {
   documentName: string;
 };
 
+// Legacy comparison types (kept for backward compatibility)
 type ComparisonChange = {
   type: 'added' | 'removed' | 'modified' | 'unchanged';
   content: string;
@@ -238,6 +240,20 @@ type StoreState = {
   
   comparison: Comparison | null;
   setComparison: (comparison: Comparison | null) => void;
+  
+  // New comparison result from API
+  comparisonResult: ComparisonResult | null;
+  setComparisonResult: (result: ComparisonResult | null) => void;
+  
+  // Comparison loading states
+  isComparing: boolean;
+  setIsComparing: (comparing: boolean) => void;
+  
+  comparisonError: string | null;
+  setComparisonError: (error: string | null) => void;
+  
+  // Comparison API method
+  performComparison: (query: string) => Promise<void>;
   
   citations: Record<string, Citation>;
   setCitations: (citations: Record<string, Citation>) => void;
@@ -347,6 +363,31 @@ export const useStore = create<StoreState>((set, get) => ({
   // Comparison
   comparison: null,
   setComparison: (comparison) => set({ comparison }),
+
+  // New comparison result from API
+  comparisonResult: null,
+  setComparisonResult: (result) => set({ comparisonResult: result }),
+
+  // Comparison loading states
+  isComparing: false,
+  setIsComparing: (comparing) => set({ isComparing: comparing }),
+
+  comparisonError: null,
+  setComparisonError: (error) => set({ comparisonError: error }),
+
+  // Comparison API method
+  performComparison: async (query: string) => {
+    try {
+      set({ isComparing: true, comparisonError: null, comparisonResult: null });
+      const result = await apiService.compareRules(query);
+      set({ comparisonResult: result });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      set({ comparisonError: errorMessage });
+    } finally {
+      set({ isComparing: false });
+    }
+  },
 
   // Citations
   citations: sampleCitations,

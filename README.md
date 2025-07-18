@@ -138,8 +138,12 @@ python scheduled_updater.py
 ---
 
 ## 🚀 Frontend Setup
-1. Copy `front/.env.example` to `front/.env.development` and set the backend API URL.
-2. Install dependencies and run:
+1. Ensure you are using Node.js 18.x (recommended) for best compatibility. If you use nvm, run:
+   ```bash
+   nvm use 18
+   ```
+2. Copy `front/.env.example` to `front/.env.development` and set the backend API URL.
+3. Install dependencies and run:
    ```bash
    cd front
    npm install
