@@ -1,7 +1,7 @@
 # 🏥 RegHealth Navigator
 
 **Authors:**  
-Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, Seon Young Jhang, Daisy Chen
+Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi, 
 
 **Last Updated:** Jul 2025
 **Status:** 🚀 Pre-release v0.7
@@ -51,7 +51,7 @@ RegHealth-Navigator/
 - Summary development and optimization: leading the design and improvement of the summary module
 
 ### System Architecture & Data Pipeline (Fanxing Bu)
-**Overall Responsibilities:**
+**Responsibilities:**
 - System architecture design and implementation
 - Data preprocessing pipeline (download, chunk, embedding, summary)
 - UI design and implementation
