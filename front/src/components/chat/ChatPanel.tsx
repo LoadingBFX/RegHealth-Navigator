@@ -147,10 +147,10 @@ const ChatPanel: React.FC = () => {
                 console.error('API call failed:', error);
 
                 // More specific error messages
-                let errorMessage = 'Sorry, something went wrong. Please try again later.';
+                let errorMessage = 'Daisy\'s cat seems to have caused some mischief! Seon, Sai, Sarvesh, Dhruv and Fanxing are working to fix it. Please try again later.';
 
                 if (error instanceof TypeError && error.message.includes('fetch')) {
-                    errorMessage = `Unable to connect to the server. Please check if the backend is running at ${config.api.baseUrl}`;
+                    errorMessage = `Daisy's cat ran away, and Seon, Sai, Sarvesh, Dhruv and Fanxing are out looking for it. Please wait while they reconnect... Please check if the backend is running at ${config.api.baseUrl}`;
                 } else if (error instanceof Error) {
                     errorMessage = `Error: ${error.message}`;
                 }

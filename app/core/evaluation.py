@@ -1,3 +1,28 @@
+"""
+evaluation.py
+
+Evaluation system for assessing Q&A response quality.
+Compares actual responses against expected responses using LLM-based evaluation.
+
+Functionality:
+- LLM-based response quality evaluation
+- Comparison of actual vs expected responses
+- Scoring system (0-100 scale) for response accuracy
+- Detailed reasoning for score justification
+- Batch evaluation of test datasets
+- CSV output for evaluation results
+
+Process Flow:
+1. Load test dataset with questions and expected responses
+2. Generate actual responses using search system
+3. Evaluate response quality using GPT-4
+4. Score responses on 0-100 scale
+5. Provide detailed reasoning for scores
+6. Save evaluation results to CSV file
+
+Author: Sai
+"""
+
 import pandas as pd
 
 import openai

@@ -4,6 +4,23 @@ auto_update_pipeline.py
 Complete automated pipeline for regulation updates.
 Integrates regulation fetching, XML downloading, incremental processing, and embedding updates.
 Provides simple, unified entry points with comprehensive error handling and rollback capabilities.
+
+Functionality:
+- Automated regulation discovery and downloading from Federal Register
+- Incremental processing of new/changed XML files
+- FAISS index updates with new embeddings
+- Summary generation for new documents
+- System validation and cost estimation
+
+Process Flow:
+1. Check for new regulations using Federal Register API
+2. Download XML files for new regulations
+3. Process files through incremental pipeline (chunking + embedding)
+4. Update FAISS index with new embeddings
+5. Generate summaries for new documents
+6. Validate system consistency
+
+Author: Fanxing Bu
 """
 import os
 import json

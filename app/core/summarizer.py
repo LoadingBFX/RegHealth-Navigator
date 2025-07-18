@@ -1,3 +1,29 @@
+"""
+summarizer.py
+
+Summary Generator for CMS regulatory rules using OpenAI.
+Provides comprehensive document summarization with batch processing and caching.
+
+Functionality:
+- Chunk-based summarization using OpenAI GPT-4o-mini
+- Batch processing with async concurrency control
+- Intelligent caching to reduce API costs
+- Token management and context optimization
+- Final report synthesis with action items
+- Support for large documents with segmentation
+
+Process Flow:
+1. Load document chunks from RAG system
+2. Split chunks into manageable batches
+3. Process batches concurrently with rate limiting
+4. Cache batch results to avoid redundant API calls
+5. Synthesize final executive summary
+6. Handle large documents with automatic segmentation
+7. Save results as Markdown files
+
+Author: Seon
+"""
+
 import os
 import json
 import sys

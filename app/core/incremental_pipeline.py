@@ -3,6 +3,23 @@ incremental_pipeline.py
 
 Orchestrates the complete incremental processing pipeline.
 Coordinates chunking and FAISS operations with atomic transactions and proper error handling.
+
+Functionality:
+- Orchestrates complete incremental processing workflow
+- Coordinates chunking and FAISS embedding operations
+- Provides atomic CRUD operations for XML files
+- Handles system validation and cost estimation
+- Manages data consistency across chunks and embeddings
+
+Process Flow:
+1. Detect new/modified XML files in data directory
+2. Process files through incremental chunker (create text chunks)
+3. Update FAISS index with new embeddings
+4. Maintain data consistency between chunks and metadata
+5. Provide rollback capabilities for failed operations
+6. Validate system integrity after operations
+
+Author: Fanxing Bu
 """
 import os
 import json

@@ -1,14 +1,21 @@
 server:
-  host: 0.0.0.0
+  host: 127.0.0.1
   port: 8080
-  debug: false
+  debug: true
 
 cors:
   origins:
-    - https://reghealth-navigator.com
-    - https://www.reghealth-navigator.com
-
-
+    - http://localhost:5173
+    - http://127.0.0.1:5173
+    - https://*.pages.dev      # Cloudflare Pages
+    - https://*.github.io      # GitHub Pages
+    - https://*.cloudflare.com # Cloudflare Workers
+    - https://loadingbfx.github.io
+    - https://loadingbfx.github.io/RegHealth-Navigator
+    - https://*.ngrok.io       # ngrok tunnels
+    - https://*.loca.lt        # localtunnel
+    
+    
 rag_data:
   faiss_index: rag_data/faiss.index
   metadata: rag_data/faiss_metadata.json

@@ -2,6 +2,25 @@
 incremental_summary.py
 
 Simple incremental summary generation similar to incremental_pipeline pattern.
+
+Functionality:
+- Incremental summary generation for regulatory documents
+- File-based summary management with existence checking
+- Integration with SummaryGenerator for batch processing
+- Chunk loading from RAG system for summary generation
+- Force regeneration capabilities for existing summaries
+- File path resolution and validation
+
+Process Flow:
+1. Scan data directory for XML files
+2. Check for existing summaries to avoid duplication
+3. Load chunks for specific files from RAG system
+4. Generate summaries using SummaryGenerator
+5. Save summaries as Markdown files
+6. Provide detailed processing status and error handling
+7. Support force regeneration for existing summaries
+
+Author: Fanxing Bu
 """
 import os
 import logging

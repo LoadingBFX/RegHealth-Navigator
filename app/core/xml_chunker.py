@@ -2,6 +2,29 @@
 xml_chunker.py
 
 Module for chunking XML documents into smaller pieces for processing.
+Provides structure-aware XML parsing and intelligent text chunking.
+
+Functionality:
+- Structure-aware XML parsing for regulatory documents
+- Intelligent text chunking with overlap management
+- Footnote merging and reference resolution
+- Special element handling (graphics, tables, billing codes)
+- Metadata extraction from filenames and document content
+- Logical block identification and section header generation
+- HTML entity decoding and text normalization
+
+Process Flow:
+1. Parse XML document using ElementTree
+2. Preprocess XML (merge footnotes, clean special elements)
+3. Extract logical blocks based on structural elements
+4. Generate section headers with document context
+5. Split text into chunks with configurable word limits
+6. Apply sentence overlap for context preservation
+7. Extract metadata from filenames and document content
+8. Save chunks with comprehensive metadata
+
+Author: 
+Previous Team, Dhruv, Fanxing Bu
 """
 import os
 import re

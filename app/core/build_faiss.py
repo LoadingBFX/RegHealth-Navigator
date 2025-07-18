@@ -1,3 +1,30 @@
+"""
+build_faiss.py
+
+FAISS index builder for regulatory document embeddings.
+Creates vector search index from preprocessed document chunks.
+
+Functionality:
+- FAISS index construction from document chunks
+- OpenAI embedding generation with token management
+- Batch processing with progress tracking
+- Cost estimation and model configuration
+- Long text splitting and token optimization
+- Index persistence and metadata management
+
+Process Flow:
+1. Load preprocessed chunks from JSON file
+2. Setup model configuration and tokenizer
+3. Split long texts into token-appropriate chunks
+4. Generate embeddings using OpenAI API
+5. Create FAISS index with proper dimensionality
+6. Add embeddings to index in batches
+7. Save index and metadata files
+8. Provide cost and performance statistics
+
+Previous Team, Dhruv, Fanxing Bu
+"""
+
 import json
 import os
 import numpy as np

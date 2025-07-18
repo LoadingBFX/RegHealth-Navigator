@@ -72,3 +72,9 @@ The `app/core/search.py` module implements the core logic for semantic search an
 - The system enforces strict grounding: answers must be based only on retrieved content, with explicit source citations.
 - All retrieval and answer generation is logged for traceability.
 - The architecture supports both filtered (document-specific) and unfiltered (corpus-wide) search. 
+- Supports hybrid retrieval (dense + BM25), but the main flow uses dense (FAISS) retrieval, with BM25 only for assistance and future expansion.
+- Supports source_file filtering, allowing frontend to specify document scope for more targeted comparison/Q&A.
+- Supports OpenAI embedding model configuration, defaulting to text-embedding-3-small, configurable via config.
+- End-to-end flow includes moderation, embedding, FAISS retrieval, prompt construction, LLM response, citation extraction, and frontend formatting, with detailed logging at all steps.
+- Future support planned for Heuristic search, Summary, and other features (marked as TODO in code).
+- Documentation is synchronized with search.py, with all parameters, API paths, and field names consistent with code implementation. 

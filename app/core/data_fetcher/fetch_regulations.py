@@ -1,4 +1,62 @@
 #!/usr/bin/env python3
+"""
+Federal Register Regulation Fetcher
+
+Functionality:
+    This module provides comprehensive functionality to fetch and download federal regulations
+    from the Federal Register API. It supports both single document downloads and bulk
+    fetching of latest regulations with intelligent filtering and categorization.
+
+Process Flow:
+    1. API Integration: Connects to Federal Register API to fetch document metadata
+    2. Document Discovery: Searches for regulations by date range, agency, and document type
+    3. Program Classification: Automatically detects and categorizes regulations into:
+       - MPFS (Medicare Physician Fee Schedule)
+       - HOSPICE (Hospice Payment Regulations)
+       - SNF (Skilled Nursing Facility Regulations)
+    4. Year Extraction: Uses regex patterns to extract issue years from document titles
+    5. XML Download: Downloads full-text XML files with proper naming conventions
+    6. File Validation: Ensures downloaded files are valid XML before saving
+    7. Directory Organization: Creates structured directory hierarchy by program type
+    8. Error Handling: Comprehensive error handling with detailed logging
+    9. Rate Limiting: Implements delays to respect API rate limits
+
+Key Features:
+    - Intelligent document type detection using keyword matching
+    - Regex-based year extraction for different program types
+    - Automatic file naming with standardized conventions
+    - XML validation and integrity checking
+    - Comprehensive logging and error reporting
+    - Support for both single document and bulk download modes
+    - Respectful API usage with configurable delays
+
+Usage:
+    Command line interface for fetching regulations:
+    - Single document: python fetch_regulations.py --mode single --doc-number 2024-06431
+    - Latest documents: python fetch_regulations.py --mode latest --days 30
+    - Verbose logging: python fetch_regulations.py --mode latest --verbose
+
+Output Structure:
+    data/
+    ├── MPFS/
+    │   ├── 2025_MPFS_final_2024-06431.xml
+    │   └── 2024_MPFS_proposed_2024-06432.xml
+    ├── HOSPICE/
+    │   ├── 2025_HOSPICE_final_2024-06433.xml
+    │   └── 2024_HOSPICE_proposed_2024-06434.xml
+    └── SNF/
+        ├── 2025_SNF_final_2024-06435.xml
+        └── 2024_SNF_proposed_2024-06436.xml
+
+Dependencies:
+    - requests: HTTP client for API calls
+    - lxml: XML parsing and validation
+    - pathlib: File path handling
+    - logging: Comprehensive logging system
+    - argparse: Command line argument parsing
+
+Author: Fanxing Bu
+"""
 import argparse
 import logging
 import time

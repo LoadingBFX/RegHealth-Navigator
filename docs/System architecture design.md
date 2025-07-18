@@ -154,14 +154,23 @@ The system supports two primary usage modes:
 
 ## 4.2 Data Ingestion & Indexing
 
-A scheduled backend job (via **GitHub Actions** and **Cloudflare Workers**) ingests new XML documents from the **Federal Register API**.
+The system supports both **manual ingestion** and **automated processing** through multiple pipelines:
+
+### Manual Processing
+- **Initial Setup**: Use `xml_chunker.py` and `build_faiss.py` for complete system initialization
+- **Single File**: Use `incremental_pipeline.py --file "path/to/file.xml"` for individual files
+
+### Automated Processing
+- **AutoUpdatePipeline**: Automatically fetches and processes new regulations from Federal Register
+- **ScheduledUpdater**: Runs periodic updates via cron jobs or GitHub Actions
+- **IncrementalPipeline**: Processes only new/modified files without reprocessing everything
 
 The ingestion pipeline includes:
 
 1. **XML parsing** to extract `<SUPLINF>` and `<REGTEXT>` sections  
-2. **Chunking** into semantically coherent passages  
-3. **Embedding generation** using OpenAI Embedding API  
-4. **Indexing** into a **FAISS** vector store
+2. **Chunking** into semantically coherent passages (configurable: 500 words, 1 sentence overlap)
+3. **Embedding generation** using OpenAI Embedding API (default: text-embedding-3-small)
+4. **Indexing** into **FAISS** vector store with metadata tracking
 
 Indexing latency is minimal; new documents are usually searchable within minutes.
 
@@ -319,25 +328,29 @@ Built using **React** and hosted via **static site deployment** (e.g., GitHub Pa
 
 ## 6.2 Backend Services
 
-Modular backend implemented in **Python**, deployed via **Cloudflare Workers** (API routing) and **VM/container backend** (heavy processing).
+Modular backend implemented in **Python** using **Flask**, deployed via **Cloudflare Workers** (API routing) and **VM/container backend** (heavy processing).
 
-| Service | Role |
-| :---- | :---- |
-| **Ingestion Service** | Periodically fetches and parses new XML from Federal Register |
-| **XML Parser** | Extracts structured sections for processing |
-| **Indexer** | Embeds text chunks and stores in FAISS |
-| **RAG Query Engine** | Handles query → retrieve → LLM → respond pipeline |
-| **Clarification Engine** | Triggers follow-up prompts if user input is vague |
-| **Cache Manager** | Reads/writes result cache to reduce LLM load |
+| Service | Role | Implementation |
+| :---- | :---- | :---- |
+| **Ingestion Service** | Periodically fetches and parses new XML from Federal Register | `AutoUpdatePipeline` class |
+| **XML Parser** | Extracts structured sections for processing | `XMLChunker` and `IncrementalChunker` classes |
+| **Indexer** | Embeds text chunks and stores in FAISS | `IncrementalFAISS` class |
+| **RAG Query Engine** | Handles query → retrieve → LLM → respond pipeline | `ChatSearchService` class |
+| **Comparison Engine** | Performs document-to-document comparisons | `SectionBySectionRuleComparator` class |
+| **Summary Generator** | Creates executive summaries and FQA | `SummaryGenerator` class |
+| **Cache Manager** | Reads/writes result cache to reduce LLM load | Built-in caching in main.py |
 
 ## 6.3 Data Storage
 
-| Component | Purpose |
-| :---- | :---- |
-| **FAISS Vector Index** | Stores text chunk embeddings for similarity search |
-| **Regulation XML Store** | Source-of-truth for parsed documents |
-| **Result Cache** | Stores generated outputs (summaries, Q\&A, comparisons) keyed by hash |
-| **Chat History DB** | Maintains user-level and document-level conversation history |
+| Component | Purpose | Location |
+| :---- | :---- | :---- |
+| **FAISS Vector Index** | Stores text chunk embeddings for similarity search | `rag_data/faiss.index` |
+| **FAISS Metadata** | Stores chunk metadata and document information | `rag_data/faiss_metadata.json` |
+| **Chunks Store** | Stores processed text chunks with metadata | `rag_data/chunks.json` |
+| **Regulation XML Store** | Source-of-truth for parsed documents | `data/` directory |
+| **Summary Cache** | Stores generated executive summaries | `summary_outputs/` directory |
+| **Result Cache** | Stores generated outputs (Q\&A, comparisons) keyed by hash | In-memory with persistence |
+| **Processed Files Tracker** | Tracks processed files for incremental updates | `rag_data/processed_files.json` |
 
 # 7\. Functions Design
 

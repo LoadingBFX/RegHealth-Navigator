@@ -1,25 +1,27 @@
 """
-Search Service - Core of Q&A System
-Main functionality: Receive user query, return relevant document chunks
-Earlier Authors (Daisy, Dhruv)
-Modified by : Saicharan Emmadi
+search.py
 
-Steps followed :
-    1) Query processing
-        1.1) Moderation
-        1.2) Classify - Q&A, Summary, Compare
-    2) Find relevant chunks
-        2.1) Use filters
-        2.2) Generate embeddings for query
-        2.3) Use Heuristic search (TODO)
-        2.4) Use similarity search on FAISS
-        2.5) Return relevant chunks
-    3) Q&A
-        3.1) Define prompt
-        3.2) Generate response
-        3.3) Prepare citations/sources
-        3.4) Compute Confidence
-    4) Summary (TODO)
+Search Service - Core of Q&A System
+Main functionality: Receive user query, return relevant document chunks with citations.
+
+Functionality:
+- Semantic search using FAISS vector index
+- Document filtering by source file
+- OpenAI GPT-4 integration for answer generation
+- Citation extraction and source management
+- Hybrid search (dense + sparse) capabilities
+- Query moderation and confidence scoring
+
+Process Flow:
+1. Query processing and moderation
+2. Generate query embeddings using OpenAI
+3. Search FAISS index for relevant chunks
+4. Apply document filters if specified
+5. Generate answer using GPT-4 with context
+6. Extract citations and source information
+7. Return structured response with confidence score
+
+Author: Daisy
 """
 import sys
 import os

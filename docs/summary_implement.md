@@ -25,7 +25,7 @@ Key features:
 The core summarization engine that handles the actual document processing:
 
 **Key Components:**
-- **Chunk Processing**: Splits document chunks into manageable batches (default: 5 chunks per batch)
+- **Chunk Processing**: Splits document chunks into manageable batches (default: 20 chunks per batch)
 - **OpenAI Integration**: Uses GPT-4o-mini for both batch summarization and final report synthesis
 - **Async Processing**: Supports concurrent batch processing with rate limiting (3 concurrent requests)
 - **Token Management**: Accurate token counting with tiktoken, automatic segmentation for large documents
@@ -42,7 +42,7 @@ class SummaryGenerator:
 
 **Processing Flow:**
 1. Load document chunks from `rag_data/chunks.json`
-2. Split into batches of 5 chunks each
+2. Split into batches of 20 chunks each (configurable)
 3. Process each batch with OpenAI (extract topics, key changes, stakeholders)
 4. Cache batch results in `summary_outputs/batch_cache/<file>/`
 5. Synthesize final executive summary (single or segmented based on token count)
@@ -85,12 +85,12 @@ Provides the API layer and UI components for summary access and display:
 ```python
 # List available summaries (only documents with generated summaries)
 GET /api/available-summaries
-Response: {"summaries": [{"id": "...", "title": "...", "program": "...", "year": "...", "type": "..."}]}
+Response: {"summaries": [{"id": "...", "name": "...", "program": "...", "year": "...", "type": "...", "size": "...", "date": "..."}]}
 
 # Get specific summary content
 POST /api/get-summary
 Request: {"doc_name": "2024_MPFS_final_2023-24184"}
-Response: {"summary": {"title": "...", "content": "...", "source": "generated_summary"}}
+Response: {"summary": {"title": "...", "document_name": "...", "content": "...", "source": "generated_summary", "summary_path": "..."}}
 ```
 
 **Frontend Components:**
@@ -103,8 +103,8 @@ Response: {"summary": {"title": "...", "content": "...", "source": "generated_su
 1. Frontend calls `/api/available-summaries` to get document list
 2. User selects a document from the list
 3. Frontend calls `/api/get-summary` with document name
-4. Backend reads Markdown file and returns content
-5. Frontend renders Markdown with custom styling
+4. Backend reads Markdown file and returns content (or generates placeholder if not found)
+5. Frontend renders Markdown with custom styling using `react-markdown` and `remark-gfm`
 
 ---
 
@@ -210,7 +210,7 @@ OPENAI_API_KEY=your_openai_key
 ```
 
 ### Configurable Parameters
-- **Batch Size**: Number of chunks per batch (default: 5)
+- **Batch Size**: Number of chunks per batch (default: 20)
 - **Model**: OpenAI model for summarization (default: gpt-4o-mini)
 - **Concurrency**: Number of concurrent API calls (default: 3)
 - **Token Limits**: Maximum tokens for single final report (default: 80,000)
@@ -220,6 +220,8 @@ OPENAI_API_KEY=your_openai_key
 - **API Failures**: Retry logic and partial result preservation
 - **Token Limits**: Automatic segmentation for large documents
 - **File Corruption**: Validation and recovery mechanisms
+- **Missing Summaries**: Placeholder summaries generated for documents without existing summaries
+- **File Not Found**: Graceful handling when summary files don't exist
 
 ---
 

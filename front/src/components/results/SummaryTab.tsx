@@ -129,7 +129,7 @@ const SummaryTab: React.FC = () => {
         setDocuments(data.summaries || []);
       } catch (err) {
         console.error('Error fetching documents:', err);
-        setError('Failed to load documents. Please try again.');
+        setError('Daisy\'s cat seems to have hidden our documents! Seon, Sai, Sarvesh, Dhruv and Fanxing are searching for them. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -259,7 +259,7 @@ const SummaryTab: React.FC = () => {
       
     } catch (err) {
       console.error('Error loading summary:', err);
-      setError('Failed to load summary. Please try again.');
+      setError('Daisy\'s cat ran away with the summary! Seon, Sai, Sarvesh, Dhruv and Fanxing are chasing after it. Please try again.');
     } finally {
       setLoading(false);
     }

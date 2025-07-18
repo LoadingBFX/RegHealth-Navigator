@@ -337,6 +337,7 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch (error) {
       console.error('Error fetching files:', error);
       // Keep using sample files if API fails
+      console.log("Daisy's cat seems to have hidden our files! Seon, Sai, Sarvesh, Dhruv and Fanxing are looking for them...");
     } finally {
       set({ isLoading: false });
     }
@@ -383,7 +384,7 @@ export const useStore = create<StoreState>((set, get) => ({
       set({ comparisonResult: result });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      set({ comparisonError: errorMessage });
+      set({ comparisonError: `Daisy's cat interrupted our comparison! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: ${errorMessage}` });
     } finally {
       set({ isComparing: false });
     }

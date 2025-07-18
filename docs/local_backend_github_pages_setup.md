@@ -1,46 +1,46 @@
-# Local Backend + ngrok + GitHub Pages 完整启动流程
+# Local Backend + ngrok + GitHub Pages Complete Startup Process
 
-本文档详细说明如何设置 Local Backend + ngrok + GitHub Pages 的完整部署流程。
+This document provides detailed instructions on how to set up the complete deployment process for Local Backend + ngrok + GitHub Pages.
 
-## 🚀 快速启动流程
+## 🚀 Quick Startup Process
 
-### **1. 后端启动 (Local)**
+### **1. Backend Startup (Local)**
 ```bash
-# 激活conda环境
+# Activate conda environment
 conda activate capstone
 
-# 启动后端服务
+# Start backend service
 cd RegHealth-Navigator
 export FLASK_ENV=development
 python -m app.main
 ```
-✅ **后端运行在**: `http://127.0.0.1:8080`
+✅ **Backend running on**: `http://127.0.0.1:8080`
 
-### **2. 设置公网隧道 (ngrok)**
+### **2. Setup Public Tunnel (ngrok)**
 ```bash
-# 新终端窗口
+# New terminal window
 ngrok http 8080
 ```
-✅ **获得公网URL**: `https://xxxxx.ngrok-free.app`
+✅ **Get public URL**: `https://xxxxx.ngrok-free.app`
 
-### **3. 配置 GitHub Repository Secret**
-1. 访问: `https://github.com/LoadingBFX/RegHealth-Navigator/settings/secrets/actions`
-2. 编辑 `VITE_API_BASE_URL` secret
-3. 设置值为 ngrok URL: `https://xxxxx.ngrok-free.app`
+### **3. Configure GitHub Repository Secret**
+1. Visit: `https://github.com/LoadingBFX/RegHealth-Navigator/settings/secrets/actions`
+2. Edit the `VITE_API_BASE_URL` secret
+3. Set value to ngrok URL: `https://xxxxx.ngrok-free.app`
 
-### **4. 触发前端部署**
+### **4. Trigger Frontend Deployment**
 ```bash
-# 任意提交触发 GitHub Actions
+# Any commit triggers GitHub Actions
 git commit --allow-empty -m "Update API URL for deployment" && git push origin dev
 ```
 
-### **5. 访问部署的应用**
-- **前端**: `https://loadingbfx.github.io/RegHealth-Navigator/`
-- **后端API**: `https://xxxxx.ngrok-free.app`
+### **5. Access Deployed Application**
+- **Frontend**: `https://loadingbfx.github.io/RegHealth-Navigator/`
+- **Backend API**: `https://xxxxx.ngrok-free.app`
 
 ---
 
-## 🔧 系统架构
+## 🔧 System Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
@@ -53,31 +53,31 @@ git commit --allow-empty -m "Update API URL for deployment" && git push origin d
 
 ---
 
-## 📝 详细配置
+## 📝 Detailed Configuration
 
-### **后端配置**
+### **Backend Configuration**
 
-#### CORS 设置 (`app/config/development.yml`)
+#### CORS Settings (`app/config/development.yml`)
 ```yaml
 cors:
   origins:
-    - http://localhost:5173          # 本地开发
-    - http://127.0.0.1:5173         # 本地开发
+    - http://localhost:5173          # Local development
+    - http://127.0.0.1:5173         # Local development
     - https://*.github.io           # GitHub Pages
-    - https://loadingbfx.github.io/RegHealth-Navigator  # 具体项目URL
-    - https://*.ngrok.io            # ngrok 隧道
-    - https://*.loca.lt             # localtunnel (备用)
+    - https://loadingbfx.github.io/RegHealth-Navigator  # Specific project URL
+    - https://*.ngrok.io            # ngrok tunnel
+    - https://*.loca.lt             # localtunnel (backup)
 ```
 
-#### 必需的环境变量
+#### Required Environment Variables
 ```bash
 export OPENAI_API_KEY="your-openai-api-key"
 export FLASK_ENV="development"
 ```
 
-### **前端配置**
+### **Frontend Configuration**
 
-#### GitHub Actions 工作流 (`.github/workflows/deploy.yml`)
+#### GitHub Actions Workflow (`.github/workflows/deploy.yml`)
 ```yaml
 name: Deploy to GitHub Pages
 
@@ -124,7 +124,7 @@ jobs:
         publish_dir: ./front/dist
 ```
 
-#### 前端 API 配置 (`front/src/config/index.ts`)
+#### Frontend API Configuration (`front/src/config/index.ts`)
 ```typescript
 export const config = {
   api: {
@@ -138,121 +138,101 @@ export const config = {
 
 ---
 
-## 🔄 完整启动检查清单
+## 🔄 Complete Startup Checklist
 
-### **初次设置**
-- [ ] conda 环境已创建并激活
-- [ ] 后端依赖已安装 (`pip install -r requirements.txt`)
-- [ ] OpenAI API Key 已设置
-- [ ] ngrok 已安装并配置
-- [ ] GitHub repository secrets 已配置
+### **Initial Setup**
+- [ ] conda environment created and activated
+- [ ] Backend dependencies installed (`pip install -r requirements.txt`)
+- [ ] OpenAI API Key configured
+- [ ] ngrok installed and configured
+- [ ] GitHub repository secrets configured
 
-### **每次启动**
-- [ ] 后端服务运行在 `http://127.0.0.1:8080`
-- [ ] ngrok 隧道已建立
-- [ ] GitHub secret `VITE_API_BASE_URL` 已更新为当前 ngrok URL
-- [ ] 前端已重新部署
-- [ ] 应用可通过 GitHub Pages URL 访问
-
----
-
-## ⚠️ 注意事项与限制
-
-### **ngrok 免费版限制**
-- **会话时间**: 免费版有会话时间限制
-- **URL 变化**: 每次重启都会获得新的随机 URL
-- **访问警告**: 首次访问可能显示 ngrok 警告页面，需点击 "Visit Site"
-
-### **后端注意事项**
-- **CORS 配置**: 任何新的前端域名都需要添加到 CORS 配置中
-- **重启需求**: 修改配置文件后需要重启后端服务
-- **日志监控**: 建议监控后端日志以排查问题
-
-### **前端部署**
-- **构建时间**: GitHub Actions 构建通常需要 2-3 分钟
-- **缓存问题**: 浏览器可能缓存旧版本，需要硬刷新 (Ctrl+F5)
-- **环境变量**: 确保 `VITE_API_BASE_URL` secret 正确设置
+### **Every Startup**
+- [ ] Backend service running on `http://127.0.0.1:8080`
+- [ ] ngrok tunnel established
+- [ ] GitHub secret `VITE_API_BASE_URL` updated to current ngrok URL
+- [ ] Frontend redeployed
+- [ ] Application accessible via GitHub Pages URL
 
 ---
 
-## 🛠️ 故障排除
+## ⚠️ Notes and Limitations
 
-### **连接问题**
+### **ngrok Free Version Limitations**
+- **Session Time**: Free version has session time limits
+- **URL Changes**: Each restart gets a new random URL
+- **Access Warning**: First visit may show ngrok warning page, need to click "Visit Site"
+
+### **Backend Notes**
+- **CORS Configuration**: Any new frontend domain needs to be added to CORS configuration
+- **Restart Required**: Backend service needs restart after configuration changes
+- **Log Monitoring**: Recommended to monitor backend logs for troubleshooting
+
+### **Frontend Deployment**
+- **Build Time**: GitHub Actions build typically takes 2-3 minutes
+- **Cache Issues**: Browser may cache old version, need hard refresh (Ctrl+F5)
+- **Environment Variables**: Ensure `VITE_API_BASE_URL` secret is correctly set
+
+---
+
+## 🛠️ Troubleshooting
+
+### **Connection Issues**
 ```bash
-# 测试后端本地连接
+# Test backend local connection
 curl -X POST http://127.0.0.1:8080/api/simple-chat \
   -H "Content-Type: application/json" \
   -d '{"message": "test"}'
 
-# 测试 ngrok 连接
+# Test ngrok connection
 curl -X POST https://xxxxx.ngrok-free.app/api/simple-chat \
   -H "Content-Type: application/json" \
   -d '{"message": "test"}' \
   -H "ngrok-skip-browser-warning: true"
 ```
 
-### **常见错误**
+### **Common Errors**
 
 #### 1. "Unable to connect to the server"
-**原因**: ngrok URL 过期或未更新
-**解决**: 
-1. 检查 ngrok 是否还在运行
-2. 更新 GitHub repository secret
-3. 重新触发部署
+**Cause**: ngrok URL expired or not updated
+**Solution**: 
+1. Check if ngrok is still running
+2. Update GitHub repository secret
+3. Redeploy frontend
 
-#### 2. CORS 错误
-**原因**: 前端域名不在 CORS 允许列表中
-**解决**: 
-1. 检查 `app/config/development.yml` 中的 CORS 配置
-2. 重启后端服务
+#### 2. CORS Errors
+**Cause**: Frontend domain not in CORS configuration
+**Solution**: Add new domain to `app/config/development.yml` and restart backend
 
-#### 3. 前端白屏
-**原因**: JavaScript 错误或 API 响应格式问题
-**解决**: 
-1. 检查浏览器控制台错误
-2. 验证 API 响应格式
-3. 检查网络请求状态
-
-#### 4. GitHub Actions 部署失败
-**原因**: 环境变量未设置或构建错误
-**解决**: 
-1. 检查 GitHub Actions 日志
-2. 验证 `VITE_API_BASE_URL` secret 设置
-3. 确认 Node.js 依赖完整
+#### 3. Build Failures
+**Cause**: Environment variables not set correctly
+**Solution**: Check GitHub repository secrets and ensure `VITE_API_BASE_URL` is set
 
 ---
 
-## 📊 性能优化建议
+## 📊 Performance Monitoring
 
-### **后端优化**
-- 使用生产级 WSGI 服务器 (如 Gunicorn)
-- 配置请求日志和监控
-- 实现 API 响应缓存
+### **Backend Performance**
+- Monitor response times for API calls
+- Check memory usage during processing
+- Monitor OpenAI API usage and costs
 
-### **前端优化**
-- 启用 Vite 构建优化
-- 配置 CDN 加速
-- 实现前端缓存策略
-
-### **网络优化**
-- 使用 ngrok 付费版获得固定 URL
-- 考虑使用 Cloudflare Tunnel 作为替代
-- 配置请求压缩和优化
+### **Frontend Performance**
+- Monitor page load times
+- Check for JavaScript errors in browser console
+- Verify API calls are reaching the correct endpoint
 
 ---
 
-## 🔗 相关文档
+## 🔄 Maintenance
 
-- [Deployment Guide](./deployment_guide.md) - 通用部署指南
-- [GitHub Actions 说明](./github_action_instruction.md) - GitHub Actions 详细说明
-- [Frontend Guide](./frontend_guide.md) - 前端开发指南
-- [Troubleshooting](../README.md#troubleshooting) - 问题排除指南
+### **Regular Tasks**
+- Update ngrok URL in GitHub secrets when it changes
+- Monitor backend logs for errors
+- Check GitHub Actions for deployment status
+- Update dependencies as needed
 
----
-
-## 📝 更新日志
-
-- **2025-07-08**: 初始版本，包含完整的 Local Backend + ngrok + GitHub Pages 流程
-- **修复问题**: 解决了 `ask_question` 方法返回值格式问题
-- **CORS 配置**: 完善了跨域访问配置
-- **部署优化**: 改进了 GitHub Actions 工作流配置
+### **Backup and Recovery**
+- Keep local copies of configuration files
+- Document any custom settings
+- Have backup deployment strategies ready

@@ -1,3 +1,29 @@
+"""
+compare.py
+
+Section-by-section rule comparison system for CMS regulations.
+Provides detailed analysis of changes between different versions of regulatory rules.
+
+Functionality:
+- Section-by-section comparison of CMS regulatory rules
+- Semantic similarity matching between rule sections
+- Detailed change analysis with impact assessment
+- FAISS-based chunk retrieval and similarity search
+- OpenAI GPT-4 integration for intelligent comparison
+- Token management and context optimization
+
+Process Flow:
+1. Parse comparison query to identify target rules
+2. Retrieve relevant chunks from FAISS index
+3. Organize chunks by section headers
+4. Find matching sections using semantic similarity
+5. Compare matched sections for changes and impact
+6. Analyze unmatched sections for unique content
+7. Generate comprehensive comparison report
+
+Author: Dhruv
+"""
+
 import openai
 import json
 import re

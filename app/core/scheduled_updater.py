@@ -3,6 +3,24 @@ scheduled_updater.py
 
 Scheduled updater that can be run periodically to check for and process new regulations.
 This script is designed to be run via cron or similar scheduling systems.
+
+Functionality:
+- Automated periodic regulation updates via cron jobs
+- Checks for new regulations from Federal Register
+- Downloads and processes new XML files automatically
+- Maintains update history and logging
+- Provides command-line interface for manual execution
+
+Process Flow:
+1. Check for new regulations using Federal Register API
+2. Download new XML files if available
+3. Process files through incremental pipeline
+4. Update FAISS index with new embeddings
+5. Generate summaries for new documents
+6. Log update results and maintain history
+7. Provide status reporting and error handling
+
+Author: Fanxing Bu
 """
 import os
 import sys

@@ -2,6 +2,26 @@
 main.py
 
 Flask app entry point for RegHealth Navigator backend.
+Provides RESTful API endpoints for chat, comparison, summarization, and document management.
+
+Functionality:
+- Flask web server with CORS configuration
+- RESTful API endpoints for all system features
+- Service initialization and dependency injection
+- Error handling and request validation
+- Document listing and summary management
+- Federal Register integration endpoints
+
+Process Flow:
+1. Initialize Flask application with CORS
+2. Load environment variables and API keys
+3. Initialize core services (ChatSearchService, SummaryGenerator, SectionBySectionRuleComparator)
+4. Register error handlers and API routes
+5. Handle incoming requests with proper validation
+6. Return structured JSON responses
+7. Provide comprehensive error handling
+
+Author: Sarvesh, Fanxing Bu
 """
 import sys
 import os
@@ -402,16 +422,16 @@ def register_error_handlers(app: Flask) -> None:
 
     @app.errorhandler(404)
     def not_found(error: HTTPException) -> tuple[Dict[str, str], int]:
-        return jsonify({"error": "Endpoint not found"}), 404
+        return jsonify({"error": "The page you're looking for seems to have wandered off with Daisy's cat. Maybe Seon, Sai, Sarvesh, Dhruv and Fanxing can help find it! (404 - Endpoint not found)"}), 404
 
     @app.errorhandler(500)
     def internal_error(error: HTTPException) -> tuple[Dict[str, str], int]:
         logger.error(f"Internal server error: {str(error)}")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": "Oops! Something went wrong on our end. Daisy's cat must have knocked over the server! Seon, Sai, Sarvesh, Dhruv and Fanxing are working to fix it. (500 - Internal server error)"}), 500
 
     @app.errorhandler(BadRequest)
     def handle_bad_request(error: BadRequest) -> tuple[Dict[str, str], int]:
-        return jsonify({"error": str(error)}), 400
+        return jsonify({"error": f"Looks like there's a typo in your request! Even Daisy's cat wouldn't make that mistake. {str(error)} (400 - Bad Request)"}), 400
 
 
 def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: SummaryGenerator, comparator: SectionBySectionRuleComparator) -> None:
@@ -465,7 +485,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return jsonify({"documents": documents})
         except Exception as e:
             logger.error(f"Error in documents endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Daisy's cat seems to have hidden our documents! Seon, Sai, Sarvesh, Dhruv and Fanxing are searching for them. Error: {str(e)}"}), 400
 
     @app.route("/api/chat", methods=["POST"])
     def chat() -> tuple[Dict[str, Any], int]:
@@ -531,7 +551,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             })
         except Exception as e:
             logger.error(f"Error in chat endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Daisy's cat interrupted our chat! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: {str(e)}"}), 400
 
     @app.route("/api/summarize", methods=["POST"])
     def summarize() -> tuple[Dict[str, str], int]:
@@ -554,7 +574,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return jsonify({"response": summary})
         except Exception as e:
             logger.error(f"Error in summarize endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Daisy's cat ran away with our summary! Seon, Sai, Sarvesh, Dhruv and Fanxing are chasing after it. Error: {str(e)}"}), 400
 
     @app.route("/api/get-summary", methods=["POST"])
     def api_get_summary() -> tuple[Dict[str, Any], int]:
@@ -578,7 +598,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return jsonify({"summary": summary})
         except Exception as e:
             logger.error(f"Error in get-summary endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Daisy's cat seems to have hidden that summary! Seon, Sai, Sarvesh, Dhruv and Fanxing are looking for it. Error: {str(e)}"}), 400
 
     @app.route("/api/available-summaries", methods=["GET"])
     def api_available_summaries() -> tuple[Dict[str, Any], int]:
@@ -595,7 +615,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return jsonify({"summaries": summaries})
         except Exception as e:
             logger.error(f"Error in available-summaries endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Daisy's cat seems to have hidden our summary list! Seon, Sai, Sarvesh, Dhruv and Fanxing are searching for it. Error: {str(e)}"}), 400
 
     @app.route("/api/federal-register/<doc_number>", methods=["GET"])
     def get_federal_register_info(doc_number: str) -> tuple[Dict[str, Any], int]:
@@ -644,7 +664,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return jsonify({"error": "Failed to fetch document information"}), 503
         except Exception as e:
             logger.error(f"Error in federal-register endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": f"Daisy's cat seems to have hidden the Federal Register info! Seon, Sai, Sarvesh, Dhruv and Fanxing are looking for it. Error: {str(e)}"}), 500
 
     @app.route("/api/compare", methods=["POST"])
     def compare() -> tuple[Dict[str, Any], int]:
@@ -655,7 +675,7 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             return response#jsonify({"response": response})
         except Exception as e:
             logger.error(f"Error in summarize endpoint: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": f"Daisy's cat interrupted our comparison! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: {str(e)}"}), 500
 
 def main() -> None:
     """Main entry point for the Flask application."""

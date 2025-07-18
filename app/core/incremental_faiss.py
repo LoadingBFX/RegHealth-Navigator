@@ -3,6 +3,26 @@ incremental_faiss.py
 
 Enhanced FAISS index manager with CRUD operations for embeddings.
 Provides atomic operations for adding, updating, and removing embeddings with proper error handling.
+
+Functionality:
+- Incremental FAISS index management with CRUD operations
+- OpenAI embedding generation with rate limiting
+- Token management and cost estimation
+- Batch processing with error handling and retries
+- Metadata synchronization with FAISS index
+- File-level embedding operations (add/update/remove)
+- System validation and consistency checking
+
+Process Flow:
+1. Load existing FAISS index and metadata
+2. Process chunks through OpenAI embedding API
+3. Handle rate limiting with exponential backoff
+4. Update FAISS index with new embeddings
+5. Synchronize metadata with index changes
+6. Validate system consistency
+7. Provide cost tracking and status reporting
+
+Author: Fanxing Bu
 """
 import json
 import os

@@ -70,7 +70,7 @@ const ComparisonTab: React.FC = () => {
         const errorMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant' as const,
-          content: `I encountered an error while performing the comparison: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again or refine your query.`
+          content: `Daisy's cat interrupted our comparison analysis! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it and get back to work. Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again or refine your query.`
         };
         setMessages(prev => [...prev, errorMessage]);
       }

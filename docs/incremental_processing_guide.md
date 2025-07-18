@@ -9,8 +9,11 @@ The incremental processing system consists of several components:
 1. **IncrementalChunker** (`incremental_chunker.py`) - Processes new XML files into chunks
 2. **IncrementalFAISS** (`incremental_faiss.py`) - Updates FAISS index with new embeddings
 3. **IncrementalPipeline** (`incremental_pipeline.py`) - Orchestrates the complete workflow
-4. **AutoUpdatePipeline** (`auto_update_pipeline.py`) - **NEW**: Automated regulation fetching and processing
-5. **ScheduledUpdater** (`scheduled_updater.py`) - **NEW**: For periodic automated updates
+4. **AutoUpdatePipeline** (`auto_update_pipeline.py`) - **NEW**: Automated regulation fetching and processing (depends on IncrementalPipeline)
+5. **ScheduledUpdater** (`scheduled_updater.py`) - **NEW**: For periodic automated updates (depends on AutoUpdatePipeline)
+
+> **Component Dependency:**
+> - `ScheduledUpdater` → `AutoUpdatePipeline` → `IncrementalPipeline` → `IncrementalChunker`/`IncrementalFAISS`
 
 ## Prerequisites
 
@@ -461,7 +464,17 @@ The system maintains a `processed_files.json` file that tracks:
 - Processing timestamps
 - Number of chunks created per file
 
-This file is automatically updated when files are processed.
+**Sample `processed_files.json` entry:**
+```json
+{
+  "MPFS/2024_MPFS_final_2023-24184.xml": {
+    "hash": "e3b0c442...",
+    "chunks_count": 45,
+    "processed_at": "2024-06-10T12:34:56",
+    "file_size": 123456
+  }
+}
+```
 
 ## Cost Management
 
@@ -470,6 +483,11 @@ The system provides cost estimates for each processing run:
 - Token count for new chunks
 - Estimated OpenAI API cost
 - Per-file cost breakdown
+
+**Embedding model pricing (as of 2024-06):**
+- `text-embedding-3-small`: $0.00002 per 1K tokens
+- `text-embedding-ada-002`: $0.0001 per 1K tokens
+- `text-embedding-3-large`: $0.00013 per 1K tokens
 
 Example output:
 ```
@@ -525,6 +543,11 @@ For production use:
 - Monitor update logs
 - Review update history regularly
 - Set up alerts for failed updates
+
+**Recommended crontab example:**
+```
+0 2 * * * cd /path/to/RegHealth-Navigator/app/core && python scheduled_updater.py --days 365 >> /path/to/logs/update.log 2>&1
+```
 
 ### 5. Incremental vs Full Processing
 
@@ -610,6 +633,8 @@ Logs are written to:
 - stdout for interactive use
 - `rag_data/logs/update_YYYYMMDD.log` for scheduled updates
 - `rag_data/update_history.json` for update history
+
+> **Tip:** For troubleshooting, check the latest log file in `rag_data/logs/` and update history in `rag_data/update_history.json`.
 
 ## Automation Examples
 

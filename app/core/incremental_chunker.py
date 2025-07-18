@@ -3,6 +3,25 @@ incremental_chunker.py
 
 Incremental XML chunking based on optimized XMLChunker.
 Provides CRUD operations for individual XML files with change detection and tracking.
+
+Functionality:
+- Incremental XML file processing with change detection
+- CRUD operations for individual XML files
+- Hash-based change tracking and file monitoring
+- Metadata inference from filenames
+- Chunk management and persistence
+- Deleted file cleanup and tracking
+
+Process Flow:
+1. Scan data directory for XML files
+2. Calculate file hashes for change detection
+3. Process new/modified files through XMLChunker
+4. Update chunk metadata with program/year/rule_type
+5. Save chunks to JSON file with tracking information
+6. Clean up chunks for deleted files
+7. Maintain processed files tracking
+
+Author: Fanxing Bu
 """
 import os
 import json
