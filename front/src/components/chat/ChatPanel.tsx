@@ -295,7 +295,7 @@ const ChatPanel: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-teal-50 to-blue-50">
+            <div className="p-6">
                 <div className="max-w-2xl mx-auto">
                     <form onSubmit={handleSubmit} className="flex gap-3 bg-white rounded-2xl shadow-2xl p-2 border border-teal-200">
                         <div className="relative flex-1">

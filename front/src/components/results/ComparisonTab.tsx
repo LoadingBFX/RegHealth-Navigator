@@ -182,7 +182,7 @@ const ComparisonTab: React.FC = () => {
       
       {/* Input */}
       {!comparisonResult && (
-        <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+        <div className="p-6">
           <div className="max-w-2xl mx-auto">
             <form onSubmit={handleSubmit} className="flex items-center space-x-3 bg-white rounded-2xl shadow-2xl p-2 border border-yellow-200">
               <input
