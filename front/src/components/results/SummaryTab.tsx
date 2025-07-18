@@ -193,22 +193,22 @@ const SummaryTab: React.FC = () => {
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-neutral-200 bg-white">
-        <div className="flex items-center">
-          <div className="bg-pink-100 p-2 rounded-lg mr-3">
-            <FileText className="h-5 w-5 text-pink-600" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="bg-pink-100 p-2 rounded-lg mr-3">
+              <FileText className="h-5 w-5 text-pink-600" />
+            </div>
+            <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
           </div>
-          <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
-        </div>
-        <p className="text-sm text-neutral-500 mt-1">
-          Browse and review summaries of regulatory documents. Select a document for detailed analysis.
-        </p>
-        <div className="mt-3">
-          <div className="bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200 inline-block">
+          <div className="bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200">
             <p className="text-sm text-neutral-700 font-medium">
               {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
             </p>
           </div>
         </div>
+        <p className="text-sm text-neutral-500 mt-1">
+          Browse and review summaries of regulatory documents. Select a document for detailed analysis.
+        </p>
       </div>
       
       {/* Document Grid */}
@@ -232,22 +232,43 @@ const SummaryTab: React.FC = () => {
               <div className="text-neutral-500 text-lg">No documents found</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {currentFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="bg-white rounded-xl border border-neutral-200 p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                  className="bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden relative hover:shadow-lg"
+                  style={{
+                    borderColor: file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                                file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                                file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                                '#D3D3D3'
+                  }}
                   onClick={() => handleDocumentSelect(file.id)}
                 >
-                  <div className="text-center">
-                    <h3 className="text-sm font-medium text-neutral-800 leading-tight">
-                      <span>{file.year}</span>
-                      <span className="mx-1.5 text-neutral-400">•</span>
-                      <span>{file.program}</span>
-                      <span className="mx-1.5 text-neutral-400">•</span>
-                      <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
-                    </h3>
+                  <div className="p-4">
+                    {/* 文件名 */}
+                    <div className="text-center">
+                      <h3 className="text-sm font-medium text-gray-800 leading-tight flex items-center justify-center">
+                        <span>{file.year}</span>
+                        <span className="mx-1.5 text-gray-400">•</span>
+                        <span>{file.program}</span>
+                        <span className="mx-1.5 text-gray-400">•</span>
+                        <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                      </h3>
+                    </div>
                   </div>
+                  
+                  {/* 右下角类型指示条 */}
+                  <div 
+                    className="absolute bottom-0 right-0 w-8 h-1.5 rounded-tl-lg"
+                    style={{
+                      backgroundColor: 
+                        file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                        file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                        file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                        '#D3D3D3'
+                    }}
+                  ></div>
                 </div>
               ))}
             </div>
