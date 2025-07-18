@@ -35,6 +35,7 @@ const SummaryTab: React.FC = () => {
   } = useStore();
   
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentSummaries, setDocumentSummaries] = useState<{[key: string]: string}>({});
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [selectedSummary, setSelectedSummary] = useState<Summary | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,6 +105,37 @@ const SummaryTab: React.FC = () => {
   }, []);
   
   const selectedDocument = selectedDocumentId ? documents.find(f => f.id === selectedDocumentId) : null;
+
+  // Function to fetch summary for a single document
+  const fetchDocumentSummary = async (documentId: string) => {
+    if (documentSummaries[documentId]) return; // Already fetched
+    
+    try {
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.getSummary}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          doc_name: documentId
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.summary?.content) {
+        setDocumentSummaries(prev => ({
+          ...prev,
+          [documentId]: data.summary.content
+        }));
+      }
+    } catch (err) {
+      console.error('Error loading summary for document:', documentId, err);
+    }
+  };
   
   const handleDownloadSummary = () => {
     if (!selectedSummary) return;
@@ -275,12 +307,34 @@ const SummaryTab: React.FC = () => {
                   {/* 下部分：摘要内容 (约62% - 黄金分割的大部分) */}
                   <div className="p-6 pt-4">
                     <div className="text-sm text-neutral-700 leading-relaxed line-clamp-6">
-                      <p className="text-neutral-600 leading-relaxed">
-                        This document contains regulatory information for {file.program} in {file.year}. 
-                        The {file.type.toLowerCase()} rule includes updates to payment methodologies, 
-                        coverage policies, and administrative procedures. Click to view the complete summary 
-                        and detailed analysis of all regulatory changes.
-                      </p>
+                      {documentSummaries[file.id] ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({node, ...props}) => <p className="text-neutral-700 leading-relaxed mb-2" {...props} />,
+                              strong: ({node, ...props}) => <strong className="font-semibold text-neutral-800" {...props} />,
+                              em: ({node, ...props}) => <em className="italic text-neutral-700" {...props} />,
+                              ul: ({node, ...props}) => <ul className="list-disc list-inside text-neutral-700 mb-2 space-y-1" {...props} />,
+                              ol: ({node, ...props}) => <ol className="list-decimal list-inside text-neutral-700 mb-2 space-y-1" {...props} />,
+                            }}
+                          >
+                            {documentSummaries[file.id].length > 150 ? documentSummaries[file.id].substring(0, 150) + '...' : documentSummaries[file.id]}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchDocumentSummary(file.id);
+                            }}
+                            className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
+                          >
+                            Click to load summary
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
