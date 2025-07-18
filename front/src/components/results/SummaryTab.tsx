@@ -316,7 +316,7 @@ const SummaryTab: React.FC = () => {
                   </div>
                   
                   {/* 下部分：摘要内容 (约62% - 黄金分割的大部分) */}
-                  <div className="p-6 pt-4">
+                  <div className="p-6 pt-4 relative">
                     <div className="text-sm text-neutral-700 leading-relaxed line-clamp-6">
                       {documentSummaries[file.id] ? (
                         <div className="prose prose-sm max-w-none">
@@ -338,6 +338,13 @@ const SummaryTab: React.FC = () => {
                           <div className="text-neutral-400 text-sm">Loading summary...</div>
                         </div>
                       )}
+                    </div>
+                    
+                    {/* 右下角 Click 引导 */}
+                    <div className="absolute bottom-2 right-2">
+                      <div className="bg-neutral-100 text-neutral-600 text-xs px-2 py-1 rounded-full opacity-70 group-hover:opacity-100 transition-opacity">
+                        Click
+                      </div>
                     </div>
                   </div>
                 </div>
