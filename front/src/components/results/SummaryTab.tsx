@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../../store/store';
-import { RefreshCw, Download, Copy, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RefreshCw, Download, Copy, FileText, ChevronLeft, ChevronRight, Search, Filter } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import config from '../../config';
@@ -40,13 +40,45 @@ const SummaryTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState('all');
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+  const [isGridView, setIsGridView] = useState(true);
   const itemsPerPage = 10;
   
-  // Pagination logic
-  const totalPages = Math.ceil(documents.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentFiles = documents.slice(startIndex, endIndex);
+  // Filter and search logic
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesProgram = selectedProgram === 'all' || doc.program === selectedProgram;
+      const matchesYear = selectedYear === 'all' || doc.year === selectedYear;
+      const matchesType = selectedType === 'all' || doc.type === selectedType;
+      
+      return matchesSearch && matchesProgram && matchesYear && matchesType;
+    });
+  }, [documents, searchTerm, selectedProgram, selectedYear, selectedType]);
+  
+  // Get unique values for filters
+  const uniquePrograms = useMemo(() => [...new Set(documents.map(doc => doc.program))], [documents]);
+  const uniqueYears = useMemo(() => [...new Set(documents.map(doc => doc.year))].sort().reverse(), [documents]);
+  const uniqueTypes = useMemo(() => [...new Set(documents.map(doc => doc.type))], [documents]);
+  
+  // Pagination logic for grid view
+  const itemsPerPageGrid = 12; // More items per page for grid
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPageGrid);
+  const startIndex = (currentPage - 1) * itemsPerPageGrid;
+  const endIndex = startIndex + itemsPerPageGrid;
+  const currentFiles = filteredDocuments.slice(startIndex, endIndex);
+  
+  // Pagination for split view sidebar
+  const currentFilesSidebar = filteredDocuments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedProgram, selectedYear, selectedType]);
   
   // Fetch documents from backend
   useEffect(() => {
@@ -73,54 +105,29 @@ const SummaryTab: React.FC = () => {
   
   const selectedDocument = selectedDocumentId ? documents.find(f => f.id === selectedDocumentId) : null;
   
-  const handleGenerateSummary = async () => {
-    if (!selectedDocumentId) return;
+  const handleDownloadSummary = () => {
+    if (!selectedSummary) return;
     
-    setProcessing(true);
-    setProcessingProgress(0);
-    
-    try {
-      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.getSummary}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          doc_name: selectedDocumentId
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setSelectedSummary(data.summary);
-      
-      // Simulate progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        setProcessingProgress(progress);
-        
-        if (progress >= 100) {
-          clearInterval(interval);
-          setProcessing(false);
-          setProcessingProgress(0);
-        }
-      }, 100);
-      
-    } catch (err) {
-      console.error('Error generating summary:', err);
-      setProcessing(false);
-      setProcessingProgress(0);
-      setError('Failed to generate summary. Please try again.');
-    }
+    const blob = new Blob([selectedSummary.content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedSummary.title || 'summary'}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
   
-  const handleCopySummary = () => {
-    if (selectedSummary?.content) {
-      navigator.clipboard.writeText(selectedSummary.content);
+  const handleCopySummary = async () => {
+    if (!selectedSummary?.content) return;
+    
+    try {
+      await navigator.clipboard.writeText(selectedSummary.content);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy summary:', err);
     }
   };
 
@@ -150,11 +157,10 @@ const SummaryTab: React.FC = () => {
 
   const handleDocumentSelect = async (documentId: string) => {
     setSelectedDocumentId(documentId);
-    setSelectedSummary(null); // Clear previous summary
-    
-    // Auto-generate summary when document is selected
-    setProcessing(true);
-    setProcessingProgress(0);
+    setSelectedSummary(null);
+    setError(null);
+    setLoading(true);
+    setIsGridView(false); // Switch to split view
     
     try {
       const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.getSummary}`, {
@@ -174,48 +180,299 @@ const SummaryTab: React.FC = () => {
       const data = await response.json();
       setSelectedSummary(data.summary);
       
-      // Simulate progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        setProcessingProgress(progress);
-        
-        if (progress >= 100) {
-          clearInterval(interval);
-          setProcessing(false);
-          setProcessingProgress(0);
-        }
-      }, 100);
-      
     } catch (err) {
-      console.error('Error generating summary:', err);
-      setProcessing(false);
-      setProcessingProgress(0);
-      setError('Failed to generate summary. Please try again.');
+      console.error('Error loading summary:', err);
+      setError('Failed to load summary. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
+  // Grid view for all documents
+  const renderGridView = () => (
+    <div className="flex-1 p-6 bg-gray-50 overflow-y-auto h-full">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-neutral-800 mb-2">Document Summaries</h2>
+        <p className="text-neutral-600">
+          {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
+        </p>
+        
+        {/* Search and Filters */}
+        <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
+          <div className="relative mb-4">
+            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search documents..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <select
+              value={selectedProgram}
+              onChange={(e) => setSelectedProgram(e.target.value)}
+              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">All Programs</option>
+              {uniquePrograms.map(program => (
+                <option key={program} value={program}>{program}</option>
+              ))}
+            </select>
+            
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">All Years</option>
+              {uniqueYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="p-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">All Types</option>
+              {uniqueTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      {/* Document Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
+        {loading ? (
+          [...Array(8)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 animate-pulse">
+              <div className="flex items-start justify-between mb-4">
+                <div className="h-5 bg-neutral-200 rounded w-3/4"></div>
+                <div className="flex space-x-2">
+                  <div className="w-3 h-3 bg-neutral-200 rounded-full"></div>
+                  <div className="w-3 h-3 bg-neutral-200 rounded-full"></div>
+                </div>
+              </div>
+              <div className="space-y-2 mb-4">
+                <div className="h-3 bg-neutral-200 rounded w-full"></div>
+                <div className="h-3 bg-neutral-200 rounded w-2/3"></div>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="h-4 bg-neutral-200 rounded w-16"></div>
+                <div className="h-4 bg-neutral-200 rounded w-12"></div>
+              </div>
+            </div>
+          ))
+        ) : error ? (
+          <div className="col-span-full text-center py-12">
+            <div className="text-red-500 text-lg">{error}</div>
+          </div>
+        ) : filteredDocuments.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <div className="text-neutral-500 text-lg">No documents found</div>
+          </div>
+        ) : (
+          currentFiles.map((file) => (
+            <div
+              key={file.id}
+              className="bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden relative hover:shadow-lg"
+              style={{
+                borderColor: file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                            file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                            file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                            '#D3D3D3'
+              }}
+              onClick={() => handleDocumentSelect(file.id)}
+            >
+              <div className="p-4">
+                {/* 文件名 */}
+                <div className="text-center">
+                  <h3 className="text-sm font-medium text-gray-800 leading-tight flex items-center justify-center">
+                    <span>{file.year}</span>
+                    <span className="mx-1.5 text-gray-400">•</span>
+                    <span>{file.program}</span>
+                    <span className="mx-1.5 text-gray-400">•</span>
+                    <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                  </h3>
+                </div>
+              </div>
+              
+              {/* 右下角类型指示条 */}
+              <div 
+                className="absolute bottom-0 right-0 w-8 h-1.5 rounded-tl-lg"
+                style={{
+                  backgroundColor: 
+                    file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                    file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                    file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                    '#D3D3D3'
+                }}
+              ></div>
+            </div>
+          ))
+        )}
+      </div>
+      
+      {/* Pagination for Grid View - Only show if more than one page */}
+      {filteredDocuments.length > itemsPerPageGrid && (
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </button>
+            
+            <div className="flex space-x-1">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let page;
+                if (totalPages <= 5) {
+                  page = i + 1;
+                } else if (currentPage <= 3) {
+                  page = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  page = totalPages - 4 + i;
+                } else {
+                  page = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`px-3 py-2 text-sm rounded-lg ${
+                      currentPage === page
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-white border border-neutral-300 hover:bg-neutral-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+  
+  // Split view for selected document
+  const renderSplitView = () => (
     <div className="flex-1 flex h-full">
       {/* Left Sidebar - Document List (20%) */}
       <div className="w-1/5 bg-white border-r border-neutral-200 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-neutral-200">
+          <button
+            onClick={() => {
+              setIsGridView(true);
+              setSelectedDocumentId(null);
+              setSelectedSummary(null);
+            }}
+            className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-lg transition-colors mb-3 text-sm"
+          >
+            ← Back to Grid
+          </button>
           <h3 className="text-lg font-medium text-neutral-800 flex items-center">
             <FileText className="h-5 w-5 mr-2 text-primary-600" />
             Documents
           </h3>
           <p className="text-sm text-neutral-500 mt-1">
-            {loading ? 'Loading...' : `${documents.length} documents available`}
+            {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents`}
           </p>
+          
+          {/* Search */}
+          <div className="mt-3 relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search documents..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+          
+          {/* Filters */}
+          <div className="mt-3 space-y-2">
+            <select
+              value={selectedProgram}
+              onChange={(e) => setSelectedProgram(e.target.value)}
+              className="w-full p-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="all">All Programs</option>
+              {uniquePrograms.map(program => (
+                <option key={program} value={program}>{program}</option>
+              ))}
+            </select>
+            
+            <div className="flex space-x-2">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="flex-1 p-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="all">All Years</option>
+                {uniqueYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="flex-1 p-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="all">All Types</option>
+                {uniqueTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
         
         {/* Document List */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-2">
+          <div className="p-3">
             {loading ? (
-              <div className="p-4 text-center text-neutral-500">
-                Loading documents...
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg border border-neutral-200 p-4 animate-pulse">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="h-4 bg-neutral-200 rounded w-3/4"></div>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-neutral-200 rounded-full"></div>
+                        <div className="w-2 h-2 bg-neutral-200 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between mb-2">
+                      <div className="h-3 bg-neutral-200 rounded w-16"></div>
+                      <div className="h-3 bg-neutral-200 rounded w-12"></div>
+                    </div>
+                    <div className="h-3 bg-neutral-200 rounded w-24"></div>
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="p-4 text-center text-red-500">
@@ -226,34 +483,56 @@ const SummaryTab: React.FC = () => {
                 No documents found
               </div>
             ) : (
-              currentFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
-                    selectedDocumentId === file.id
-                      ? 'bg-primary-50 border border-primary-200'
-                      : 'hover:bg-neutral-50 border border-transparent'
-                  }`}
-                  onClick={() => handleDocumentSelect(file.id)}
-                >
-                  <h4 className="text-sm font-medium text-neutral-800 mb-1 line-clamp-2">
-                    {file.name}
-                  </h4>
-                  <div className="flex justify-between text-xs text-neutral-500">
-                    <span>{file.size}</span>
-                    <span>{file.year}</span>
+              <div className="space-y-3">
+                {currentFilesSidebar.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`bg-white rounded-xl border-2 transition-all duration-200 cursor-pointer relative overflow-hidden ${
+                      selectedDocumentId === file.id
+                        ? 'ring-2 ring-blue-200 shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    style={{
+                      borderColor: file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                                  file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                                  file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                                  '#D3D3D3'
+                    }}
+                    onClick={() => handleDocumentSelect(file.id)}
+                  >
+                    <div className="p-3">
+                      {/* 文件名 */}
+                      <div className="text-center">
+                        <h4 className="text-xs font-medium text-gray-800 leading-tight flex items-center justify-center">
+                          <span>{file.year}</span>
+                          <span className="mx-1 text-gray-400">•</span>
+                          <span>{file.program}</span>
+                          <span className="mx-1 text-gray-400">•</span>
+                          <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                        </h4>
+                      </div>
+                    </div>
+                    
+                    {/* 右下角类型指示条 */}
+                    <div 
+                      className="absolute bottom-0 right-0 w-6 h-1.5 rounded-tl"
+                      style={{
+                        backgroundColor: 
+                          file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                          file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                          file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                          '#D3D3D3'
+                      }}
+                    ></div>
                   </div>
-                  <div className="text-xs text-neutral-400 mt-1">
-                    {file.program} • {file.type}
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>
         
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {/* Sidebar Pagination */}
+        {Math.ceil(filteredDocuments.length / itemsPerPage) > 1 && (
           <div className="p-4 border-t border-neutral-200">
             <div className="flex items-center justify-between">
               <button
@@ -265,7 +544,7 @@ const SummaryTab: React.FC = () => {
               </button>
               
               <div className="flex space-x-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: Math.ceil(filteredDocuments.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => goToPage(page)}
@@ -282,7 +561,7 @@ const SummaryTab: React.FC = () => {
               
               <button
                 onClick={goToNextPage}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === Math.ceil(filteredDocuments.length / itemsPerPage)}
                 className="p-1 rounded hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -290,7 +569,7 @@ const SummaryTab: React.FC = () => {
             </div>
             
             <p className="text-xs text-neutral-500 text-center mt-2">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {Math.ceil(filteredDocuments.length / itemsPerPage)}
             </p>
           </div>
         )}
@@ -304,20 +583,65 @@ const SummaryTab: React.FC = () => {
             <div className="p-6 border-b border-neutral-200 bg-white">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-semibold text-neutral-800">Document Summary</h2>
-                  <p className="text-sm text-neutral-500 mt-1">
-                    {selectedDocument.year} • {selectedDocument.program} • {selectedDocument.type}
-                  </p>
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-2xl font-semibold text-gray-800">Document Summary</h2>
+                    <div 
+                      className="w-4 h-4 rounded-full"
+                      style={{
+                        backgroundColor: 
+                          selectedDocument.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                          selectedDocument.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                          selectedDocument.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                          '#D3D3D3'
+                      }}
+                      title={selectedDocument.type}
+                    ></div>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-sm font-medium text-gray-700 flex items-center">
+                      <span>{selectedDocument.year}</span>
+                      <span className="mx-2 text-gray-400">•</span>
+                      <span>{selectedDocument.program}</span>
+                      <span className="mx-2 text-gray-400">•</span>
+                      <span>{selectedDocument.type.toLowerCase().includes('final') ? 'Final' : selectedDocument.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                    </span>
+                  </div>
                 </div>
-                {/* Removed Copy, Download, and Refresh buttons */}
+                {selectedSummary && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleCopySummary}
+                      className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
+                        showCopySuccess 
+                          ? 'bg-green-100 text-green-700 border border-green-300' 
+                          : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                      }`}
+                    >
+                      <Copy className="h-4 w-4 mr-1" />
+                      {showCopySuccess ? 'Copied!' : 'Copy'}
+                    </button>
+                    <button
+                      onClick={handleDownloadSummary}
+                      className="flex items-center px-3 py-2 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
             {/* Summary Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-neutral-50">
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
               <div className="max-w-4xl mx-auto">
                 {selectedSummary ? (
-                  <div className="bg-white rounded-lg shadow-sm p-8">
+                  <div className="bg-white rounded-lg shadow-sm p-8 border-2" style={{
+                    borderColor: selectedDocument.type.toLowerCase().includes('final') ? '#FFB6C1' : 
+                                selectedDocument.type.toLowerCase().includes('proposed') ? '#FFE4B5' : 
+                                selectedDocument.type.toLowerCase().includes('notice') ? '#E6E6FA' : 
+                                '#D3D3D3'
+                  }}>
                     <div className="prose prose-lg max-w-none">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
@@ -354,8 +678,10 @@ const SummaryTab: React.FC = () => {
                     <div className="text-center text-neutral-500">
                       {error ? (
                         <div className="text-red-500">{error}</div>
+                      ) : loading ? (
+                        <div>Loading summary...</div>
                       ) : (
-                        <div>Generating summary...</div>
+                        <div>No summary available</div>
                       )}
                     </div>
                   </div>
@@ -364,21 +690,32 @@ const SummaryTab: React.FC = () => {
             </div>
           </>
         ) : (
-          /* No Document Selected */
+          /* Back to Grid Button */
           <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <button
+              onClick={() => {
+                setIsGridView(true);
+                setSelectedDocumentId(null);
+                setSelectedSummary(null);
+              }}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors mb-4"
+            >
+              ← Back to All Documents
+            </button>
             <div className="bg-primary-50 p-6 rounded-full mb-6">
               <FileText className="h-12 w-12 text-primary-700" />
             </div>
             <h3 className="text-2xl font-medium text-neutral-800 mb-4">Select a Document</h3>
             <p className="text-neutral-500 text-center max-w-md">
-              Choose a document from the list on the left to view its summary. 
-              The summary provides key insights and important information extracted from the document.
+              Choose a document from the list on the left to view its summary.
             </p>
           </div>
         )}
       </div>
     </div>
   );
+  
+  return isGridView ? renderGridView() : renderSplitView();
 };
 
 export default SummaryTab;
