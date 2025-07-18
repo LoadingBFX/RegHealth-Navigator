@@ -232,11 +232,11 @@ const SummaryTab: React.FC = () => {
               <div className="text-neutral-500 text-lg">No documents found</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden relative hover:shadow-lg"
+                  className="bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden relative hover:shadow-xl hover:scale-105"
                   style={{
                     borderColor: file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
                                 file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
@@ -245,30 +245,44 @@ const SummaryTab: React.FC = () => {
                   }}
                   onClick={() => handleDocumentSelect(file.id)}
                 >
-                  <div className="p-4">
-                    {/* 文件名 */}
+                  {/* 上部分：基本信息 (约38% - 黄金分割的小部分) */}
+                  <div className="p-6 pb-4 border-b border-neutral-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: 
+                            file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
+                            file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
+                            file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
+                            '#D3D3D3'
+                        }}
+                      ></div>
+                      <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                        {file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}
+                      </span>
+                    </div>
                     <div className="text-center">
-                      <h3 className="text-sm font-medium text-gray-800 leading-tight flex items-center justify-center">
-                        <span>{file.year}</span>
-                        <span className="mx-1.5 text-gray-400">•</span>
-                        <span>{file.program}</span>
-                        <span className="mx-1.5 text-gray-400">•</span>
-                        <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                      <h3 className="text-lg font-semibold text-neutral-800 mb-1">
+                        {file.program}
                       </h3>
+                      <p className="text-sm text-neutral-600">
+                        {file.year}
+                      </p>
                     </div>
                   </div>
                   
-                  {/* 右下角类型指示条 */}
-                  <div 
-                    className="absolute bottom-0 right-0 w-8 h-1.5 rounded-tl-lg"
-                    style={{
-                      backgroundColor: 
-                        file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
-                        file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
-                        file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
-                        '#D3D3D3'
-                    }}
-                  ></div>
+                  {/* 下部分：摘要内容 (约62% - 黄金分割的大部分) */}
+                  <div className="p-6 pt-4">
+                    <div className="text-sm text-neutral-700 leading-relaxed line-clamp-6">
+                      <p className="text-neutral-600 leading-relaxed">
+                        This document contains regulatory information for {file.program} in {file.year}. 
+                        The {file.type.toLowerCase()} rule includes updates to payment methodologies, 
+                        coverage policies, and administrative procedures. Click to view the complete summary 
+                        and detailed analysis of all regulatory changes.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
