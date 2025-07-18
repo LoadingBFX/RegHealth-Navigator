@@ -8,6 +8,7 @@ import config from '../../config';
 interface Document {
   id: string;
   name: string;
+  title?: string;  // Optional title field
   program: string;
   year: string;
   type: string;
@@ -49,10 +50,43 @@ const SummaryTab: React.FC = () => {
   const [isGridView, setIsGridView] = useState(true);
   const itemsPerPage = 10;
   
+  // Smart search tokenization and matching
+  const tokenizeSearch = (searchText: string): string[] => {
+    return searchText
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(token => token.length > 0)
+      .map(token => token.trim());
+  };
+
+  // Enhanced search logic with smart tokenization
+  const matchesSearchTokens = (doc: Document, searchTokens: string[]): boolean => {
+    if (searchTokens.length === 0) return true;
+    
+    // Create a searchable text from all document fields
+    const searchableText = [
+      doc.name,
+      doc.program,
+      doc.year,
+      doc.type,
+      doc.title || ''
+    ].join(' ').toLowerCase();
+    
+    // Check if ALL tokens are found in the searchable text
+    return searchTokens.every(token => searchableText.includes(token));
+  };
+
+  // Debug function to show search tokens (for development)
+  const getSearchTokens = () => {
+    return tokenizeSearch(searchTerm);
+  };
+
   // Filter and search logic
   const filteredDocuments = useMemo(() => {
+    const searchTokens = tokenizeSearch(searchTerm);
+    
     return documents.filter(doc => {
-      const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = matchesSearchTokens(doc, searchTokens);
       const matchesProgram = selectedProgram === 'all' || doc.program === selectedProgram;
       const matchesYear = selectedYear === 'all' || doc.year === selectedYear;
       const matchesType = selectedType === 'all' || doc.type === selectedType;
@@ -236,7 +270,7 @@ const SummaryTab: React.FC = () => {
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-neutral-200 bg-white">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <div className="bg-pink-100 p-2 rounded-lg mr-3">
               <FileText className="h-5 w-5 text-pink-600" />
@@ -249,9 +283,78 @@ const SummaryTab: React.FC = () => {
             </p>
           </div>
         </div>
-        <p className="text-sm text-neutral-500 mt-1">
+        <p className="text-sm text-neutral-500 mb-4">
           Browse and review summaries of regulatory documents. Select a document for detailed analysis.
         </p>
+        
+        {/* Search and Filter Controls */}
+        <div className="space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="'2025 mpfs final' or 'hospice 2023'..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+          
+
+          
+          {/* Filter Controls */}
+          <div className="flex flex-wrap gap-3">
+            <select
+              value={selectedProgram}
+              onChange={(e) => setSelectedProgram(e.target.value)}
+              className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            >
+              <option value="all">All Programs</option>
+              {uniquePrograms.map(program => (
+                <option key={program} value={program}>{program}</option>
+              ))}
+            </select>
+            
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            >
+              <option value="all">All Years</option>
+              {uniqueYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+            >
+              <option value="all">All Types</option>
+              {uniqueTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            
+            {/* Clear Filters Button */}
+            {(searchTerm || selectedProgram !== 'all' || selectedYear !== 'all' || selectedType !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedProgram('all');
+                  setSelectedYear('all');
+                  setSelectedType('all');
+                }}
+                className="px-3 py-2 text-sm text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors flex items-center"
+              >
+                <Filter className="h-4 w-4 mr-1" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
       </div>
       
       {/* Document Grid */}
@@ -272,7 +375,24 @@ const SummaryTab: React.FC = () => {
             </div>
           ) : filteredDocuments.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-neutral-500 text-lg">No documents found</div>
+              <div className="text-neutral-500 text-lg">
+                {searchTerm || selectedProgram !== 'all' || selectedYear !== 'all' || selectedType !== 'all' 
+                  ? 'No documents match your search criteria' 
+                  : 'No documents found'}
+              </div>
+              {(searchTerm || selectedProgram !== 'all' || selectedYear !== 'all' || selectedType !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedProgram('all');
+                    setSelectedYear('all');
+                    setSelectedType('all');
+                  }}
+                  className="mt-3 px-4 py-2 text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

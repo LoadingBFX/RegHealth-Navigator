@@ -54,7 +54,7 @@ const Layout: React.FC = () => {
       )}
       
       {/* Tab Navigation */}
-      <div className="bg-teal-50">
+      <div className="bg-white">
         <div className="flex space-x-1 px-4">
           {tabs.map((tab, idx) => {
             const Icon = tab.icon;
@@ -70,8 +70,12 @@ const Layout: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-all rounded-xl relative z-10
                   ${activeTab === tab.id
-                    ? `${pastelBg[idx]} border-teal-400 text-neutral-800 shadow-lg scale-105 -translate-y-1`
-                    : 'bg-teal-50 border-transparent text-neutral-500 hover:bg-teal-100 hover:text-neutral-700 hover:border-teal-200 shadow-sm'}
+                    ? `${pastelBg[idx]} text-neutral-800 shadow-lg scale-105 -translate-y-1 ${
+                        idx === 0 ? 'border-teal-400' : 
+                        idx === 1 ? 'border-pink-400' : 
+                        'border-yellow-400'
+                      }`
+                    : 'bg-white border-transparent text-neutral-500 hover:shadow-md hover:text-neutral-700'}
                 `}
                 style={{ marginBottom: '-1px', transition: 'all 0.18s cubic-bezier(.4,2,.6,1)' }}
               >
