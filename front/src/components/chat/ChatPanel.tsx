@@ -295,13 +295,13 @@ const ChatPanel: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-neutral-200 bg-white">
-                <form onSubmit={handleSubmit} className="flex gap-2">
+            <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-teal-50 to-blue-50 shadow-lg">
+                <form onSubmit={handleSubmit} className="flex gap-3">
                     <div className="relative flex-1">
                         <button
                             type="button"
                             onClick={() => setShowDocumentSelector(!showDocumentSelector)}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 p-1 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-primary-700 rounded-full hover:bg-neutral-100 transition-colors z-10"
                         >
                             <Plus className="h-4 w-4"/>
                         </button>
@@ -309,7 +309,7 @@ const ChatPanel: React.FC = () => {
                         {showDocumentSelector && (
                             <div
                                 ref={searchRef}
-                                className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg border border-neutral-200 overflow-hidden"
+                                className="absolute bottom-full left-0 right-0 mb-3 bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden"
                             >
                                 <div className="p-3 border-b border-neutral-200">
                                     <div className="relative">
@@ -443,19 +443,19 @@ const ChatPanel: React.FC = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask about the documents..."
-                            className="w-full pl-10 pr-4 py-3 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-teal-50"
+                            className="w-full pl-12 pr-4 py-4 border-2 border-teal-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 bg-white shadow-lg hover:shadow-xl transition-all duration-200 text-lg"
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={!input.trim()}
-                        className={`p-3 rounded-lg transition-colors ${
+                        className={`p-4 rounded-xl transition-all duration-200 ${
                             input.trim()
-                                ? 'bg-pink-400 hover:bg-pink-500 text-white shadow-md hover:shadow-lg'
-                                : 'bg-pink-100 text-pink-300 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                                : 'bg-pink-100 text-pink-300 cursor-not-allowed shadow-md'
                         }`}
                     >
-                        <SendHorizontal className="h-5 w-5"/>
+                        <SendHorizontal className="h-6 w-6"/>
                     </button>
                 </form>
             </div>
