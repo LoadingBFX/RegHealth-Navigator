@@ -1,5 +1,7 @@
 # 🏥 RegHealth Navigator
 
+**A collaboration between Carnegie Mellon University (CMU) and [Simply Compliance Consulting](https://www.simplycomplianceconsulting.com/)**
+
 **Authors:**  
 Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi
 
@@ -319,26 +321,73 @@ For detailed deployment instructions, see:
 ---
 
 ## 📝 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-- **Federal Register**: For providing comprehensive regulation data
-- **OpenAI**: For AI capabilities and API services
-- **CMU Capstone Program**: For academic guidance and support
-- **All Contributors**: For their dedication to improving healthcare regulation accessibility
+- This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+- **Copyright © Carnegie Mellon University (CMU) and Simply Compliance Consulting ([https://www.simplycomplianceconsulting.com/](https://www.simplycomplianceconsulting.com/)), 2024. All rights reserved.**
 
 ---
 
-## 📊 Project Status
+## 🚧 Next Steps
 
-**Current Development Phase:** Active Development
-**Last Major Update:** March 2025
-**Next Milestone:** Production deployment and user testing
+The following features and improvements are planned for upcoming releases. These are informed by the product requirements, architecture docs, and user feedback:
 
-**Key Metrics:**
-- ✅ Comprehensive documentation completed
-- ✅ Automated regulation fetching implemented
-- ✅ Incremental processing system operational
-- ✅ Frontend-backend integration complete
-- 🚧 Production deployment in progress
-- 🚧 User testing and feedback collection
+### 1. User Authentication & Login Interface
+- Implement a secure login page for user authentication.
+- Support for role-based access control (future: admin, analyst, guest).
+
+### 2. History & Session Management
+- Add a persistent history panel to let users review past queries, summaries, and comparisons.
+- Enable search/filtering of previous sessions and document interactions.
+
+### 3. LLM API Configuration Switching
+- UI and backend support for switching between different LLM providers (e.g., OpenAI, local models).
+- Allow users/admins to select or configure the embedding and completion model in the dashboard.
+
+### 4. Dashboard & Analytics
+- Develop a dashboard for:
+  - System status and update history (e.g., last regulation fetch, processing stats).
+  - Usage analytics (e.g., most queried documents, API usage, cost tracking).
+  - Quality and latency benchmarking (especially for Hospice/SNF pipeline stabilization).
+
+### 5. Feedback Mechanism
+- Add a user feedback widget for reporting issues, rating answers, and suggesting improvements.
+- Integrate feedback into the admin dashboard for review and triage.
+
+### 6. Comparison UI & Direct Linking
+- Enhance the document comparison interface:
+  - Direct links to source documents and sections.
+  - Improved section matching and visualization.
+  - Export comparison results as PDF.
+
+### 7. Advanced Document Navigation
+- Interactive mind-map view for visual navigation across regulations and cross-references.
+- Document preview before selection.
+- Smart document suggestions based on user queries.
+
+### 8. Automated & Incremental Updates
+- Fully automate regulation fetching and processing via scheduled jobs.
+- Improve monitoring, logging, and error notifications for update pipelines.
+
+### 9. Accessibility & Internationalization
+- Ensure full WCAG 2.1 AA compliance.
+- Add ARIA labels and support for non-English characters.
+
+### 10. Other Planned Enhancements
+- Batch operations for document selection.
+- Grouping and categorization of documents.
+- Corpus-wide Q&A (cross-document search when no file is selected).
+- Product management assistant tools (risk flagging, milestone reminders).
+
+---
+
+**For more details, see:**
+- [Product Requirements Document (PRD)](docs/PRD.md)
+- [System Architecture Design](docs/System%20architecture%20design.md)
+- [Comparison UI Optimization](docs/comparison-ui-optimization.md)
+- [Chat Filter Implementation](docs/CHAT_FILTER_IMPLEMENTATION.md)
+- [Incremental Processing Guide](docs/incremental_processing_guide.md)
+- [Summary Implementation](docs/summary_implement.md)
+
+---
+
+**Contributions and feedback are welcome!**  
+If you have suggestions or want to help with any of these next steps, please open an issue or pull request.
