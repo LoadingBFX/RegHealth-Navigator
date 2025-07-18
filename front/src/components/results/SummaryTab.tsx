@@ -190,151 +190,125 @@ const SummaryTab: React.FC = () => {
 
   // Grid view for all documents
   const renderGridView = () => (
-    <div className="flex-1 p-6 bg-gray-50 overflow-y-auto h-full">
+    <div className="flex-1 flex flex-col h-full">
       {/* Header */}
-      <div className="max-w-3xl mx-auto w-full px-4">
-        <div className="mb-6 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="bg-pink-100 p-2 rounded-lg mr-3">
-                <FileText className="h-5 w-5 text-pink-600" />
-              </div>
-              <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
-            </div>
-            <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
-              <p className="text-sm text-teal-700 font-medium">
-                {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
-              </p>
-            </div>
+      <div className="p-4 border-b border-neutral-200 bg-white">
+        <div className="flex items-center">
+          <div className="bg-pink-100 p-2 rounded-lg mr-3">
+            <FileText className="h-5 w-5 text-pink-600" />
           </div>
-          <p className="text-sm text-neutral-500 mt-3 ml-12">
-            Browse and review summaries of regulatory documents. Select a document for detailed analysis.
-          </p>
+          <h2 className="text-lg font-medium text-neutral-800">Document Summaries</h2>
+        </div>
+        <p className="text-sm text-neutral-500 mt-1">
+          Browse and review summaries of regulatory documents. Select a document for detailed analysis.
+        </p>
+        <div className="mt-3">
+          <div className="bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200 inline-block">
+            <p className="text-sm text-neutral-700 font-medium">
+              {loading ? 'Loading...' : `${filteredDocuments.length} of ${documents.length} documents available`}
+            </p>
+          </div>
         </div>
       </div>
       
       {/* Document Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
-        {loading ? (
-          [...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 animate-pulse">
-              <div className="flex items-start justify-between mb-4">
-                <div className="h-5 bg-neutral-200 rounded w-3/4"></div>
-                <div className="flex space-x-2">
-                  <div className="w-3 h-3 bg-neutral-200 rounded-full"></div>
-                  <div className="w-3 h-3 bg-neutral-200 rounded-full"></div>
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-4xl mx-auto">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-neutral-200 p-4 animate-pulse">
+                  <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-neutral-200 rounded w-1/2"></div>
                 </div>
-              </div>
-              <div className="space-y-2 mb-4">
-                <div className="h-3 bg-neutral-200 rounded w-full"></div>
-                <div className="h-3 bg-neutral-200 rounded w-2/3"></div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="h-4 bg-neutral-200 rounded w-16"></div>
-                <div className="h-4 bg-neutral-200 rounded w-12"></div>
-              </div>
+              ))}
             </div>
-          ))
-        ) : error ? (
-          <div className="col-span-full text-center py-12">
-            <div className="text-red-500 text-lg">{error}</div>
-          </div>
-        ) : filteredDocuments.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <div className="text-neutral-500 text-lg">No documents found</div>
-          </div>
-        ) : (
-          currentFiles.map((file) => (
-            <div
-              key={file.id}
-              className="bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden relative hover:shadow-lg"
-              style={{
-                borderColor: file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
-                            file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
-                            file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
-                            '#D3D3D3'
-              }}
-              onClick={() => handleDocumentSelect(file.id)}
-            >
-              <div className="p-4">
-                {/* 文件名 */}
-                <div className="text-center">
-                  <h3 className="text-sm font-medium text-gray-800 leading-tight flex items-center justify-center">
-                    <span>{file.year}</span>
-                    <span className="mx-1.5 text-gray-400">•</span>
-                    <span>{file.program}</span>
-                    <span className="mx-1.5 text-gray-400">•</span>
-                    <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
-                  </h3>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="text-red-500 text-lg">{error}</div>
+            </div>
+          ) : filteredDocuments.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-neutral-500 text-lg">No documents found</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 cursor-pointer hover:shadow-md transition-all duration-200"
+                  onClick={() => handleDocumentSelect(file.id)}
+                >
+                  <div className="text-center">
+                    <h3 className="text-sm font-medium text-neutral-800 leading-tight">
+                      <span>{file.year}</span>
+                      <span className="mx-1.5 text-neutral-400">•</span>
+                      <span>{file.program}</span>
+                      <span className="mx-1.5 text-neutral-400">•</span>
+                      <span>{file.type.toLowerCase().includes('final') ? 'Final' : file.type.toLowerCase().includes('proposed') ? 'Proposed' : 'Notice'}</span>
+                    </h3>
+                  </div>
                 </div>
-              </div>
-              
-              {/* 右下角类型指示条 */}
-              <div 
-                className="absolute bottom-0 right-0 w-8 h-1.5 rounded-tl-lg"
-                style={{
-                  backgroundColor: 
-                    file.type.toLowerCase().includes('final') ? '#FFB6C1' : // 马卡龙粉
-                    file.type.toLowerCase().includes('proposed') ? '#FFE4B5' : // 马卡龙黄
-                    file.type.toLowerCase().includes('notice') ? '#E6E6FA' : // 马卡龙紫
-                    '#D3D3D3'
-                }}
-              ></div>
+              ))}
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
       
       {/* Pagination for Grid View - Only show if more than one page */}
       {filteredDocuments.length > itemsPerPageGrid && (
-        <div className="flex justify-center mt-6">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={goToPrevPage}
-              disabled={currentPage === 1}
-              className="px-3 py-2 text-sm bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
-            </button>
-            
-            <div className="flex space-x-1">
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let page;
-                if (totalPages <= 5) {
-                  page = i + 1;
-                } else if (currentPage <= 3) {
-                  page = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  page = totalPages - 4 + i;
-                } else {
-                  page = currentPage - 2 + i;
-                }
+        <div className="p-4 border-t border-neutral-200 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-sm bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </button>
                 
-                return (
-                  <button
-                    key={page}
-                    onClick={() => goToPage(page)}
-                    className={`px-3 py-2 text-sm rounded-lg ${
-                      currentPage === page
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-white border border-neutral-300 hover:bg-neutral-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let page;
+                    if (totalPages <= 5) {
+                      page = i + 1;
+                    } else if (currentPage <= 3) {
+                      page = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      page = totalPages - 4 + i;
+                    } else {
+                      page = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`px-3 py-2 text-sm rounded-lg ${
+                          currentPage === page
+                            ? 'bg-neutral-800 text-white'
+                            : 'bg-white border border-neutral-200 hover:bg-neutral-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 text-sm bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
+              </div>
             </div>
-            
-            <button
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-              className="px-3 py-2 text-sm bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
           </div>
         </div>
       )}
