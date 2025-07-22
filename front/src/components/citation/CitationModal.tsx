@@ -27,7 +27,11 @@ const CitationModal: React.FC = () => {
         setIsLoadingFederalInfo(true);
         setFederalRegisterInfo(null);
         
-        fetch(`${config.api.baseUrl}/api/federal-register/${docId}`)
+        fetch(`${config.api.baseUrl}/api/federal-register/${docId}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        })
           .then(response => response.json())
           .then(data => {
             if (!data.error) {

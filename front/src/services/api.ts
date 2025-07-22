@@ -91,6 +91,7 @@ export class ApiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ message: query } as CompareApiRequest),
       });
@@ -126,6 +127,7 @@ export class ApiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ 
           query, 
@@ -158,6 +160,7 @@ export class ApiService {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
       });
 

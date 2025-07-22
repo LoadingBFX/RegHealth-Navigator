@@ -121,7 +121,11 @@ const SummaryTab: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.availableSummaries}`);
+        const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.availableSummaries}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -160,6 +164,7 @@ const SummaryTab: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           doc_name: documentId
@@ -244,6 +249,7 @@ const SummaryTab: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           doc_name: documentId

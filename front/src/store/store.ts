@@ -312,7 +312,11 @@ export const useStore = create<StoreState>((set, get) => ({
   fetchFiles: async () => {
     try {
       set({ isLoading: true });
-      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.documents}`);
+      const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.documents}`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch documents: ${response.status}`);

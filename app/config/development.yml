@@ -1,5 +1,5 @@
 server:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 8080
   debug: true
 
@@ -7,6 +7,8 @@ cors:
   origins:
     - http://localhost:5173
     - http://127.0.0.1:5173
+    - http://localhost:5174
+    - http://127.0.0.1:5174
     - https://*.pages.dev      # Cloudflare Pages
     - https://*.github.io      # GitHub Pages
     - https://*.cloudflare.com # Cloudflare Workers
