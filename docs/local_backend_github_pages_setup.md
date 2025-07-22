@@ -19,7 +19,9 @@ python -m app.main
 ### **2. Setup Public Tunnel (ngrok)**
 ```bash
 # New terminal window
-ngrok http 8080
+# ngrok http 8080
+# pkill -f ngrok
+ngrok http 8080 --host-header=localhost:8080
 ```
 ✅ **Get public URL**: `https://xxxxx.ngrok-free.app`
 
@@ -56,6 +58,14 @@ git commit --allow-empty -m "Update API URL for deployment" && git push origin d
 ## 📝 Detailed Configuration
 
 ### **Backend Configuration**
+
+#### Server Settings (`app/config/development.yml`)
+```yaml
+server:
+  host: 0.0.0.0    # CRITICAL: Must be 0.0.0.0 for ngrok access, not 127.0.0.1
+  port: 8080
+  debug: true
+```
 
 #### CORS Settings (`app/config/development.yml`)
 ```yaml
@@ -161,7 +171,7 @@ export const config = {
 ### **ngrok Free Version Limitations**
 - **Session Time**: Free version has session time limits
 - **URL Changes**: Each restart gets a new random URL
-- **Access Warning**: First visit may show ngrok warning page, need to click "Visit Site"
+- **Browser Warning**: ⚠️ **CRITICAL**: ngrok free version shows warning page on first API access, blocking programmatic requests
 
 ### **Backend Notes**
 - **CORS Configuration**: Any new frontend domain needs to be added to CORS configuration
@@ -175,20 +185,61 @@ export const config = {
 
 ---
 
+## 🚨 Known Issue: ngrok Browser Warning
+
+### **Problem**
+ngrok free version displays a browser warning page on first access:
+```html
+<noscript>You are about to visit xxxxx.ngrok-free.app, served by IP. 
+This website is served for free through ngrok.com. 
+You should only visit this website if you trust whoever sent the link to you.</noscript>
+```
+
+This warning **blocks all programmatic API requests** from GitHub Pages, causing:
+- ❌ Summary functionality fails
+- ❌ File filtering appears to work but doesn't actually filter  
+- ❌ Federal Register links return 404 errors
+- ✅ Chat and Compare work (due to different request patterns)
+
+### **Solution: Add ngrok-skip-browser-warning Header**
+
+All API calls must include the header: `ngrok-skip-browser-warning: true`
+
+**Files Modified:**
+- `front/src/services/api.ts` - All API service methods
+- `front/src/components/chat/ChatPanel.tsx` - Chat requests
+- `front/src/components/results/SummaryTab.tsx` - Summary API calls
+- `front/src/components/citation/CitationModal.tsx` - Federal Register API
+- `front/src/store/store.ts` - Documents API
+
+**Example Implementation:**
+```typescript
+const response = await fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true'  // This bypasses ngrok warning
+  },
+  body: JSON.stringify(data)
+});
+```
+
+---
+
 ## 🛠️ Troubleshooting
 
 ### **Connection Issues**
 ```bash
 # Test backend local connection
-curl -X POST http://127.0.0.1:8080/api/simple-chat \
+curl -X POST http://127.0.0.1:8080/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "test"}'
+  -d '{"query": "test"}'
 
-# Test ngrok connection
-curl -X POST https://xxxxx.ngrok-free.app/api/simple-chat \
+# Test ngrok connection (CRITICAL: Include the warning bypass header)
+curl -X POST https://xxxxx.ngrok-free.app/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "test"}' \
-  -H "ngrok-skip-browser-warning: true"
+  -H "ngrok-skip-browser-warning: true" \
+  -d '{"query": "test"}'
 ```
 
 ### **Common Errors**
