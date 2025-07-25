@@ -43,6 +43,11 @@ RegHealth-Navigator/
 └── README.md    # Project overview
 ```
 
+> Example data for `data`, `rag_data`, and `summary_outputs` can be found at:
+> - `data`: [Google Drive Link](https://drive.google.com/file/d/1P_LLnsZ0bnetWVOSbLYWdUwfwbI6Mt4F/view?usp=drive_link)
+> - `rag_data`: [Google Drive Link](https://drive.google.com/file/d/1i5ArE-khILLxQLsNdDmbjyVcRNWco5jU/view?usp=drive_link)
+> - `summary_outputs`: [Google Drive Link](https://drive.google.com/file/d/1vnTfsYEzZkmEcz_Tm8MSCnySmOCl0XZr/view?usp=drive_link)
+
 ---
 
 ## 🏗️ Architecture Overview
@@ -244,23 +249,24 @@ Each file follows the naming convention: `YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.
 ## 📚 Documentation
 
 ### Core Documentation
-- **[System Architecture Design](docs/System%20architecture%20design.md)**: High-level system design and architecture
-- **[Product Requirements Document](docs/PRD.md)**: Detailed product requirements and specifications
-- **[Incremental Processing Guide](docs/incremental_processing_guide.md)**: Guide to incremental processing system
-- **[Search and QA Logic](docs/search_and_qa_logic.md)**: Search functionality and Q&A system documentation
+- **[System Architecture Design](docs/System%20architecture%20design.md)**: High-level system design, data flow, backend/frontend architecture, and technical components.
+- **[Product Requirements Document (PRD)](docs/PRD.md)**: Product vision, user personas, technical workflow, MVP scope, and milestones.
+- **[Incremental Processing Guide](docs/incremental_processing_guide.md)**: How to use the incremental processing system for efficient document updates and FAISS index management.
+- **[Search and QA Logic](docs/search_and_qa_logic.md)**: Backend search and Q&A engine, retrieval logic, and API flow.
 
 ### Implementation Guides
-- **[Chat Filter Implementation](docs/CHAT_FILTER_IMPLEMENTATION.md)**: Chat filtering system implementation
-- **[Summary Implementation](docs/summary_implement.md)**: Document summarization implementation
-- **[Federal Register Integration](docs/federal_register.md)**: Federal Register API integration details
+- **[Chat Filter Implementation](docs/CHAT_FILTER_IMPLEMENTATION.md)**: Implementation of document filtering in chat, including backend, search, and frontend integration.
+- **[Summary Implementation](docs/summary_implement.md)**: Summary generation pipeline, incremental summary processing, and frontend-backend coordination.
+- **[Federal Register Integration](docs/federal_register.md)**: Details on fetching, classifying, and organizing regulations from the Federal Register API.
 
 ### Deployment & Operations
-- **[Local Backend + GitHub Pages Setup](docs/local_backend_github_pages_setup.md)**: Complete deployment guide using ngrok
-- **[GitHub Workflow Instructions](docs/github_workflow_instruction.md)**: CI/CD pipeline documentation
-- **[GitHub Actions Instructions](docs/github_action_instruction.md)**: Automated deployment setup
+- **[Local Backend + GitHub Pages Setup](docs/local_backend_github_pages_setup.md)**: Step-by-step deployment guide using ngrok and GitHub Pages.
+- **[GitHub Workflow Instructions](docs/github_workflow_instruction.md)**: Collaborative development workflow, branching, PRs, and CI/CD best practices.
+- **[GitHub Actions Instructions](docs/github_action_instruction.md)**: How to use GitHub Actions for automated deployment and CI/CD.
+- **[GITHUB_WORKFLOW](docs/GITHUB_WORKFLOW.md)**: (Duplicate of workflow guide for reference.)
 
 ### Development Guides
-- **[Comparison UI Optimization](docs/comparison-ui-optimization.md)**: Frontend optimization strategies
+- **[Comparison UI Optimization](docs/comparison-ui-optimization.md)**: Frontend UI/UX optimization for document comparison, user feedback, and technical rationale.
 - **[Incremental Processing Guide](docs/incremental_processing_guide.md)**: Development guide for incremental processing
 
 ---
