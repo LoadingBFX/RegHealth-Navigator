@@ -202,6 +202,61 @@ python incremental_pipeline.py --validate
 python incremental_pipeline.py --cleanup
 ```
 
+#### Summary Generation
+Generate executive summaries for regulatory documents:
+
+```bash
+cd app/core
+
+# Generate summary for a single file
+python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml"
+
+# Generate summaries for multiple files
+python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml" "2023_HOSPICE_final_2022-16457.xml"
+
+# Force regenerate existing summaries
+python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml" --force
+
+# Process all files without summaries (incremental)
+python incremental_summary.py --incremental
+```
+
+#### MPFS-Specific Summary Generation
+Generate summaries for MPFS documents only:
+
+```bash
+cd app/core
+
+# Check MPFS summary status
+python mpfs_summary_generator.py --status
+
+# Generate summaries for all MPFS files (incremental)
+python mpfs_summary_generator.py --incremental
+
+# Generate summaries for specific MPFS files
+python mpfs_summary_generator.py --files "2024_MPFS_final_2023-24184.xml" "2023_MPFS_final_2022-23873.xml"
+
+# Force regenerate all MPFS summaries
+python mpfs_summary_generator.py --incremental --force
+```
+
+**API Usage:**
+```bash
+# Get available summaries
+curl -X GET http://localhost:8080/api/available-summaries
+
+# Get specific summary
+curl -X POST http://localhost:8080/api/get-summary \
+  -H 'Content-Type: application/json' \
+  -d '{"doc_name": "2024_MPFS_final_2023-24184"}'
+```
+
+**Frontend Usage:**
+- Navigate to the **Summary** tab in the web interface
+- Browse available summaries by program type and year
+- Click on any document to view its detailed summary
+- Download or copy summary content as needed
+
 #### Scheduled Updates
 For production environments, automated scheduled updates:
 ```bash
@@ -216,6 +271,12 @@ Regulations are automatically organized by program type:
 - **SNF/**: Skilled Nursing Facility regulations
 
 Each file follows the naming convention: `YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.xml`
+
+### Summary Files Organization
+Generated summaries are stored in the `summary_outputs/` directory:
+- **Markdown files**: `YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.md` - Human-readable summaries
+- **JSON files**: `YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.json` - Structured data for processing
+- **Batch cache**: `batch_cache/YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER/` - Cached batch results for cost optimization
 
 ---
 
@@ -258,6 +319,7 @@ Each file follows the naming convention: `YYYY_PROGRAM_TYPE_DOC_TYPE_DOC_NUMBER.
 - **[Chat Filter Implementation](docs/CHAT_FILTER_IMPLEMENTATION.md)**: Implementation of document filtering in chat, including backend, search, and frontend integration.
 - **[Summary Implementation](docs/summary_implement.md)**: Summary generation pipeline, incremental summary processing, and frontend-backend coordination.
 - **[Federal Register Integration](docs/federal_register.md)**: Details on fetching, classifying, and organizing regulations from the Federal Register API.
+- **[Processing Flow Diagram](docs/processing_flow_diagram.md)**: Complete visual flow of download, chunking, embedding, and summary generation processes.
 
 ### Deployment & Operations
 - **[Local Backend + GitHub Pages Setup](docs/local_backend_github_pages_setup.md)**: Step-by-step deployment guide using ngrok and GitHub Pages.
