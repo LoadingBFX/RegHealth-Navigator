@@ -167,6 +167,39 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 ## 📊 Data Management & Updates
 
+### 🚀 Quick Start Guide
+
+#### 1. Initial Setup (First Time)
+```bash
+# Navigate to core directory
+cd app/core
+
+# Set up environment variables
+cp ../../.env.example ../../.env
+# Edit .env file and add your OpenAI API key
+nano ../../.env
+
+# Configure paths
+cp config/development.yml.example config/development.yml
+# Edit config file if needed
+nano config/development.yml
+
+# Run initial setup
+python auto_update_pipeline.py --full-auto
+```
+
+#### 2. Daily Operations
+```bash
+# Check system status
+python incremental_pipeline.py --status
+
+# Process new regulations (if any)
+python incremental_pipeline.py --incremental
+
+# Generate summaries for new documents
+python incremental_summary.py --incremental
+```
+
 ### Automated Regulation Fetching
 
 The system includes a comprehensive automated pipeline for fetching and processing Federal Register regulations:
@@ -214,11 +247,27 @@ python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml"
 # Generate summaries for multiple files
 python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml" "2023_HOSPICE_final_2022-16457.xml"
 
-# Force regenerate existing summaries
+# Force regenerate existing summaries (clears cache and regenerates)
 python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml" --force
 
 # Process all files without summaries (incremental)
 python incremental_summary.py --incremental
+```
+
+#### 🔧 Advanced Summary Operations
+```bash
+# Check summary status for all files
+python incremental_summary.py --status
+
+# Generate summaries for specific program types
+python incremental_summary.py --files "2024_MPFS_*.xml"  # All MPFS 2024 files
+python incremental_summary.py --files "*_HOSPICE_*.xml"   # All Hospice files
+
+# Force regenerate all summaries (use with caution - expensive)
+python incremental_summary.py --incremental --force
+
+# Check batch cache status
+ls -la ../../summary_outputs/batch_cache/
 ```
 
 #### MPFS-Specific Summary Generation
@@ -307,9 +356,41 @@ Generated summaries are stored in the `summary_outputs/` directory:
 
 ---
 
-## 📚 Documentation
+## 📋 Quick Reference
 
-### Core Documentation
+### 🚀 Essential Commands
+```bash
+# Start backend
+cd app && python -m app.main
+
+# Start frontend  
+cd front && npm run dev
+
+# Check system status
+cd app/core && python incremental_pipeline.py --status
+
+# Generate summaries
+cd app/core && python incremental_summary.py --incremental
+
+# Force regenerate summary
+cd app/core && python incremental_summary.py --files "FILENAME.xml" --force
+```
+
+### 📁 Key Directories
+- `data/` - Raw regulation XML files
+- `rag_data/` - FAISS index and embeddings
+- `summary_outputs/` - Generated summaries and cache
+- `log/` - Application logs
+- `app/config/` - Configuration files
+
+### 🔧 Configuration Files
+- `.env` - API keys and sensitive data
+- `app/config/development.yml` - Backend configuration
+- `front/.env.development` - Frontend configuration
+
+---
+
+## 📚 Documentation
 - **[System Architecture Design](docs/System%20architecture%20design.md)**: High-level system design, data flow, backend/frontend architecture, and technical components.
 - **[Product Requirements Document (PRD)](docs/PRD.md)**: Product vision, user personas, technical workflow, MVP scope, and milestones.
 - **[Incremental Processing Guide](docs/incremental_processing_guide.md)**: How to use the incremental processing system for efficient document updates and FAISS index management.
@@ -368,23 +449,116 @@ For detailed deployment instructions, see:
 ### Common Issues
 - **Q: API key not set error?**
   - A: Check your `.env` file and ensure `OPENAI_API_KEY` is set without extra spaces.
+  ```bash
+  # Verify API key is loaded
+  cd app/core
+  python -c "from dotenv import load_dotenv; import os; load_dotenv(); print('API Key:', 'SET' if os.getenv('OPENAI_API_KEY') else 'NOT SET')"
+  ```
 
 - **Q: rag_data path error?**
   - A: Verify `app/config/development.yml` has correct paths and `rag_data/` directory exists.
+  ```bash
+  # Check config and paths
+  cat app/config/development.yml
+  ls -la rag_data/
+  ```
 
 - **Q: Frontend cannot connect to backend?**
   - A: Check `VITE_API_BASE_URL` in frontend env file and CORS settings in backend config.
+  ```bash
+  # Check frontend config
+  cat front/.env.development
+  # Check backend CORS settings
+  cat app/config/development.yml | grep -i cors
+  ```
 
 - **Q: Regulation fetching fails?**
   - A: Check internet connection and Federal Register API availability. Verify API rate limits.
+  ```bash
+  # Test Federal Register API
+  curl -s "https://www.federalregister.gov/api/v1/documents.json?per_page=1" | head -20
+  ```
 
 - **Q: FAISS index corruption?**
   - A: Run `python incremental_pipeline.py --validate` to check system state and rebuild if needed.
+  ```bash
+  # Validate system state
+  cd app/core
+  python incremental_pipeline.py --validate
+  
+  # If validation fails, rebuild FAISS index
+  python incremental_pipeline.py --rebuild-index
+  ```
+
+- **Q: Summary generation fails or uses old cache?**
+  - A: Use `--force` flag to clear cache and regenerate summaries.
+  ```bash
+  # Force regenerate specific summary
+  python incremental_summary.py --files "2024_MPFS_final_2023-24184.xml" --force
+  
+  # Clear all batch cache manually
+  rm -rf ../../summary_outputs/batch_cache/
+  ```
+
+- **Q: High API costs during summary generation?**
+  - A: Use incremental processing and monitor batch cache usage.
+  ```bash
+  # Check batch cache size
+  du -sh ../../summary_outputs/batch_cache/
+  
+  # Use incremental processing only
+  python incremental_summary.py --incremental
+  ```
 
 ### Performance Optimization
 - **Cost Efficiency**: Use incremental processing to minimize API costs
 - **Processing Speed**: Monitor logs for performance bottlenecks
 - **Storage Management**: Regularly clean up old logs and temporary files
+
+### 🔍 System Monitoring & Maintenance
+
+#### Daily Health Checks
+```bash
+# Check system status
+cd app/core
+python incremental_pipeline.py --status
+
+# Check summary status
+python incremental_summary.py --status
+
+# Monitor disk usage
+du -sh rag_data/ summary_outputs/ data/
+
+# Check log files
+tail -f ../../log/app.log
+```
+
+#### Weekly Maintenance
+```bash
+# Clean up old logs
+find ../../log/ -name "*.log" -mtime +7 -delete
+
+# Check for orphaned files
+python incremental_pipeline.py --cleanup
+
+# Validate system integrity
+python incremental_pipeline.py --validate
+
+# Monitor API usage costs
+grep "API cost" ../../log/app.log | tail -20
+```
+
+#### Monthly Tasks
+```bash
+# Backup important data
+tar -czf backup_$(date +%Y%m%d).tar.gz rag_data/ summary_outputs/
+
+# Update system dependencies
+pip install -r requirements.txt --upgrade
+
+# Review and clean old summary outputs
+ls -la ../../summary_outputs/ | grep -E "202[0-2]"
+```
 
 ---
 
