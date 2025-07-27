@@ -2,6 +2,30 @@
 
 ---
 
+## 2025-07-27 — v0.8
+
+### Summary of Changes
+- **Pre-release preparation for v0.8**
+  - Created release branch for v0.8
+  - Updated project log with release entry
+  - Prepared for upcoming feature additions and improvements
+
+### Technical Decisions
+- **Release Strategy**: Created dedicated release branch for v0.8 development
+- **Documentation**: Updated project log to track release progress
+
+### User–Assistant Discussion Highlights
+- **User requested release preparation**: Asked to create new branch for v0.8 release
+- **Assistant implemented release setup**: Created release-v0.8 branch and updated project log
+- **Systematic approach**: Followed established release workflow and documentation practices
+
+### Impact and Results
+- **Release Management**: Proper branch isolation for v0.8 development
+- **Documentation**: Updated project log with current release status
+- **Development Workflow**: Established foundation for v0.8 feature development
+
+---
+
 ## 2025-07-18 — v0.7
 
 ### Summary of Changes
