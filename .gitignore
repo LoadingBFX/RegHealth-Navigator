@@ -191,6 +191,21 @@ node_modules/
 
 # Ignore RAG data files (large binary and processed data)
 rag_data/
+rag_data_*/
+rag_data_*/*
+
+# Ignore data files (XML, PDF, etc.)
+data/
+data/*/
+data/*/*.xml
+data/*/*.pdf
+
+# Ignore summary outputs and cache files
+summary_outputs/
+summary_outputs*/
+summary_outputs*/*/
+summary_outputs*/batch_cache/
+summary_outputs*/batch_cache/*/
 
 # Python
 __pycache__/
