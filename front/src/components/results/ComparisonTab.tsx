@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../../store/store';
-import { SendHorizontal, GitCompare, Loader2, AlertCircle } from 'lucide-react';
+import { SendHorizontal, GitCompare, Loader2 } from 'lucide-react';
 import ChatMessage from '../chat/ChatMessage';
 import ComparisonResult from '../comparison/ComparisonResult';
 
@@ -36,6 +36,18 @@ const ComparisonTab: React.FC = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Add success message when comparison result is available
+  useEffect(() => {
+    if (comparisonResult && Object.keys(comparisonResult).length > 0) {
+      const successMessage = {
+        id: Date.now().toString(),
+        role: 'assistant' as const,
+        content: `I've completed the comparison analysis. You can view the detailed results below, including section-by-section comparisons, unique sections, and an executive summary.`
+      };
+      setMessages(prev => [...prev, successMessage]);
+    }
+  }, [comparisonResult]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,20 +69,34 @@ const ComparisonTab: React.FC = () => {
       try {
         // Perform the comparison
         await performComparison(query);
-        
-        // Add a success message to chat
-        const successMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant' as const,
-          content: `I've completed the comparison analysis for: "${query}". You can view the detailed results below, including section-by-section comparisons, unique sections, and an executive summary.`
-        };
-        setMessages(prev => [...prev, successMessage]);
+        // Success message will be added by useEffect when comparisonResult is set
       } catch (error) {
-        // Add error message to chat
+        // Add conversational error message to chat
+        let errorContent = '';
+        
+        if (error instanceof Error && error.message.includes('No matching documents found')) {
+          errorContent = `I couldn't find the specific documents you're asking about. Please try specifying the program type (e.g., 'MPFS', 'SNF', 'Hospice') in your query.
+
+Some Examples:
+
+**MPFS**
+"Compare MPFS 2024 vs 2025 quality reporting"
+
+**SNF**
+"How do SNF 2023 and 2024 rules differ?"
+
+**Hospice**
+"Compare Hospice 2024 final vs proposed rules"
+
+This will help me find the right documents to compare for you.`;
+        } else {
+          errorContent = `Daisy's cat interrupted our comparison analysis! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it and get back to work. Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again or refine your query.`;
+        }
+        
         const errorMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant' as const,
-          content: `Daisy's cat interrupted our comparison analysis! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it and get back to work. Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again or refine your query.`
+          content: errorContent
         };
         setMessages(prev => [...prev, errorMessage]);
       }
@@ -89,6 +115,8 @@ const ComparisonTab: React.FC = () => {
     setComparisonResult(null);
     setComparisonError(null);
     clearMessages();
+    setMessages([]);
+    setInput('');
   };
 
   return (
@@ -111,6 +139,18 @@ const ComparisonTab: React.FC = () => {
         {comparisonResult ? (
           // Show comparison results
           <div className="max-w-3xl mx-auto">
+            {/* Back button */}
+            <div className="mb-6">
+              <button
+                onClick={handleNewComparison}
+                className="flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span className="font-medium">Start New Comparison</span>
+              </button>
+            </div>
             <ComparisonResult result={comparisonResult} />
           </div>
         ) : (
@@ -125,6 +165,36 @@ const ComparisonTab: React.FC = () => {
                 <p className="text-neutral-500 mb-4 sm:mb-6 text-sm sm:text-base max-w-sm sm:max-w-md lg:max-w-lg">
                   Ask questions about differences between documents. For example, "What's the difference between 2024 MPFS final and proposed rules?"
                 </p>
+                
+                {/* Tip for program specification */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6 max-w-sm sm:max-w-md lg:max-w-lg shadow-sm">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="bg-blue-500 p-2 rounded-full">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-semibold text-blue-800">Pro Tip</span>
+                  </div>
+                  <p className="text-sm text-blue-700 leading-relaxed">
+                    For best results, include the program type in your query:
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">MPFS</span>
+                      <span className="text-xs text-blue-600">Medicare Physician Fee Schedule</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">SNF</span>
+                      <span className="text-xs text-blue-600">Skilled Nursing Facility</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Hospice</span>
+                      <span className="text-xs text-blue-600">Hospice Care</span>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="space-y-2 sm:space-y-3 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
                   {[
                     "What's the difference between 2024 MPFS final and proposed rules?",
@@ -148,7 +218,6 @@ const ComparisonTab: React.FC = () => {
                   <ChatMessage 
                     key={message.id} 
                     message={message}
-                    onCitationClick={handleCitationClick}
                   />
                 ))}
                 
@@ -162,16 +231,7 @@ const ComparisonTab: React.FC = () => {
                   </div>
                 )}
                 
-                {/* Error display */}
-                {comparisonError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center space-x-2">
-                      <AlertCircle className="h-5 w-5 text-red-600" />
-                      <span className="text-red-700 font-medium">Comparison Error</span>
-                    </div>
-                    <p className="text-red-600 mt-2">{comparisonError}</p>
-                  </div>
-                )}
+
                 
                 <div ref={messagesEndRef} />
               </>

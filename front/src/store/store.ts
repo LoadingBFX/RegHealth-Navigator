@@ -253,7 +253,7 @@ type StoreState = {
   setComparisonError: (error: string | null) => void;
   
   // Comparison API method
-  performComparison: (query: string) => Promise<void>;
+  performComparison: (query: string) => Promise<ComparisonResult | void>;
   
   citations: Record<string, Citation>;
   setCitations: (citations: Record<string, Citation>) => void;
@@ -386,9 +386,21 @@ export const useStore = create<StoreState>((set, get) => ({
       set({ isComparing: true, comparisonError: null, comparisonResult: null });
       const result = await apiService.compareRules(query);
       set({ comparisonResult: result });
+      return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      set({ comparisonError: `Daisy's cat interrupted our comparison! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: ${errorMessage}` });
+      let errorMessage = 'An unknown error occurred';
+      
+      // Handle API error responses with suggestions
+      if (error instanceof Error) {
+        if (error.message.includes('No matching documents found')) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = `Daisy's cat interrupted our comparison! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: ${error.message}`;
+        }
+      }
+      
+      set({ comparisonError: errorMessage });
+      throw error;
     } finally {
       set({ isComparing: false });
     }

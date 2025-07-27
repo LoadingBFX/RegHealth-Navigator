@@ -98,6 +98,10 @@ export class ApiService {
 
       if (!response.ok) {
         const errorData: ApiError = await response.json();
+        // Handle specific error messages from backend
+        if (errorData.error && errorData.error.includes('No matching documents found')) {
+          throw new Error(errorData.error);
+        }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 

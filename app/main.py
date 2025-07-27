@@ -672,9 +672,17 @@ def register_routes(app: Flask, chat_service: ChatSearchService, summarizer: Sum
             data = validate_json_request(required_fields=["message"])
             query = data.get("message")
             response = comparator.compare_rules(query)
-            return response#jsonify({"response": response})
+            
+            # Handle empty response from comparator
+            if not response or response == {}:
+                return jsonify({
+                    "error": "No matching documents found for comparison. Please try specifying the program type (e.g., 'MPFS', 'SNF', 'Hospice') in your query.",
+                    "suggestion": "Try queries like: 'Compare MPFS 2024 vs 2025 quality reporting' or 'How do SNF 2023 and 2024 rules differ?'"
+                }), 404
+            
+            return response
         except Exception as e:
-            logger.error(f"Error in summarize endpoint: {str(e)}")
+            logger.error(f"Error in compare endpoint: {str(e)}")
             return jsonify({"error": f"Daisy's cat interrupted our comparison! Seon, Sai, Sarvesh, Dhruv and Fanxing are trying to catch it. Error: {str(e)}"}), 500
 
 def main() -> None:
