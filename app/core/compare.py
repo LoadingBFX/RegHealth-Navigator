@@ -424,7 +424,8 @@ Executive Summary:"""
         rule2_all_chunks = self.filter_chunks_by_rule(rule2)
         
         if not rule1_all_chunks or not rule2_all_chunks:
-            return {"error": "Could not find chunks for one or both rules"}
+            #return {"error": "Could not find chunks for one or both rules"}
+            return {}
         
         # Step 3: Get relevant chunks (larger set for section analysis)
         rule1_relevant = self.semantic_similarity_search(query_embedding, rule1_all_chunks, k=150)
@@ -594,6 +595,10 @@ Executive Summary:"""
         elif len(years) == 2 and len(rule_types) == 2:
             rule1 = {"program": program, "year": years[0], "rule_type": rule_types[0], "topic": topic}
             rule2 = {"program": program, "year": years[1], "rule_type": rule_types[1], "topic": topic}
+        elif len(years) == 0 and len(rule_types) == 2:
+            current_date_time = datetime.now()
+            rule1 = {"program": program, "year": current_date_time.year, "rule_type": rule_types[0], "topic": topic}
+            rule2 = {"program": program, "year": current_date_time.year, "rule_type": rule_types[1], "topic": topic}
         else:
             current_date_time = datetime.now()
             rule1 = {"program": program, "year": years[0] if years else current_date_time.year - 1, "rule_type": "Final", "topic": topic}
@@ -668,54 +673,54 @@ Executive Summary:"""
             return list(obj)
         return str(obj)
 
-# # Example usage
-# if __name__ == "__main__":
-#     load_dotenv()
-#     import os
-#
-#     faiss_index_path = "./rag_data/faiss.index"
-#     metadata_path = "./rag_data/faiss_metadata.json"
-#
-#     comparator = SectionBySectionRuleComparator(
-#         faiss_index_path=faiss_index_path,
-#         metadata_path=metadata_path,
-#         api_key=os.getenv("OPENAI_API_KEY")
-#     )
-#
-#     # Test query
-#     query = "Compare MPFS fee schedule for 2023 final rule and 2024 final rule"
-#
-#     print(f"Testing section-by-section comparison: {query}")
-#     result = comparator.compare_rules(query)
-#     print (result)
-#
-#     # if "error" in result:
-#     #     print(f"Error: {result['error']}")
-#     # else:
-#     #     # print(f"\n{'='*80}")
-#     #     # print("SECTION-BY-SECTION COMPARISON RESULTS")
-#     #     # print('='*80)
-#
-#     #     # print(f"\nRules Compared:")
-#     #     # print(f"Rule 1: {result['rule1']['program']} {result['rule1']['year']} {result['rule1']['rule_type']}")
-#     #     # print(f"Rule 2: {result['rule2']['program']} {result['rule2']['year']} {result['rule2']['rule_type']}")
-#
-#     #     # #print(f"\nStats:")
-#     #     # stats = result['stats']
-#     #     # print(f"- Sections compared: {stats['total_sections_compared']}")
-#     #     # print(f"- Rule 1 unique sections: {stats['rule1_unique_sections']}")
-#     #     # print(f"- Rule 2 unique sections: {stats['rule2_unique_sections']}")
-#
-#     #     print(f"\n{'='*60}")
-#     #     print("FINAL EXECUTIVE SUMMARY")
-#     #     print('='*60)
-#     #     print(result['final_summary'])
-#
-#     #     print(f"\n{'='*60}")
-#     #     print("DETAILED SECTION COMPARISONS")
-#     #     print('='*60)
-#     #     for i, comp in enumerate(result['section_comparisons'][:10], 1):  # Show first 5
-#     #         if not comp.get('error'):
-#     #             print(f"\n{i}. {comp['rule1_section']} <-> {comp['rule2_section']}")
-#     #             #print(f"   Similarity: {comp['similarity_score']:.2f}")
-#     #             print(f"   {comp['comparison']}")
+# Example usage
+if __name__ == "__main__":
+    load_dotenv()
+    import os
+
+    faiss_index_path = "./rag_data/faiss.index"
+    metadata_path = "./rag_data/faiss_metadata.json"
+
+    comparator = SectionBySectionRuleComparator(
+        faiss_index_path=faiss_index_path,
+        metadata_path=metadata_path,
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+
+    # Test query
+    query = "Analyze 2021 SNF proposed vs 2023 final rule"
+
+    print(f"Testing section-by-section comparison: {query}")
+    result = comparator.compare_rules(query)
+    print (result)
+
+    # if "error" in result:
+    #     print(f"Error: {result['error']}")
+    # else:
+    #     # print(f"\n{'='*80}")
+    #     # print("SECTION-BY-SECTION COMPARISON RESULTS")
+    #     # print('='*80)
+
+    #     # print(f"\nRules Compared:")
+    #     # print(f"Rule 1: {result['rule1']['program']} {result['rule1']['year']} {result['rule1']['rule_type']}")
+    #     # print(f"Rule 2: {result['rule2']['program']} {result['rule2']['year']} {result['rule2']['rule_type']}")
+
+    #     # #print(f"\nStats:")
+    #     # stats = result['stats']
+    #     # print(f"- Sections compared: {stats['total_sections_compared']}")
+    #     # print(f"- Rule 1 unique sections: {stats['rule1_unique_sections']}")
+    #     # print(f"- Rule 2 unique sections: {stats['rule2_unique_sections']}")
+
+    #     print(f"\n{'='*60}")
+    #     print("FINAL EXECUTIVE SUMMARY")
+    #     print('='*60)
+    #     print(result['final_summary'])
+
+    #     print(f"\n{'='*60}")
+    #     print("DETAILED SECTION COMPARISONS")
+    #     print('='*60)
+    #     for i, comp in enumerate(result['section_comparisons'][:10], 1):  # Show first 5
+    #         if not comp.get('error'):
+    #             print(f"\n{i}. {comp['rule1_section']} <-> {comp['rule2_section']}")
+    #             #print(f"   Similarity: {comp['similarity_score']:.2f}")
+    #             print(f"   {comp['comparison']}")
