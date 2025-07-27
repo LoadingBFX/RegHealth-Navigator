@@ -31,6 +31,10 @@ import random
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+# Load environment variables first
+load_dotenv()
 
 # Add the app directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -86,6 +90,11 @@ class AutoUpdatePipeline:
             model: Embedding model to use (from config if None)
             days_back: Days to look back for new regulations (from config if None)
         """
+        # Verify API key is available
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        
         self.model = model if model else config.default_embedding_model
         self.days_back = days_back if days_back else getattr(config, 'regulation_fetch_days_back', 365)
         

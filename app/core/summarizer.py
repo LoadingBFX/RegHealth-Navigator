@@ -279,7 +279,7 @@ class SummaryGenerator:
         except Exception:
             section_str = "- Key Policy Changes"
 
-        title = f"Business Intelligence Report: CY {year} {program.upper()} Final Rule"
+        title = f"Regulatory Analysis Report: CY {year} {program.upper()} Regulatory Updates"
         return f"""
                 You are a senior regulatory analyst. Using the structured JSON below, write a professional summary for executives.
 
@@ -406,7 +406,7 @@ class SummaryGenerator:
         try:
             chunk_json = json.dumps(chunk, indent=2)
             segment_prompt = f"""
-            You are a senior regulatory analyst. Create a concise executive summary for this segment of CMS {program.upper()} Final Rule data.
+            You are a senior regulatory analyst. Create a concise executive summary for this segment of CMS {program.upper()} regulatory data.
             
             Focus on the most important changes, key stakeholders affected, and critical action items.
             Use specific numbers, dates, and codes where available.
@@ -463,7 +463,7 @@ class SummaryGenerator:
             final_prompt = f"""
             You are a senior regulatory analyst. Create a comprehensive executive summary by combining these partial summaries.
             
-            ### Business Intelligence Report: CY {year} {program.upper()} Final Rule
+            ### Regulatory Analysis Report: CY {year} {program.upper()} Regulatory Updates
             
             **Instructions:**
             - Synthesize the partial summaries into a coherent executive report
@@ -507,7 +507,7 @@ class SummaryGenerator:
                 
                 chunk_json = json.dumps(chunk, indent=2)
                 segment_prompt = f"""
-                You are a senior regulatory analyst. Create a concise executive summary for this segment of CMS {program.upper()} Final Rule data.
+                You are a senior regulatory analyst. Create a concise executive summary for this segment of CMS {program.upper()} regulatory data.
                 
                 Focus on the most important changes, key stakeholders affected, and critical action items.
                 Use specific numbers, dates, and codes where available.
@@ -532,7 +532,7 @@ class SummaryGenerator:
             final_prompt = f"""
             You are a senior regulatory analyst. Create a comprehensive executive summary by combining these partial summaries.
             
-            ### Business Intelligence Report: CY {year} {program.upper()} Final Rule
+            ### Regulatory Analysis Report: CY {year} {program.upper()} Regulatory Updates
             
             **Instructions:**
             - Synthesize the partial summaries into a coherent executive report

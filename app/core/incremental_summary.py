@@ -26,6 +26,10 @@ import os
 import logging
 from pathlib import Path
 from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables first
+load_dotenv()
 
 # Add the app directory to Python path for imports
 import sys
@@ -33,7 +37,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
 # Import required components
-from summarizer import SummaryGenerator
+from core.summarizer import SummaryGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +52,11 @@ class IncrementalSummary:
     
     def __init__(self):
         """Initialize IncrementalSummary."""
+        # Verify API key is available
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        
         self.data_dir = Path(config.docs_data_path)
         self.summary_dir = Path(config.summary_output_dir)
         self.chunks_dir = Path(config.build_faiss_output_folder)
@@ -100,7 +109,7 @@ class IncrementalSummary:
             logger.error(f"❌ Error loading chunks for {xml_file.name}: {e}")
             return []
     
-    def generate_summary_for_file(self, xml_file: Path) -> Dict:
+    def generate_summary_for_file(self, xml_file: Path, force_regenerate: bool = False) -> Dict:
         """Generate summary for a single XML file."""
         try:
             logger.info(f"📄 Generating summary for: {xml_file.name}")
@@ -113,6 +122,10 @@ class IncrementalSummary:
                     'status': 'error',
                     'error': 'No chunks found for file'
                 }
+            
+            # If force regenerate, clear batch cache for this file
+            if force_regenerate:
+                self._clear_batch_cache_for_file(xml_file.stem)
             
             # Generate summary using SummaryGenerator
             summary_result = self.summarizer.generate_report(chunks, xml_file.stem)
@@ -177,7 +190,7 @@ class IncrementalSummary:
                 logger.info(f"📄 Summary exists for {xml_file.name}, skipping...")
                 skipped.append(str(xml_file))
             else:
-                result = self.generate_summary_for_file(xml_file)
+                result = self.generate_summary_for_file(xml_file, force_regenerate)
                 if result['status'] == 'success':
                     processed.append(result)
                     logger.info(f"✅ Generated summary for {xml_file.name}")
@@ -200,6 +213,30 @@ class IncrementalSummary:
             'failed': failed,
             'total_files': len(resolved_files)
         }
+    
+    def _clear_batch_cache_for_file(self, file_stem: str):
+        """Clear batch cache for a specific file."""
+        try:
+            batch_cache_dir = self.summary_dir / "batch_cache" / file_stem
+            if batch_cache_dir.exists():
+                import shutil
+                shutil.rmtree(batch_cache_dir)
+                logger.info(f"🗑️ Cleared batch cache for {file_stem}")
+            
+            # Also remove the summary files if they exist
+            summary_file = self.summary_dir / f"{file_stem}.md"
+            json_file = self.summary_dir / f"{file_stem}.json"
+            
+            if summary_file.exists():
+                summary_file.unlink()
+                logger.info(f"🗑️ Removed summary file: {summary_file}")
+            
+            if json_file.exists():
+                json_file.unlink()
+                logger.info(f"🗑️ Removed JSON file: {json_file}")
+                
+        except Exception as e:
+            logger.warning(f"⚠️ Error clearing cache for {file_stem}: {e}")
     
     def _resolve_file_path(self, file_path: str) -> Path:
         """
