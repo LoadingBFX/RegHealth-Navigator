@@ -43,28 +43,30 @@ Professionals who track regulatory or standards‑driven content (e.g., health�
 
 ## 2\. Technical Workflow Update (2024-06)
 
-### Large XML Handling & Section-Based Processing
+### Large XML Handling & Chunk-Based Processing
 
-- **Partitioning:** Large XML files (often \>300MB, \>1000 pages) are automatically partitioned into logical sections (e.g., "Medicare Physician Fee Schedule", "HIPAA regulations").  
-- **Chunking:** Each section is further split into manageable text chunks for embedding and retrieval.  
-- **Embedding & Storage:** Chunks are embedded (e.g., via OpenAI API) and stored in a vector database, with metadata for section and location.  
-- **Section-Level Operations:** All LLM-based features (Q\&A, summarization, comparison) operate at the section level to avoid context overflow and ensure performance.  
-- **API & Frontend:** Backend API and frontend are designed to support section selection and section-level operations. Users can select a section for Q\&A, summary, or comparison.  
+- **XML Parsing:** Large XML files (often \>300MB, \>1000 pages) are parsed to extract regulatory content from `<SUPLINF>` and `<REGTEXT>` sections.
+- **Chunking:** Content is split into manageable text chunks (500 words with 1 sentence overlap) for embedding and retrieval.
+- **Embedding & Storage:** Chunks are embedded (e.g., via OpenAI API) and stored in a vector database (FAISS), with metadata for source file and location.
+- **Chunk-Level Operations:** All LLM-based features (Q\&A, summarization, comparison) operate at the chunk level to ensure performance and manage API costs.
+- **API & Frontend:** Backend API and frontend are designed to support document selection and chunk-level operations. Users can select documents for Q\&A, summary, or comparison.
 - **Rationale:**  
   - Enables handling of very large documents without exceeding LLM context limits.  
-  - Improves performance and scalability by isolating operations to relevant sections.  
-  - Lays the foundation for future cross-section or multi-section features.
+  - Improves performance and scalability by processing manageable chunks.
+  - Provides cost-effective processing through incremental updates and caching.
 
 ### Core Backend Modules (MVP)
 
-- `core/xml_partition.py`: Partition XML into logical sections.  
-- `core/xml_chunker.py`: Chunk a section into smaller text units.  
-- `core/embedding.py`: Generate and store embeddings for section chunks.  
-- `core/llm.py`: Section-level LLM operations (summarization, Q\&A, comparison).
+- `core/xml_chunker.py`: Parse XML and create text chunks with metadata.
+- `core/incremental_chunker.py`: Process new files incrementally.
+- `core/incremental_faiss.py`: Update FAISS index with new embeddings.
+- `core/search.py`: Chunk-level search and Q\&A operations.
+- `core/summarizer.py`: Chunk-based summary generation.
+- `core/compare.py`: Document comparison using chunk-level analysis.
 
 ### Extensibility
 
-- The architecture supports future expansion to multi-section or cross-document operations, as well as more advanced caching and retrieval strategies.
+- The architecture supports future expansion to multi-document operations, as well as more advanced caching and retrieval strategies.
 
 ---
 
@@ -110,8 +112,8 @@ Professionals who track regulatory or standards‑driven content (e.g., health�
    * Select ≥ 2 files → ask aspect (e.g., "dosage changes") → receive diff summary.  
 7. **History & caching**  
    * Derived artefacts (summaries, embeddings, mind‑maps) cached in Redis \+ disk; keyed by server file ID.  
-8. **NotebookLM‑style three‑column UI**  
-   * **Left:** files & history. **Center:** persistent chat. **Right:** actions/results.
+8. **Tab-based interface with modal overlays**  
+   * **Top:** Tab navigation (Chat, Summary, Compare). **Center:** Main content area. **Modals:** History and citation details.
 
 ### 4.2 Non‑Functional Requirements
 
@@ -135,11 +137,12 @@ Professionals who track regulatory or standards‑driven content (e.g., health�
 
 ## 5\. User Journey (Happy Path)
 
-1. **Select / Upload File(s)** → XML added to processing queue.  
-2. **Generate Summary** (Right sidebar) → bullet list & mind‑map appear; cached for future sessions.  
-3. **Ask Follow‑up** ("What are new safety requirements?") → grounded answer with `[§3.2]` references.  
-4. **Compare** previous vs. new XML → diff summary; user scrolls chat while results stay in Right column.  
-5. **Return next week**; cached artefacts load instantly.
+1. **Access Application** → Load tab-based interface (Chat, Summary, Compare).
+2. **Select Documents** (Chat tab) → Choose documents from available list for querying.
+3. **Ask Questions** (Chat tab) → Input natural language questions and receive grounded answers with citations.
+4. **View Summaries** (Summary tab) → Browse generated document summaries by program type and year.
+5. **Compare Documents** (Compare tab) → Input comparison queries and receive detailed analysis.
+6. **Return Later** → Cached content loads instantly for future sessions.
 
 ---
 
