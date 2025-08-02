@@ -10,6 +10,16 @@ Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan 
 **Status:** 🚀 Pre-release v0.8
 
 [![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
+[![Version](https://img.shields.io/badge/version-v0.8-blue)](#)
+[![License: Apache](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
+[![Last Updated](https://img.shields.io/badge/last%20updated-Jul%202025-lightgrey)](#)
+
+[![Backend](https://img.shields.io/badge/backend-Flask-blue)](https://flask.palletsprojects.com/)
+[![Frontend](https://img.shields.io/badge/frontend-React-blue)](https://reactjs.org/)
+[![LLM](https://img.shields.io/badge/LLM-OpenAI-orange)](https://platform.openai.com/)
+[![Vector Search](https://img.shields.io/badge/Vector%20Search-FAISS-darkgreen)](https://github.com/facebookresearch/faiss)
+[![Language](https://img.shields.io/badge/language-Python%203.8%2B-yellow)](https://www.python.org/)
+[![RAG](https://img.shields.io/badge/Architecture-RAG-blueviolet)](#)
 
 ---
 
