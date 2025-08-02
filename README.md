@@ -6,6 +6,7 @@
 Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan Emmadi
 
 **Last Updated:** Jul 2025
+
 **Status:** 🚀 Pre-release v0.8
 
 [![Capstone Project](https://img.shields.io/badge/CMU-Capstone%20Project-red)](https://www.cmu.edu/)
@@ -15,6 +16,10 @@ Seon Young Jhang, Daisy Yan, Fanxing Bu, Dhruv Tangri, Sarvesh Siras, Saicharan 
 ## 📖 Project Introduction
 
 RegHealth Navigator is an intelligent regulatory document analysis platform designed to help healthcare professionals, compliance officers, and policy analysts efficiently understand and analyze complex Medicare regulations. The system provides powerful tools for document comparison, semantic search, and AI-powered analysis with comprehensive documentation and maintainable code structure.
+
+
+https://github.com/user-attachments/assets/c9ce0294-80d4-4cd8-b4fd-f27fd39d5b41
+
 
 ### 🎯 Key Features
 - **Intelligent Document Processing**: Automated fetching and processing of Federal Register regulations
